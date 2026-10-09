@@ -1,0 +1,834 @@
+{
+  "version": "0.2.1",
+  "passed": true,
+  "checkedAt": "2026-10-05T06:52:36.865104+00:00",
+  "apk": {
+    "filename": "CalendarLedgerAI-v0.2.1.apk",
+    "bytes": 546763,
+    "sha256": "f57d2531abd22474c7d15eef86f0829935e6b664f371fb99bfbfe73843c1d1dd",
+    "package": "org.calendarledger.preview",
+    "minSdk": 26,
+    "targetSdk": 35,
+    "version": "0.2.1",
+    "versionCode": 5
+  },
+  "unitTests": {
+    "passed": true,
+    "count": 34
+  },
+  "browser": {
+    "passed": true,
+    "findings": [
+      {
+        "check": "desktop initial",
+        "width": 1440,
+        "doc": 1425,
+        "buttons": 63
+      },
+      {
+        "check": "UI multi-operation chat",
+        "passed": true
+      },
+      {
+        "check": "UI continuous edits",
+        "passed": true
+      },
+      {
+        "check": "desktop chat results",
+        "width": 1440,
+        "doc": 1425,
+        "buttons": 78
+      },
+      {
+        "check": "desktop reports",
+        "width": 1440,
+        "doc": 1440,
+        "buttons": 35
+      },
+      {
+        "check": "manual transaction form",
+        "passed": true
+      },
+      {
+        "check": "task completion button",
+        "passed": true
+      },
+      {
+        "check": "desktop dark theme",
+        "width": 1440,
+        "doc": 1440,
+        "buttons": 36
+      },
+      {
+        "check": "calendar statutory holidays and adjusted workdays",
+        "passed": true
+      },
+      {
+        "check": "S24U layout 412px",
+        "width": 412,
+        "doc": 412,
+        "buttons": 57
+      },
+      {
+        "check": "whole month fits phone viewport",
+        "gridBottom": 641.28125,
+        "navTop": 769
+      },
+      {
+        "check": "six-week month fits phone viewport",
+        "rows": "6",
+        "bottom": 705.28125,
+        "navTop": 769
+      },
+      {
+        "check": "S24U chat 412px",
+        "width": 412,
+        "doc": 412,
+        "buttons": 24
+      },
+      {
+        "check": "keyboard viewport retains input and send button",
+        "top": 335.5,
+        "bottom": 391.5,
+        "height": 420
+      },
+      {
+        "check": "mobile analysis",
+        "width": 412,
+        "doc": 412,
+        "buttons": 14
+      },
+      {
+        "check": "mobile ledger",
+        "width": 412,
+        "doc": 412,
+        "buttons": 28
+      },
+      {
+        "check": "S24U settings 412px",
+        "width": 412,
+        "doc": 412,
+        "buttons": 64
+      },
+      {
+        "check": "small phone 360px",
+        "width": 360,
+        "doc": 360,
+        "buttons": 55
+      },
+      {
+        "check": "phone 384px",
+        "width": 384,
+        "doc": 384,
+        "buttons": 55
+      },
+      {
+        "check": "mobile dark theme large font",
+        "width": 384,
+        "doc": 384,
+        "buttons": 55
+      },
+      {
+        "check": "persistence after reload",
+        "passed": true
+      },
+      {
+        "check": "full API tool loop with mock provider and duplicate prevention",
+        "passed": true
+      },
+      {
+        "check": "partial API failure retains write and undo card",
+        "passed": true
+      },
+      {
+        "check": "browser console errors",
+        "count": 0,
+        "expectedProviderErrors": 1
+      }
+    ],
+    "errors": [],
+    "expectedNetworkErrors": [
+      "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    ]
+  },
+  "chat": {
+    "passed": true,
+    "version": "0.2.0",
+    "findings": [
+      {
+        "check": "waiting reply keeps the same focused enabled textarea",
+        "passed": true
+      },
+      {
+        "check": "tool operations preserve panel list and history nodes",
+        "passed": true
+      },
+      {
+        "check": "reply completion retains focus and next-message draft",
+        "passed": true
+      },
+      {
+        "check": "smooth new-message trajectory without history flashing",
+        "passed": true,
+        "start": 3570,
+        "end": 4283,
+        "intermediatePositions": 30
+      },
+      {
+        "check": "reply arriving while reading history does not pull to bottom",
+        "passed": true
+      },
+      {
+        "check": "background holiday refresh keeps chat position and DOM",
+        "passed": true
+      },
+      {
+        "check": "return to latest messages follows the current bottom",
+        "passed": true
+      },
+      {
+        "check": "keyboard-sized viewport preserves textarea and composer visibility",
+        "passed": true
+      },
+      {
+        "check": "restoring viewport does not discard a history reading position",
+        "passed": true
+      },
+      {
+        "check": "reduced-motion preference skips message animations",
+        "passed": true
+      }
+    ],
+    "errors": [],
+    "trace": {
+      "from": 3570,
+      "samples": [
+        {
+          "time": 109.4,
+          "top": 3570,
+          "opacity": "1"
+        },
+        {
+          "time": 126,
+          "top": 3590,
+          "opacity": "1"
+        },
+        {
+          "time": 142.7,
+          "top": 3620,
+          "opacity": "1"
+        },
+        {
+          "time": 159.3,
+          "top": 3647,
+          "opacity": "1"
+        },
+        {
+          "time": 176.1,
+          "top": 3670,
+          "opacity": "1"
+        },
+        {
+          "time": 192.7,
+          "top": 3690,
+          "opacity": "1"
+        },
+        {
+          "time": 209.4,
+          "top": 3707,
+          "opacity": "1"
+        },
+        {
+          "time": 226,
+          "top": 3721,
+          "opacity": "1"
+        },
+        {
+          "time": 242.7,
+          "top": 3733,
+          "opacity": "1"
+        },
+        {
+          "time": 259.4,
+          "top": 3742,
+          "opacity": "1"
+        },
+        {
+          "time": 276,
+          "top": 3750,
+          "opacity": "1"
+        },
+        {
+          "time": 292.7,
+          "top": 3755,
+          "opacity": "1"
+        },
+        {
+          "time": 309.4,
+          "top": 3759,
+          "opacity": "1"
+        },
+        {
+          "time": 326,
+          "top": 3762,
+          "opacity": "1"
+        },
+        {
+          "time": 342.7,
+          "top": 3764,
+          "opacity": "1"
+        },
+        {
+          "time": 359.4,
+          "top": 3765,
+          "opacity": "1"
+        },
+        {
+          "time": 376.1,
+          "top": 3765,
+          "opacity": "1"
+        },
+        {
+          "time": 392.7,
+          "top": 3794,
+          "opacity": "1"
+        },
+        {
+          "time": 409.4,
+          "top": 3877,
+          "opacity": "1"
+        },
+        {
+          "time": 426,
+          "top": 3951,
+          "opacity": "1"
+        },
+        {
+          "time": 442.7,
+          "top": 4015,
+          "opacity": "1"
+        },
+        {
+          "time": 459.3,
+          "top": 4070,
+          "opacity": "1"
+        },
+        {
+          "time": 476,
+          "top": 4117,
+          "opacity": "1"
+        },
+        {
+          "time": 492.7,
+          "top": 4157,
+          "opacity": "1"
+        },
+        {
+          "time": 509.4,
+          "top": 4190,
+          "opacity": "1"
+        },
+        {
+          "time": 526,
+          "top": 4216,
+          "opacity": "1"
+        },
+        {
+          "time": 542.7,
+          "top": 4237,
+          "opacity": "1"
+        },
+        {
+          "time": 559.3,
+          "top": 4253,
+          "opacity": "1"
+        },
+        {
+          "time": 576,
+          "top": 4265,
+          "opacity": "1"
+        },
+        {
+          "time": 592.6,
+          "top": 4273,
+          "opacity": "1"
+        },
+        {
+          "time": 609.3,
+          "top": 4278,
+          "opacity": "1"
+        },
+        {
+          "time": 626,
+          "top": 4281,
+          "opacity": "1"
+        },
+        {
+          "time": 642.7,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 659.4,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 676,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 692.7,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 709.4,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 726.1,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 742.7,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 759.3,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 776,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 792.7,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 809.3,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 826,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 842.6,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 859.3,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 876.1,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 892.7,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 909.4,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 926,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 942.6,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 959.3,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 976,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 992.7,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1009.3,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1026,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1042.7,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1059.4,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1076,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1092.6,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1109.3,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1126,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1142.7,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1159.3,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1176,
+          "top": 4283,
+          "opacity": "1"
+        }
+      ],
+      "to": 4283
+    },
+    "defaultReducedMotion": true
+  },
+  "festivals": {
+    "passed": true,
+    "version": "0.2.1",
+    "findings": [
+      {
+        "check": "month displays festival, vacation and adjusted-workday names directly",
+        "passed": true
+      },
+      {
+        "check": "festival names remain visible for every content filter",
+        "passed": true
+      },
+      {
+        "check": "week view includes holiday names and workday badges",
+        "passed": true
+      },
+      {
+        "check": "day view includes full festival and days-off detail",
+        "passed": true
+      },
+      {
+        "check": "visible 除夕 on 2026-02-16",
+        "passed": true
+      },
+      {
+        "check": "visible 春节 on 2026-02-17",
+        "passed": true
+      },
+      {
+        "check": "visible 元宵节 on 2026-03-03",
+        "passed": true
+      },
+      {
+        "check": "visible 清明节 on 2026-04-05",
+        "passed": true
+      },
+      {
+        "check": "visible 端午节 on 2026-06-19",
+        "passed": true
+      },
+      {
+        "check": "visible 七夕 on 2026-08-19",
+        "passed": true
+      },
+      {
+        "check": "visible 中秋节 on 2026-09-25",
+        "passed": true
+      },
+      {
+        "check": "visible 重阳节 on 2026-10-18",
+        "passed": true
+      },
+      {
+        "check": "2027 festival visible without inventing unannounced leave schedules",
+        "passed": true
+      },
+      {
+        "check": "Mid-Autumn festival remains distinct inside National Day vacation",
+        "passed": true
+      },
+      {
+        "check": "festival layout 412x850 2026-10",
+        "passed": true,
+        "width": 412,
+        "doc": 412,
+        "rows": 5,
+        "bottom": 641.28125,
+        "navTop": 769,
+        "clippedLabels": 0
+      },
+      {
+        "check": "festival layout 412x850 2026-08",
+        "passed": true,
+        "width": 412,
+        "doc": 412,
+        "rows": 6,
+        "bottom": 705.28125,
+        "navTop": 769,
+        "clippedLabels": 0
+      },
+      {
+        "check": "festival layout 384x820 2026-10",
+        "passed": true,
+        "width": 384,
+        "doc": 384,
+        "rows": 5,
+        "bottom": 641.28125,
+        "navTop": 739,
+        "clippedLabels": 0
+      },
+      {
+        "check": "festival layout 384x820 2026-08",
+        "passed": true,
+        "width": 384,
+        "doc": 384,
+        "rows": 6,
+        "bottom": 705.28125,
+        "navTop": 739,
+        "clippedLabels": 0
+      },
+      {
+        "check": "festival layout 360x800 2026-10",
+        "passed": true,
+        "width": 360,
+        "doc": 360,
+        "rows": 5,
+        "bottom": 637.984375,
+        "navTop": 719,
+        "clippedLabels": 0
+      },
+      {
+        "check": "festival layout 360x800 2026-08",
+        "passed": true,
+        "width": 360,
+        "doc": 360,
+        "rows": 6,
+        "bottom": 701.984375,
+        "navTop": 719,
+        "clippedLabels": 0
+      },
+      {
+        "check": "festival dark theme and large font",
+        "width": 412,
+        "doc": 412,
+        "buttons": 54
+      },
+      {
+        "check": "browser console errors",
+        "count": 0
+      }
+    ],
+    "errors": []
+  },
+  "browserChecks": 56,
+  "android": {
+    "passed": true,
+    "version": "0.2.1",
+    "device": "emulator-5580",
+    "actualSamsungPhone": false,
+    "apiKeyUsed": false,
+    "baseline": {
+      "phase": "upgrade-baseline",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "passed": true,
+      "version": "0.2.0"
+    },
+    "sameSignatureUpgrade": true,
+    "festivals": {
+      "phase": "festivals",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "viewport": {
+        "width": 412,
+        "height": 820
+      },
+      "passed": true,
+      "findings": [
+        {
+          "check": "final APK version 0.2.1",
+          "passed": true
+        },
+        {
+          "check": "v0.2.0 business records survive signed upgrade",
+          "passed": true
+        },
+        {
+          "check": "offline embedded application opens",
+          "passed": true
+        },
+        {
+          "check": "offline month directly displays National Day name",
+          "passed": true
+        },
+        {
+          "check": "vacation dates display a readable holiday name",
+          "passed": true
+        },
+        {
+          "check": "adjusted workday has name and work badge",
+          "passed": true
+        },
+        {
+          "check": "Chinese New Year and its eve display offline",
+          "passed": true
+        },
+        {
+          "check": "Lantern Festival displays without false leave badge",
+          "passed": true
+        },
+        {
+          "check": "Mid-Autumn Festival on its actual lunar date",
+          "passed": true
+        },
+        {
+          "check": "2027 lunar date independent of WebView ICU",
+          "passed": true
+        },
+        {
+          "check": "unannounced 2027 leave schedule is not fabricated",
+          "passed": true
+        },
+        {
+          "check": "six-week month and labels fit native mobile viewport",
+          "passed": true
+        },
+        {
+          "check": "festival labels do not alter transactions or schedules",
+          "passed": true
+        }
+      ]
+    },
+    "reopened": {
+      "phase": "festivals",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "viewport": {
+        "width": 412,
+        "height": 820
+      },
+      "passed": true,
+      "findings": [
+        {
+          "check": "final APK version 0.2.1",
+          "passed": true
+        },
+        {
+          "check": "v0.2.0 business records survive signed upgrade",
+          "passed": true
+        },
+        {
+          "check": "offline embedded application opens",
+          "passed": true
+        },
+        {
+          "check": "offline month directly displays National Day name",
+          "passed": true
+        },
+        {
+          "check": "vacation dates display a readable holiday name",
+          "passed": true
+        },
+        {
+          "check": "adjusted workday has name and work badge",
+          "passed": true
+        },
+        {
+          "check": "Chinese New Year and its eve display offline",
+          "passed": true
+        },
+        {
+          "check": "Lantern Festival displays without false leave badge",
+          "passed": true
+        },
+        {
+          "check": "Mid-Autumn Festival on its actual lunar date",
+          "passed": true
+        },
+        {
+          "check": "2027 lunar date independent of WebView ICU",
+          "passed": true
+        },
+        {
+          "check": "unannounced 2027 leave schedule is not fabricated",
+          "passed": true
+        },
+        {
+          "check": "six-week month and labels fit native mobile viewport",
+          "passed": true
+        },
+        {
+          "check": "festival labels do not alter transactions or schedules",
+          "passed": true
+        }
+      ]
+    },
+    "androidChecks": 26,
+    "apkSha256": "f57d2531abd22474c7d15eef86f0829935e6b664f371fb99bfbfe73843c1d1dd"
+  },
+  "visualVerification": {
+    "capturedAfterNormalAndroidLaunch": true,
+    "nativeScreenshot": "Android节日显示验证.png",
+    "browserScreenshot": "手机节日显示预览.png"
+  },
+  "sources": {
+    "calendarEngine": "lunar-javascript 1.7.7, MIT, vendored offline",
+    "dateFixtures": [
+      "https://www.hko.gov.hk/tc/gts/time/calendar/pdf/files/2025.pdf",
+      "https://www.hko.gov.hk/tc/gts/time/calendar/pdf/files/2026.pdf",
+      "https://www.hko.gov.hk/tc/gts/time/calendar/pdf/files/2027.pdf"
+    ],
+    "holidaySchedule": "Bundled holiday-cn government-sourced data and existing online/cache mechanism"
+  },
+  "limits": [
+    "Samsung S24 Ultra physical device not available for testing.",
+    "The v0.2.0 multimodal native/speech checks are historical; this release adds festival/calendar and signed-upgrade checks.",
+    "Future festival dates do not imply an announced government leave schedule."
+  ]
+}

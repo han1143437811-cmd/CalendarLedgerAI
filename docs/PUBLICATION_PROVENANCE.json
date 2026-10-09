@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-09",
+  "version": "0.2.3",
+  "package": "org.calendarledger.preview",
+  "source": "Existing CalendarLedgerAI standalone application; Fossify Calendar was researched as a design and feasibility reference.",
+  "upstreamReference": "https://github.com/FossifyOrg/Calendar",
+  "upstreamSourceImported": false,
+  "upstreamGitHistoryPresent": false,
+  "publicationType": "Independent repository with prominent acknowledgements",
+  "apkSha256": "cb7e32c66ec8b9e7d1a4bc5d36843e457901c83b61f8a089eddbc519128580ba",
+  "privateSigningMaterialIncluded": false,
+  "apiKeysIncluded": false,
+  "browserProfilesIncluded": false,
+  "originalApplicationRuntimeCodeChanged": false,
+  "filesCopied": 80
+}

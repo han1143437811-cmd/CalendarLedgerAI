@@ -1,0 +1,1295 @@
+{
+  "version": "0.2.0",
+  "passed": true,
+  "apk": {
+    "filename": "CalendarLedgerAI-v0.2.0.apk",
+    "bytes": 206480,
+    "sha256": "cd903e15714f57ce719e16254d17c380002f864038926316a3e86bfb7c7efeab",
+    "package": "org.calendarledger.preview",
+    "minSdk": 26,
+    "targetSdk": 35,
+    "version": "0.2.0",
+    "versionCode": 4
+  },
+  "unitTests": {
+    "passed": true,
+    "count": 29
+  },
+  "browser": {
+    "passed": true,
+    "findings": [
+      {
+        "check": "desktop initial",
+        "width": 1440,
+        "doc": 1425,
+        "buttons": 63
+      },
+      {
+        "check": "UI multi-operation chat",
+        "passed": true
+      },
+      {
+        "check": "UI continuous edits",
+        "passed": true
+      },
+      {
+        "check": "desktop chat results",
+        "width": 1440,
+        "doc": 1425,
+        "buttons": 78
+      },
+      {
+        "check": "desktop reports",
+        "width": 1440,
+        "doc": 1440,
+        "buttons": 35
+      },
+      {
+        "check": "manual transaction form",
+        "passed": true
+      },
+      {
+        "check": "task completion button",
+        "passed": true
+      },
+      {
+        "check": "desktop dark theme",
+        "width": 1440,
+        "doc": 1440,
+        "buttons": 36
+      },
+      {
+        "check": "calendar statutory holidays and adjusted workdays",
+        "passed": true
+      },
+      {
+        "check": "S24U layout 412px",
+        "width": 412,
+        "doc": 412,
+        "buttons": 57
+      },
+      {
+        "check": "whole month fits phone viewport",
+        "gridBottom": 606.28125,
+        "navTop": 769
+      },
+      {
+        "check": "six-week month fits phone viewport",
+        "rows": "6",
+        "bottom": 663.28125,
+        "navTop": 769
+      },
+      {
+        "check": "S24U chat 412px",
+        "width": 412,
+        "doc": 412,
+        "buttons": 24
+      },
+      {
+        "check": "keyboard viewport retains input and send button",
+        "top": 335.5,
+        "bottom": 391.5,
+        "height": 420
+      },
+      {
+        "check": "mobile analysis",
+        "width": 412,
+        "doc": 412,
+        "buttons": 14
+      },
+      {
+        "check": "mobile ledger",
+        "width": 412,
+        "doc": 412,
+        "buttons": 28
+      },
+      {
+        "check": "S24U settings 412px",
+        "width": 412,
+        "doc": 412,
+        "buttons": 64
+      },
+      {
+        "check": "small phone 360px",
+        "width": 360,
+        "doc": 360,
+        "buttons": 55
+      },
+      {
+        "check": "phone 384px",
+        "width": 384,
+        "doc": 384,
+        "buttons": 55
+      },
+      {
+        "check": "mobile dark theme large font",
+        "width": 384,
+        "doc": 384,
+        "buttons": 55
+      },
+      {
+        "check": "persistence after reload",
+        "passed": true
+      },
+      {
+        "check": "full API tool loop with mock provider and duplicate prevention",
+        "passed": true
+      },
+      {
+        "check": "partial API failure retains write and undo card",
+        "passed": true
+      },
+      {
+        "check": "browser console errors",
+        "count": 0,
+        "expectedProviderErrors": 1
+      }
+    ],
+    "errors": [],
+    "expectedNetworkErrors": [
+      "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    ]
+  },
+  "chat": {
+    "passed": true,
+    "version": "0.2.0",
+    "findings": [
+      {
+        "check": "waiting reply keeps the same focused enabled textarea",
+        "passed": true
+      },
+      {
+        "check": "tool operations preserve panel list and history nodes",
+        "passed": true
+      },
+      {
+        "check": "reply completion retains focus and next-message draft",
+        "passed": true
+      },
+      {
+        "check": "smooth new-message trajectory without history flashing",
+        "passed": true,
+        "start": 3570,
+        "end": 4283,
+        "intermediatePositions": 30
+      },
+      {
+        "check": "reply arriving while reading history does not pull to bottom",
+        "passed": true
+      },
+      {
+        "check": "background holiday refresh keeps chat position and DOM",
+        "passed": true
+      },
+      {
+        "check": "return to latest messages follows the current bottom",
+        "passed": true
+      },
+      {
+        "check": "keyboard-sized viewport preserves textarea and composer visibility",
+        "passed": true
+      },
+      {
+        "check": "restoring viewport does not discard a history reading position",
+        "passed": true
+      },
+      {
+        "check": "reduced-motion preference skips message animations",
+        "passed": true
+      }
+    ],
+    "errors": [],
+    "trace": {
+      "from": 3570,
+      "samples": [
+        {
+          "time": 125.2,
+          "top": 3570,
+          "opacity": "1"
+        },
+        {
+          "time": 141.8,
+          "top": 3590,
+          "opacity": "1"
+        },
+        {
+          "time": 158.5,
+          "top": 3620,
+          "opacity": "1"
+        },
+        {
+          "time": 175.2,
+          "top": 3647,
+          "opacity": "1"
+        },
+        {
+          "time": 191.8,
+          "top": 3670,
+          "opacity": "1"
+        },
+        {
+          "time": 208.5,
+          "top": 3690,
+          "opacity": "1"
+        },
+        {
+          "time": 225.2,
+          "top": 3707,
+          "opacity": "1"
+        },
+        {
+          "time": 241.8,
+          "top": 3721,
+          "opacity": "1"
+        },
+        {
+          "time": 258.5,
+          "top": 3733,
+          "opacity": "1"
+        },
+        {
+          "time": 275.2,
+          "top": 3742,
+          "opacity": "1"
+        },
+        {
+          "time": 291.8,
+          "top": 3750,
+          "opacity": "1"
+        },
+        {
+          "time": 308.5,
+          "top": 3755,
+          "opacity": "1"
+        },
+        {
+          "time": 325.1,
+          "top": 3759,
+          "opacity": "1"
+        },
+        {
+          "time": 341.8,
+          "top": 3762,
+          "opacity": "1"
+        },
+        {
+          "time": 358.4,
+          "top": 3764,
+          "opacity": "1"
+        },
+        {
+          "time": 375.1,
+          "top": 3765,
+          "opacity": "1"
+        },
+        {
+          "time": 391.8,
+          "top": 3765,
+          "opacity": "1"
+        },
+        {
+          "time": 408.4,
+          "top": 3799,
+          "opacity": "1"
+        },
+        {
+          "time": 425.2,
+          "top": 3882,
+          "opacity": "1"
+        },
+        {
+          "time": 441.8,
+          "top": 3955,
+          "opacity": "1"
+        },
+        {
+          "time": 458.4,
+          "top": 4018,
+          "opacity": "1"
+        },
+        {
+          "time": 475.1,
+          "top": 4073,
+          "opacity": "1"
+        },
+        {
+          "time": 491.8,
+          "top": 4120,
+          "opacity": "1"
+        },
+        {
+          "time": 508.4,
+          "top": 4159,
+          "opacity": "1"
+        },
+        {
+          "time": 525.2,
+          "top": 4191,
+          "opacity": "1"
+        },
+        {
+          "time": 541.8,
+          "top": 4218,
+          "opacity": "1"
+        },
+        {
+          "time": 558.5,
+          "top": 4238,
+          "opacity": "1"
+        },
+        {
+          "time": 575.1,
+          "top": 4254,
+          "opacity": "1"
+        },
+        {
+          "time": 591.8,
+          "top": 4266,
+          "opacity": "1"
+        },
+        {
+          "time": 608.5,
+          "top": 4274,
+          "opacity": "1"
+        },
+        {
+          "time": 625.1,
+          "top": 4279,
+          "opacity": "1"
+        },
+        {
+          "time": 641.8,
+          "top": 4281,
+          "opacity": "1"
+        },
+        {
+          "time": 658.5,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 675.1,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 691.8,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 708.5,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 725.2,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 741.8,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 758.5,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 775.2,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 791.8,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 808.4,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 825.1,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 841.8,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 858.5,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 875.1,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 891.7,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 908.4,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 925.1,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 941.8,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 958.5,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 975.1,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 991.8,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1008.4,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1025.1,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1041.7,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1058.4,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1075.1,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1091.8,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1108.4,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1125.1,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1141.8,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1158.4,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1175.1,
+          "top": 4283,
+          "opacity": "1"
+        },
+        {
+          "time": 1191.7,
+          "top": 4283,
+          "opacity": "1"
+        }
+      ],
+      "to": 4283
+    },
+    "defaultReducedMotion": true
+  },
+  "multimodal": {
+    "passed": true,
+    "findings": [
+      {
+        "check": "four reachable mobile tabs and readable calendar",
+        "passed": true
+      },
+      {
+        "check": "more page retains analysis tasks settings and backup",
+        "passed": true
+      },
+      {
+        "check": "actual decoded image thumbnail without replacing composer",
+        "passed": true
+      },
+      {
+        "check": "demo does not invent recognition or send image upstream",
+        "passed": true
+      },
+      {
+        "check": "upstream receives actual encoded image with read-only recognition tools",
+        "passed": true
+      },
+      {
+        "check": "recognition returns two cards without writing business data",
+        "passed": true
+      },
+      {
+        "check": "AI follow-up edits only the identified draft and releases previous full image",
+        "passed": true
+      },
+      {
+        "check": "editing recognition changes only the card",
+        "passed": true
+      },
+      {
+        "check": "selected cards save exact cents and real event reminder",
+        "passed": true
+      },
+      {
+        "check": "tab navigation retains history node and input",
+        "passed": true
+      },
+      {
+        "check": "AI explicit save writes selected draft once and excludes duplicate meeting",
+        "passed": true
+      },
+      {
+        "check": "process-like reload preserves records cards and image thumbnail",
+        "passed": true
+      },
+      {
+        "check": "microphone shows recording and disables send",
+        "passed": true
+      },
+      {
+        "check": "recognized speech is editable and never submits automatically",
+        "passed": true
+      },
+      {
+        "check": "cancelling voice keeps existing typed draft",
+        "passed": true
+      },
+      {
+        "check": "small keyboard viewport keeps image voice and send accessible",
+        "passed": true
+      },
+      {
+        "check": "image request failure retains photo and editable message for retry",
+        "passed": true
+      }
+    ],
+    "errors": [],
+    "mockedProvider": true,
+    "realDeepSeekKeyUsed": false
+  },
+  "android": {
+    "passed": true,
+    "version": "0.2.0",
+    "device": "emulator-5580",
+    "actualSamsungPhone": false,
+    "realDeepSeekKeyUsed": false,
+    "speechRecognition": "fixture service, no real audio recognition",
+    "baseline": {
+      "phase": "upgrade-baseline",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "passed": true,
+      "version": "0.1.2"
+    },
+    "sameSignatureUpgrade": true,
+    "chat": {
+      "phase": "chat",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "keyboardViewport": {
+        "width": 412,
+        "height": 525,
+        "composerBottom": 525.3333511352539
+      },
+      "trajectory": {
+        "start": 2644.571533203125,
+        "end": 3355.8095703125,
+        "samples": [
+          {
+            "time": 4792.6,
+            "top": 2644.571533203125,
+            "opacity": "1"
+          },
+          {
+            "time": 4809.2,
+            "top": 2644.571533203125,
+            "opacity": "1"
+          },
+          {
+            "time": 4825.9,
+            "top": 2657.90478515625,
+            "opacity": "1"
+          },
+          {
+            "time": 4842.5,
+            "top": 2689.52392578125,
+            "opacity": "1"
+          },
+          {
+            "time": 4859.3,
+            "top": 2716.571533203125,
+            "opacity": "1"
+          },
+          {
+            "time": 4875.9,
+            "top": 2740.952392578125,
+            "opacity": "1"
+          },
+          {
+            "time": 4892.6,
+            "top": 2761.142822265625,
+            "opacity": "1"
+          },
+          {
+            "time": 4909.3,
+            "top": 2778.666748046875,
+            "opacity": "1"
+          },
+          {
+            "time": 4926,
+            "top": 2793.52392578125,
+            "opacity": "1"
+          },
+          {
+            "time": 4942.6,
+            "top": 2805.71435546875,
+            "opacity": "1"
+          },
+          {
+            "time": 4959.3,
+            "top": 2815.619140625,
+            "opacity": "1"
+          },
+          {
+            "time": 4975.9,
+            "top": 2823.238037109375,
+            "opacity": "1"
+          },
+          {
+            "time": 4992.6,
+            "top": 2828.952392578125,
+            "opacity": "1"
+          },
+          {
+            "time": 5009.3,
+            "top": 2833.52392578125,
+            "opacity": "1"
+          },
+          {
+            "time": 5026,
+            "top": 2836.1904296875,
+            "opacity": "1"
+          },
+          {
+            "time": 5042.6,
+            "top": 2838.09521484375,
+            "opacity": "1"
+          },
+          {
+            "time": 5059.3,
+            "top": 2839.238037109375,
+            "opacity": "1"
+          },
+          {
+            "time": 5092.6,
+            "top": 2839.238037109375,
+            "opacity": "1"
+          },
+          {
+            "time": 5109.3,
+            "top": 2839.238037109375,
+            "opacity": "1"
+          },
+          {
+            "time": 5125.9,
+            "top": 2860.952392578125,
+            "opacity": "1"
+          },
+          {
+            "time": 5142.6,
+            "top": 2944.761962890625,
+            "opacity": "1"
+          },
+          {
+            "time": 5159.3,
+            "top": 3019.428466796875,
+            "opacity": "1"
+          },
+          {
+            "time": 5175.9,
+            "top": 3084.1904296875,
+            "opacity": "1"
+          },
+          {
+            "time": 5192.6,
+            "top": 3139.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5209.3,
+            "top": 3187.428466796875,
+            "opacity": "1"
+          },
+          {
+            "time": 5226,
+            "top": 3227.428466796875,
+            "opacity": "1"
+          },
+          {
+            "time": 5242.6,
+            "top": 3260.571533203125,
+            "opacity": "1"
+          },
+          {
+            "time": 5259.3,
+            "top": 3287.238037109375,
+            "opacity": "1"
+          },
+          {
+            "time": 5275.9,
+            "top": 3308.571533203125,
+            "opacity": "1"
+          },
+          {
+            "time": 5292.5,
+            "top": 3324.952392578125,
+            "opacity": "1"
+          },
+          {
+            "time": 5309.2,
+            "top": 3337.142822265625,
+            "opacity": "1"
+          },
+          {
+            "time": 5325.9,
+            "top": 3345.52392578125,
+            "opacity": "1"
+          },
+          {
+            "time": 5342.5,
+            "top": 3350.857177734375,
+            "opacity": "1"
+          },
+          {
+            "time": 5359.2,
+            "top": 3353.90478515625,
+            "opacity": "1"
+          },
+          {
+            "time": 5376,
+            "top": 3355.428466796875,
+            "opacity": "1"
+          },
+          {
+            "time": 5392.6,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5409.3,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5426,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5442.5,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5459.3,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5475.9,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5492.6,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5509.2,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5525.9,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5542.6,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5559.3,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5575.9,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5592.6,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5609.2,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5625.9,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5642.6,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5659.2,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5675.9,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5692.5,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5709.2,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5725.9,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5742.6,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5759.3,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5775.9,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5792.6,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5809.2,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5825.9,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5842.6,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5859.3,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          },
+          {
+            "time": 5875.9,
+            "top": 3355.8095703125,
+            "opacity": "1"
+          }
+        ],
+        "intermediatePositions": 29
+      },
+      "passed": true,
+      "findings": [
+        {
+          "check": "upgrade preserves existing transactions schedules and tasks",
+          "passed": true
+        },
+        {
+          "check": "native chat test uses demo without a real API key",
+          "passed": true
+        },
+        {
+          "check": "real Android soft keyboard opens and reduces viewport",
+          "passed": true
+        },
+        {
+          "check": "sending keeps original enabled focused input",
+          "passed": true
+        },
+        {
+          "check": "sending does not dismiss the Android keyboard",
+          "passed": true
+        },
+        {
+          "check": "native tool updates retain chat and historical message nodes",
+          "passed": true
+        },
+        {
+          "check": "completed reply preserves native keyboard focus and next draft",
+          "passed": true
+        },
+        {
+          "check": "native message scrolling has intermediate frames without reset or fading",
+          "passed": true
+        },
+        {
+          "check": "Android reply arrival preserves historical reading position",
+          "passed": true
+        },
+        {
+          "check": "tab changes retain input and history nodes",
+          "passed": true
+        },
+        {
+          "check": "returning to chat restores historical reading position",
+          "passed": true
+        },
+        {
+          "check": "return to latest messages and keyboard viewport fit",
+          "passed": true
+        },
+        {
+          "check": "closing the keyboard preserves composer and latest message",
+          "passed": true
+        }
+      ]
+    },
+    "offline": {
+      "phase": "offline",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "layout": {
+        "width": 412,
+        "height": 820,
+        "documentWidth": 412,
+        "calendarBottom": 606.2916870117188,
+        "navTop": 739.1904907226562
+      },
+      "sixWeekLayout": {
+        "rows": "6",
+        "gridHeight": "342px",
+        "calendarBottom": 663.2916870117188,
+        "navTop": 739.1904907226562
+      },
+      "passed": true,
+      "findings": [
+        {
+          "check": "offline Android startup",
+          "passed": true
+        },
+        {
+          "check": "INTERNET permission granted",
+          "passed": true
+        },
+        {
+          "check": "existing app data survives upgrade",
+          "passed": true
+        },
+        {
+          "check": "inline scripts styles and icon",
+          "passed": true
+        },
+        {
+          "check": "offline 2026 holidays and adjusted workday",
+          "passed": true
+        },
+        {
+          "check": "native bridge responds offline",
+          "passed": true
+        },
+        {
+          "check": "month fits actual Android viewport",
+          "passed": true
+        },
+        {
+          "check": "six-week month fits actual Android viewport",
+          "passed": true
+        },
+        {
+          "check": "offline UI creates expenses and schedule",
+          "passed": true
+        },
+        {
+          "check": "offline UI edits expense",
+          "passed": true
+        },
+        {
+          "check": "offline UI moves meeting",
+          "passed": true
+        },
+        {
+          "check": "offline UI analyzes recorded expenses",
+          "passed": true
+        }
+      ]
+    },
+    "persistence": {
+      "phase": "persistence",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "layout": {
+        "width": 412,
+        "height": 820,
+        "documentWidth": 412,
+        "calendarBottom": 606.2916870117188,
+        "navTop": 739.1904907226562
+      },
+      "sixWeekLayout": {
+        "rows": "6",
+        "gridHeight": "342px",
+        "calendarBottom": 663.2916870117188,
+        "navTop": 739.1904907226562
+      },
+      "passed": true,
+      "findings": [
+        {
+          "check": "offline Android startup",
+          "passed": true
+        },
+        {
+          "check": "INTERNET permission granted",
+          "passed": true
+        },
+        {
+          "check": "existing app data survives upgrade",
+          "passed": true
+        },
+        {
+          "check": "inline scripts styles and icon",
+          "passed": true
+        },
+        {
+          "check": "offline 2026 holidays and adjusted workday",
+          "passed": true
+        },
+        {
+          "check": "native bridge responds offline",
+          "passed": true
+        },
+        {
+          "check": "month fits actual Android viewport",
+          "passed": true
+        },
+        {
+          "check": "six-week month fits actual Android viewport",
+          "passed": true
+        },
+        {
+          "check": "transactions survive process restart",
+          "passed": true
+        },
+        {
+          "check": "schedule survives process restart",
+          "passed": true
+        }
+      ]
+    },
+    "multimodal": {
+      "phase": "multimodal",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "speechEngine": "test RecognitionService fixture, not a real acoustic engine",
+      "realDeepSeekKeyUsed": false,
+      "passed": true,
+      "findings": [
+        {
+          "check": "signed upgrade is version 0.2.0",
+          "passed": true
+        },
+        {
+          "check": "image picker does not request broad photo access",
+          "passed": true
+        },
+        {
+          "check": "actual native image chooser requests only images with multiple selection",
+          "passed": true
+        },
+        {
+          "check": "Android WebView decodes selected content URI and retains composer",
+          "passed": true
+        },
+        {
+          "check": "native bridge sends real image parts and restricts recognition tools",
+          "passed": true
+        },
+        {
+          "check": "image recognition does not write until save",
+          "passed": true
+        },
+        {
+          "check": "actual saved transaction contains exact cents",
+          "passed": true
+        },
+        {
+          "check": "full image and key are absent from native snapshot",
+          "passed": true
+        },
+        {
+          "check": "actual native speech service callback fills editable Chinese transcript",
+          "passed": true
+        },
+        {
+          "check": "speech results never write or send automatically",
+          "passed": true
+        },
+        {
+          "check": "sending transcript uses the actual existing business tools",
+          "passed": true
+        },
+        {
+          "check": "late recognition results after cancellation do not fill the draft",
+          "passed": true
+        },
+        {
+          "check": "new business data stored synchronously",
+          "passed": true
+        }
+      ]
+    },
+    "reopened": {
+      "phase": "persistence",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "layout": {
+        "width": 412,
+        "height": 820,
+        "documentWidth": 412,
+        "calendarBottom": 606.2916870117188,
+        "navTop": 739.1904907226562
+      },
+      "sixWeekLayout": {
+        "rows": "6",
+        "gridHeight": "342px",
+        "calendarBottom": 663.2916870117188,
+        "navTop": 739.1904907226562
+      },
+      "passed": true,
+      "findings": [
+        {
+          "check": "offline Android startup",
+          "passed": true
+        },
+        {
+          "check": "INTERNET permission granted",
+          "passed": true
+        },
+        {
+          "check": "existing app data survives upgrade",
+          "passed": true
+        },
+        {
+          "check": "inline scripts styles and icon",
+          "passed": true
+        },
+        {
+          "check": "offline 2026 holidays and adjusted workday",
+          "passed": true
+        },
+        {
+          "check": "native bridge responds offline",
+          "passed": true
+        },
+        {
+          "check": "month fits actual Android viewport",
+          "passed": true
+        },
+        {
+          "check": "six-week month fits actual Android viewport",
+          "passed": true
+        },
+        {
+          "check": "transactions survive process restart",
+          "passed": true
+        },
+        {
+          "check": "schedule survives process restart",
+          "passed": true
+        }
+      ]
+    },
+    "androidChecks": 58,
+    "apkSha256": "cd903e15714f57ce719e16254d17c380002f864038926316a3e86bfb7c7efeab"
+  },
+  "onlineHolidays": {
+    "passed": true,
+    "checkedAt": "2026-10-05T06:00:30.101Z",
+    "year": 2026,
+    "days": 39,
+    "dataURL": "https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/2026.json",
+    "papers": [
+      "https://www.gov.cn/zhengce/zhengceku/202511/content_7047091.htm"
+    ]
+  },
+  "gates": {
+    "actualSamsungPhoneTested": false,
+    "realDeepSeekKeyUsed": false,
+    "actualAudioRecognitionTested": false,
+    "speechService": "deterministic test service; delivery uses phone system service"
+  }
+}

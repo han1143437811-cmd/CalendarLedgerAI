@@ -1,0 +1,163 @@
+{
+  "passed": true,
+  "version": "0.2.3",
+  "findings": [
+    {
+      "check": "month displays festival, vacation and adjusted-workday names directly",
+      "passed": true
+    },
+    {
+      "check": "festival names remain visible for every content filter",
+      "passed": true
+    },
+    {
+      "check": "week view includes holiday names and workday badges",
+      "passed": true
+    },
+    {
+      "check": "day view includes full festival and days-off detail",
+      "passed": true
+    },
+    {
+      "check": "visible 除夕 on 2026-02-16",
+      "passed": true
+    },
+    {
+      "check": "visible 春节 on 2026-02-17",
+      "passed": true
+    },
+    {
+      "check": "visible 元宵节 on 2026-03-03",
+      "passed": true
+    },
+    {
+      "check": "visible 清明节 on 2026-04-05",
+      "passed": true
+    },
+    {
+      "check": "visible 端午节 on 2026-06-19",
+      "passed": true
+    },
+    {
+      "check": "visible 七夕 on 2026-08-19",
+      "passed": true
+    },
+    {
+      "check": "visible 中秋节 on 2026-09-25",
+      "passed": true
+    },
+    {
+      "check": "visible 重阳节 on 2026-10-18",
+      "passed": true
+    },
+    {
+      "check": "2027 festival visible without inventing unannounced leave schedules",
+      "passed": true
+    },
+    {
+      "check": "Mid-Autumn festival remains distinct inside National Day vacation",
+      "passed": true
+    },
+    {
+      "check": "festival layout 412x850 2026-10",
+      "passed": true,
+      "width": 412,
+      "doc": 412,
+      "rows": 5,
+      "bottom": 748.28125,
+      "navTop": 769,
+      "mainBottom": 757,
+      "detailTop": 772.28125,
+      "gridHeight": 427,
+      "clippedLabels": 0
+    },
+    {
+      "check": "festival layout 412x850 2026-08",
+      "passed": true,
+      "width": 412,
+      "doc": 412,
+      "rows": 6,
+      "bottom": 748.28125,
+      "navTop": 769,
+      "mainBottom": 757,
+      "detailTop": 772.28125,
+      "gridHeight": 427,
+      "clippedLabels": 0
+    },
+    {
+      "check": "festival layout 384x820 2026-10",
+      "passed": true,
+      "width": 384,
+      "doc": 384,
+      "rows": 5,
+      "bottom": 718.28125,
+      "navTop": 739,
+      "mainBottom": 727,
+      "detailTop": 742.28125,
+      "gridHeight": 397,
+      "clippedLabels": 0
+    },
+    {
+      "check": "festival layout 384x820 2026-08",
+      "passed": true,
+      "width": 384,
+      "doc": 384,
+      "rows": 6,
+      "bottom": 718.28125,
+      "navTop": 739,
+      "mainBottom": 727,
+      "detailTop": 742.28125,
+      "gridHeight": 397,
+      "clippedLabels": 0
+    },
+    {
+      "check": "festival layout 360x800 2026-10",
+      "passed": true,
+      "width": 360,
+      "doc": 360,
+      "rows": 5,
+      "bottom": 698.984375,
+      "navTop": 719,
+      "mainBottom": 707,
+      "detailTop": 722.984375,
+      "gridHeight": 381,
+      "clippedLabels": 0
+    },
+    {
+      "check": "festival layout 360x800 2026-08",
+      "passed": true,
+      "width": 360,
+      "doc": 360,
+      "rows": 6,
+      "bottom": 701.984375,
+      "navTop": 719,
+      "mainBottom": 707,
+      "detailTop": 725.984375,
+      "gridHeight": 384,
+      "clippedLabels": 0
+    },
+    {
+      "check": "scroll reveals selected daily schedules and records while month keeps its height",
+      "passed": true
+    },
+    {
+      "check": "daily reading position survives a same-month content update",
+      "passed": true
+    },
+    {
+      "check": "month dates are not covered by a floating add button and header add remains available",
+      "passed": true
+    },
+    {
+      "check": "festival dark theme and large font",
+      "width": 412,
+      "doc": 412,
+      "buttons": 55
+    },
+    {
+      "check": "browser console errors",
+      "count": 0
+    }
+  ],
+  "errors": []
+}

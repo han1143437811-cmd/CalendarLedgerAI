@@ -1,0 +1,767 @@
+{
+  "version": "0.2.2",
+  "passed": true,
+  "checkedAt": "2026-10-05T08:25:09.016814+00:00",
+  "apk": {
+    "filename": "CalendarLedgerAI-v0.2.2.apk",
+    "bytes": 51628355,
+    "sha256": "9581a61cc3c2b02519c060d370271a0f77f4de1b125e4fb48aba140f4318452f",
+    "package": "org.calendarledger.preview",
+    "minSdk": 26,
+    "targetSdk": 35,
+    "version": "0.2.2",
+    "versionCode": 6
+  },
+  "unitTests": {
+    "passed": true,
+    "count": 34,
+    "command": "npm --prefix prototype test"
+  },
+  "browser": {
+    "passed": true,
+    "count": 37,
+    "voiceUI": {
+      "passed": true,
+      "checks": 10,
+      "findings": [
+        {
+          "check": "permission failure shows persistent actionable alert and releases send",
+          "passed": true
+        },
+        {
+          "check": "error survives toast duration without replacing input or losing draft",
+          "passed": true
+        },
+        {
+          "check": "voice help and composer fit a 360px keyboard viewport",
+          "passed": true
+        },
+        {
+          "check": "voice help and composer fit a 393px keyboard viewport",
+          "passed": true
+        },
+        {
+          "check": "voice help and composer fit a 412px keyboard viewport",
+          "passed": true
+        },
+        {
+          "check": "browser permission action explains where to enable microphone",
+          "passed": true
+        },
+        {
+          "check": "dismiss only clears error and keeps original draft",
+          "passed": true
+        },
+        {
+          "check": "retry clears old error and enters recording",
+          "passed": true
+        },
+        {
+          "check": "retry result appends editable text without automatically writing a record",
+          "passed": true
+        },
+        {
+          "check": "keyboard fallback focuses same input and releases recording and alert",
+          "passed": true
+        }
+      ],
+      "errors": [],
+      "speechCallbacksMocked": true
+    },
+    "chat": {
+      "passed": true,
+      "version": "0.2.0",
+      "findings": [
+        {
+          "check": "waiting reply keeps the same focused enabled textarea",
+          "passed": true
+        },
+        {
+          "check": "tool operations preserve panel list and history nodes",
+          "passed": true
+        },
+        {
+          "check": "reply completion retains focus and next-message draft",
+          "passed": true
+        },
+        {
+          "check": "smooth new-message trajectory without history flashing",
+          "passed": true,
+          "start": 3570,
+          "end": 4283,
+          "intermediatePositions": 30
+        },
+        {
+          "check": "reply arriving while reading history does not pull to bottom",
+          "passed": true
+        },
+        {
+          "check": "background holiday refresh keeps chat position and DOM",
+          "passed": true
+        },
+        {
+          "check": "return to latest messages follows the current bottom",
+          "passed": true
+        },
+        {
+          "check": "keyboard-sized viewport preserves textarea and composer visibility",
+          "passed": true
+        },
+        {
+          "check": "restoring viewport does not discard a history reading position",
+          "passed": true
+        },
+        {
+          "check": "reduced-motion preference skips message animations",
+          "passed": true
+        }
+      ],
+      "errors": [],
+      "trace": {
+        "from": 3570,
+        "samples": [
+          {
+            "time": 119,
+            "top": 3570,
+            "opacity": "1"
+          },
+          {
+            "time": 135.6,
+            "top": 3592,
+            "opacity": "1"
+          },
+          {
+            "time": 152.3,
+            "top": 3622,
+            "opacity": "1"
+          },
+          {
+            "time": 169,
+            "top": 3649,
+            "opacity": "1"
+          },
+          {
+            "time": 185.7,
+            "top": 3672,
+            "opacity": "1"
+          },
+          {
+            "time": 202.3,
+            "top": 3691,
+            "opacity": "1"
+          },
+          {
+            "time": 219,
+            "top": 3708,
+            "opacity": "1"
+          },
+          {
+            "time": 235.7,
+            "top": 3722,
+            "opacity": "1"
+          },
+          {
+            "time": 252.3,
+            "top": 3734,
+            "opacity": "1"
+          },
+          {
+            "time": 268.9,
+            "top": 3743,
+            "opacity": "1"
+          },
+          {
+            "time": 285.7,
+            "top": 3750,
+            "opacity": "1"
+          },
+          {
+            "time": 302.3,
+            "top": 3755,
+            "opacity": "1"
+          },
+          {
+            "time": 319,
+            "top": 3759,
+            "opacity": "1"
+          },
+          {
+            "time": 335.7,
+            "top": 3762,
+            "opacity": "1"
+          },
+          {
+            "time": 352.3,
+            "top": 3764,
+            "opacity": "1"
+          },
+          {
+            "time": 369,
+            "top": 3765,
+            "opacity": "1"
+          },
+          {
+            "time": 385.7,
+            "top": 3765,
+            "opacity": "1"
+          },
+          {
+            "time": 402.3,
+            "top": 3788,
+            "opacity": "1"
+          },
+          {
+            "time": 419,
+            "top": 3872,
+            "opacity": "1"
+          },
+          {
+            "time": 435.7,
+            "top": 3946,
+            "opacity": "1"
+          },
+          {
+            "time": 452.3,
+            "top": 4011,
+            "opacity": "1"
+          },
+          {
+            "time": 469,
+            "top": 4067,
+            "opacity": "1"
+          },
+          {
+            "time": 485.6,
+            "top": 4115,
+            "opacity": "1"
+          },
+          {
+            "time": 502.3,
+            "top": 4155,
+            "opacity": "1"
+          },
+          {
+            "time": 519,
+            "top": 4188,
+            "opacity": "1"
+          },
+          {
+            "time": 535.7,
+            "top": 4215,
+            "opacity": "1"
+          },
+          {
+            "time": 552.4,
+            "top": 4236,
+            "opacity": "1"
+          },
+          {
+            "time": 568.9,
+            "top": 4252,
+            "opacity": "1"
+          },
+          {
+            "time": 585.6,
+            "top": 4264,
+            "opacity": "1"
+          },
+          {
+            "time": 602.3,
+            "top": 4273,
+            "opacity": "1"
+          },
+          {
+            "time": 618.9,
+            "top": 4278,
+            "opacity": "1"
+          },
+          {
+            "time": 635.6,
+            "top": 4281,
+            "opacity": "1"
+          },
+          {
+            "time": 652.3,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 668.9,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 685.7,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 702.3,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 719,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 735.6,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 752.3,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 769,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 785.7,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 802.3,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 819,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 835.6,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 852.3,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 869,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 885.6,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 902.3,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 918.9,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 935.6,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 952.3,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 968.9,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 985.6,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1002.3,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1019,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1035.6,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1052.2,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1069,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1085.6,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1102.3,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1118.9,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1135.6,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1152.3,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1168.9,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1185.6,
+            "top": 4283,
+            "opacity": "1"
+          }
+        ],
+        "to": 4283
+      },
+      "defaultReducedMotion": true
+    },
+    "multimodal": {
+      "passed": true,
+      "findings": [
+        {
+          "check": "four reachable mobile tabs and readable calendar",
+          "passed": true
+        },
+        {
+          "check": "more page retains analysis tasks settings and backup",
+          "passed": true
+        },
+        {
+          "check": "actual decoded image thumbnail without replacing composer",
+          "passed": true
+        },
+        {
+          "check": "demo does not invent recognition or send image upstream",
+          "passed": true
+        },
+        {
+          "check": "upstream receives actual encoded image with read-only recognition tools",
+          "passed": true
+        },
+        {
+          "check": "recognition returns two cards without writing business data",
+          "passed": true
+        },
+        {
+          "check": "AI follow-up edits only the identified draft and releases previous full image",
+          "passed": true
+        },
+        {
+          "check": "editing recognition changes only the card",
+          "passed": true
+        },
+        {
+          "check": "selected cards save exact cents and real event reminder",
+          "passed": true
+        },
+        {
+          "check": "tab navigation retains history node and input",
+          "passed": true
+        },
+        {
+          "check": "AI explicit save writes selected draft once and excludes duplicate meeting",
+          "passed": true
+        },
+        {
+          "check": "process-like reload preserves records cards and image thumbnail",
+          "passed": true
+        },
+        {
+          "check": "microphone shows recording and disables send",
+          "passed": true
+        },
+        {
+          "check": "recognized speech is editable and never submits automatically",
+          "passed": true
+        },
+        {
+          "check": "cancelling voice keeps existing typed draft",
+          "passed": true
+        },
+        {
+          "check": "small keyboard viewport keeps image voice and send accessible",
+          "passed": true
+        },
+        {
+          "check": "image request failure retains photo and editable message for retry",
+          "passed": true
+        }
+      ],
+      "errors": [],
+      "mockedProvider": true,
+      "realDeepSeekKeyUsed": false
+    }
+  },
+  "android": {
+    "passed": true,
+    "apk": {
+      "filename": "CalendarLedgerAI-v0.2.2.apk",
+      "bytes": 51628355,
+      "sha256": "9581a61cc3c2b02519c060d370271a0f77f4de1b125e4fb48aba140f4318452f"
+    },
+    "device": "emulator-5580",
+    "actualSamsungPhone": false,
+    "network": "airplane mode, Wi-Fi and data off",
+    "lifecycle": "native voice hooks called by onStop/onResume explicitly simulated around real permission dialog",
+    "audio": "silent emulator AudioRecord; separate Chinese TTS PCM sent to actual bundled Vosk decoder",
+    "baseline": {
+      "phase": "baseline",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "reproduction": "real permission request; native voice hooks called by onStop/onResume explicitly simulated, without manually stopping Android's Window",
+      "passed": true,
+      "findings": [
+        {
+          "check": "old APK requests microphone permission",
+          "passed": true
+        },
+        {
+          "check": "reproduced old session lost during permission-window stop",
+          "passed": true
+        }
+      ]
+    },
+    "upgradeBaseline": {
+      "phase": "upgrade-baseline",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "passed": true,
+      "version": "0.2.1"
+    },
+    "sameSignatureUpgrade": true,
+    "deny": {
+      "phase": "deny",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "applicationSource": "/data/app/~~d2FQwa11H0_1oHz2qk_Snw==/org.calendarledger.preview-h3zzoy9L9xzWfx-U_fWpng==/base.apk",
+      "packageSource": "/data/app/~~d2FQwa11H0_1oHz2qk_Snw==/org.calendarledger.preview-h3zzoy9L9xzWfx-U_fWpng==/base.apk",
+      "speechArchiveEntries": [
+        {
+          "name": "assets/speech/vosk-model-small-cn-0.22.zip",
+          "size": 43898754
+        }
+      ],
+      "passed": true,
+      "findings": [
+        {
+          "check": "delivery version is 0.2.2",
+          "passed": true
+        },
+        {
+          "check": "signed upgrade preserves old transactions schedules and tasks",
+          "passed": true
+        },
+        {
+          "check": "system SpeechRecognizer service is unavailable in repaired tests",
+          "passed": true
+        },
+        {
+          "check": "permission absent before tapping microphone",
+          "passed": true
+        },
+        {
+          "check": "real permission window keeps composer and shows pending state",
+          "passed": true
+        },
+        {
+          "check": "denial produces useful persistent permission message",
+          "passed": true
+        },
+        {
+          "check": "error remains visible after toast duration",
+          "passed": true
+        },
+        {
+          "check": "keyboard fallback focuses the same draft without sending",
+          "passed": true
+        },
+        {
+          "check": "permission and recording never modify business records",
+          "passed": true
+        }
+      ]
+    },
+    "grant": {
+      "phase": "grant",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "applicationSource": "/data/app/~~d2FQwa11H0_1oHz2qk_Snw==/org.calendarledger.preview-h3zzoy9L9xzWfx-U_fWpng==/base.apk",
+      "packageSource": "/data/app/~~d2FQwa11H0_1oHz2qk_Snw==/org.calendarledger.preview-h3zzoy9L9xzWfx-U_fWpng==/base.apk",
+      "speechArchiveEntries": [
+        {
+          "name": "assets/speech/vosk-model-small-cn-0.22.zip",
+          "size": 43898754
+        }
+      ],
+      "passed": true,
+      "findings": [
+        {
+          "check": "delivery version is 0.2.2",
+          "passed": true
+        },
+        {
+          "check": "signed upgrade preserves old transactions schedules and tasks",
+          "passed": true
+        },
+        {
+          "check": "system SpeechRecognizer service is unavailable in repaired tests",
+          "passed": true
+        },
+        {
+          "check": "permission absent before tapping microphone",
+          "passed": true
+        },
+        {
+          "check": "real permission window keeps composer and shows pending state",
+          "passed": true
+        },
+        {
+          "check": "pending voice session survives simulated permission-window onStop",
+          "passed": true
+        },
+        {
+          "check": "permission grant preserves the session until recording starts",
+          "passed": true
+        },
+        {
+          "check": "grant continues to actual AudioRecord listening with no system speech service",
+          "passed": true
+        },
+        {
+          "check": "bundled Mandarin model prepared privately",
+          "passed": true
+        },
+        {
+          "check": "cancel releases session and leaves text unchanged",
+          "passed": true
+        },
+        {
+          "check": "already granted retry starts without another permission request",
+          "passed": true
+        },
+        {
+          "check": "silent input completes with an actionable error instead of a stuck state",
+          "passed": true
+        },
+        {
+          "check": "background transition cancels recording",
+          "passed": true
+        },
+        {
+          "check": "permission and recording never modify business records",
+          "passed": true
+        }
+      ]
+    },
+    "audioFixtureSha256": "256fc372d4c9c9fd1a52a912ac6858409b759614a0267b43a7b22156ae62532b",
+    "pcm": {
+      "phase": "pcm",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "applicationSource": "/data/app/~~d2FQwa11H0_1oHz2qk_Snw==/org.calendarledger.preview-h3zzoy9L9xzWfx-U_fWpng==/base.apk",
+      "packageSource": "/data/app/~~d2FQwa11H0_1oHz2qk_Snw==/org.calendarledger.preview-h3zzoy9L9xzWfx-U_fWpng==/base.apk",
+      "speechArchiveEntries": [
+        {
+          "name": "assets/speech/vosk-model-small-cn-0.22.zip",
+          "size": 43898754
+        }
+      ],
+      "reference": "今天午饭三十八元，地铁六元。明天下午两点开会。",
+      "transcript": "今天午饭三十八原地铁六元明天下午两点开会",
+      "syntheticAudio": "Microsoft Huihui Desktop zh-CN, 16 kHz mono PCM; actual Vosk decoder, no mocked transcript",
+      "passed": true,
+      "findings": [
+        {
+          "check": "known Chinese PCM fixture is RIFF WAV",
+          "passed": true
+        },
+        {
+          "check": "real offline native decoder recognizes Mandarin keywords",
+          "passed": true
+        },
+        {
+          "check": "actual recognized transcript fills an editable draft without auto-send",
+          "passed": true
+        }
+      ]
+    },
+    "checks": 28
+  },
+  "packaging": {
+    "passed": true,
+    "canonicalAssetPaths": true,
+    "bundledModelSha256": "3af8b0e7e0f835ae9d414ce5df580237a3cfb08d586c9fbbb0f7ff29ad5b14ba",
+    "thirdPartyNoticesIncluded": true,
+    "elf": [
+      {
+        "name": "lib/arm64-v8a/libjnidispatch.so",
+        "minimumLoadAlignment": 16384,
+        "sha256": "abc26e994517bcaa3309acdb0a27373864086c7569c89d3087b8626fada9ef06"
+      },
+      {
+        "name": "lib/arm64-v8a/libvosk.so",
+        "minimumLoadAlignment": 16384,
+        "sha256": "06965ebb4e5eb3a9e4a815755e178d9553392e3fe8d3d368ac46952ad3694173"
+      },
+      {
+        "name": "lib/x86_64/libjnidispatch.so",
+        "minimumLoadAlignment": 16384,
+        "sha256": "3809247e9b804a05ed8377b87d545cf5b5e97f960f75e725bc8497b40260e417"
+      },
+      {
+        "name": "lib/x86_64/libvosk.so",
+        "minimumLoadAlignment": 16384,
+        "sha256": "139c42691fae9f5a65c390c0a1311fac1fc9119be662469f32e1af6cefbe496f"
+      }
+    ],
+    "signatureV2": true,
+    "signatureV3": true
+  },
+  "limitations": [
+    "未在用户 S24 Ultra / One UI 8.5 上实测",
+    "模拟器录音为静音，中文 TTS WAV 直接输入实际原生解码器",
+    "围绕实际权限弹窗显式调用语音生命周期钩子，未观测用户实机生命周期",
+    "转写有单字错误，需要核对后发送",
+    "图片和 AI API 检查使用模拟提供者，未使用真实 DeepSeek Key"
+  ],
+  "historicalChecks": {
+    "version": "0.2.1",
+    "report": "验证结果-v0.2.1.json",
+    "note": "节日完整显示和一般界面检查是此前版本结果，本轮未重复统计为新包测试"
+  }
+}

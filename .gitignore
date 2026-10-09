@@ -1,0 +1,45 @@
+# Local credentials and user data
+.env
+.env.*
+!.env.example
+**/signing/
+*.p12
+*.jks
+*.keystore
+**/password.txt
+**/hosts.yml
+**/browser-profile*/
+**/node_modules/
+backups/
+
+# Downloaded build inputs and generated binaries
+build-tools/sdk/
+build-tools/android-repository.xml
+build-tools/sdk-packages.json
+build-tools/*.zip
+build-tools/voice/*.aar
+build-tools/voice/*.jar
+build-tools/voice/*.zip
+build-tools/voice/jni/
+android/build/
+release-assets/
+*.apk
+*.apk.idsig
+*.aab
+*.class
+*.log
+__pycache__/
+*.pyc
+
+# Generated local browser results, except reviewed release records
+prototype/qa/*.png
+prototype/qa/*.json
+!prototype/qa/android-calendar-v0.2.3-results.json
+!prototype/qa/chat-scroll-results-v0.2.3.json
+!prototype/qa/festival-results-v0.2.3.json
+
+# Editor / OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

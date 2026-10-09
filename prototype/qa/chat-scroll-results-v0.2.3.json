@@ -1,0 +1,384 @@
+{
+  "passed": true,
+  "version": "0.2.3",
+  "findings": [
+    {
+      "check": "waiting reply keeps the same focused enabled textarea",
+      "passed": true
+    },
+    {
+      "check": "tool operations preserve panel list and history nodes",
+      "passed": true
+    },
+    {
+      "check": "reply completion retains focus and next-message draft",
+      "passed": true
+    },
+    {
+      "check": "smooth new-message trajectory without history flashing",
+      "passed": true,
+      "start": 3570,
+      "end": 4283,
+      "intermediatePositions": 30
+    },
+    {
+      "check": "reply arriving while reading history does not pull to bottom",
+      "passed": true
+    },
+    {
+      "check": "background holiday refresh keeps chat position and DOM",
+      "passed": true
+    },
+    {
+      "check": "return to latest messages follows the current bottom",
+      "passed": true
+    },
+    {
+      "check": "keyboard-sized viewport preserves textarea and composer visibility",
+      "passed": true
+    },
+    {
+      "check": "restoring viewport does not discard a history reading position",
+      "passed": true
+    },
+    {
+      "check": "reduced-motion preference skips message animations",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "trace": {
+    "from": 3570,
+    "samples": [
+      {
+        "time": 126.466,
+        "top": 3570,
+        "opacity": "1"
+      },
+      {
+        "time": 143,
+        "top": 3592,
+        "opacity": "1"
+      },
+      {
+        "time": 159.8,
+        "top": 3622,
+        "opacity": "1"
+      },
+      {
+        "time": 176.4,
+        "top": 3649,
+        "opacity": "1"
+      },
+      {
+        "time": 193,
+        "top": 3671,
+        "opacity": "1"
+      },
+      {
+        "time": 209.7,
+        "top": 3691,
+        "opacity": "1"
+      },
+      {
+        "time": 226.4,
+        "top": 3708,
+        "opacity": "1"
+      },
+      {
+        "time": 243,
+        "top": 3722,
+        "opacity": "1"
+      },
+      {
+        "time": 259.7,
+        "top": 3733,
+        "opacity": "1"
+      },
+      {
+        "time": 276.4,
+        "top": 3743,
+        "opacity": "1"
+      },
+      {
+        "time": 293.1,
+        "top": 3750,
+        "opacity": "1"
+      },
+      {
+        "time": 309.7,
+        "top": 3755,
+        "opacity": "1"
+      },
+      {
+        "time": 326.4,
+        "top": 3759,
+        "opacity": "1"
+      },
+      {
+        "time": 343,
+        "top": 3762,
+        "opacity": "1"
+      },
+      {
+        "time": 359.7,
+        "top": 3764,
+        "opacity": "1"
+      },
+      {
+        "time": 376.4,
+        "top": 3765,
+        "opacity": "1"
+      },
+      {
+        "time": 393.1,
+        "top": 3765,
+        "opacity": "1"
+      },
+      {
+        "time": 409.7,
+        "top": 3800,
+        "opacity": "1"
+      },
+      {
+        "time": 426.3,
+        "top": 3882,
+        "opacity": "1"
+      },
+      {
+        "time": 443.1,
+        "top": 3955,
+        "opacity": "1"
+      },
+      {
+        "time": 459.7,
+        "top": 4019,
+        "opacity": "1"
+      },
+      {
+        "time": 476.4,
+        "top": 4074,
+        "opacity": "1"
+      },
+      {
+        "time": 493,
+        "top": 4120,
+        "opacity": "1"
+      },
+      {
+        "time": 509.7,
+        "top": 4159,
+        "opacity": "1"
+      },
+      {
+        "time": 526.4,
+        "top": 4192,
+        "opacity": "1"
+      },
+      {
+        "time": 543.1,
+        "top": 4218,
+        "opacity": "1"
+      },
+      {
+        "time": 559.7,
+        "top": 4238,
+        "opacity": "1"
+      },
+      {
+        "time": 576.4,
+        "top": 4254,
+        "opacity": "1"
+      },
+      {
+        "time": 593,
+        "top": 4266,
+        "opacity": "1"
+      },
+      {
+        "time": 609.7,
+        "top": 4274,
+        "opacity": "1"
+      },
+      {
+        "time": 626.4,
+        "top": 4279,
+        "opacity": "1"
+      },
+      {
+        "time": 643,
+        "top": 4281,
+        "opacity": "1"
+      },
+      {
+        "time": 659.7,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 676.4,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 693.1,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 709.7,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 726.4,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 743,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 759.7,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 776.4,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 793,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 809.7,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 826.4,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 843,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 859.7,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 876.3,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 893.1,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 909.7,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 926.4,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 943,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 959.7,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 976.4,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 993,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 1009.6,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 1026.3,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 1043,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 1059.7,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 1076.4,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 1093.1,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 1109.7,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 1126.3,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 1143,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 1159.7,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 1176.4,
+        "top": 4283,
+        "opacity": "1"
+      },
+      {
+        "time": 1193,
+        "top": 4283,
+        "opacity": "1"
+      }
+    ],
+    "to": 4283
+  },
+  "defaultReducedMotion": true,
+  "harnessReportedVersion": "0.2.0",
+  "metadataNote": "Application 0.2.3 was tested; original harness had a fixed 0.2.0 report label. Assertions and measurements are unchanged."
+}

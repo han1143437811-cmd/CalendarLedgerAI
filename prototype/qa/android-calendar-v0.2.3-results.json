@@ -1,0 +1,173 @@
+{
+  "passed": true,
+  "version": "0.2.3",
+  "device": "emulator-5580",
+  "actualSamsungPhone": false,
+  "apiKeyUsed": false,
+  "baseline": {
+    "phase": "upgrade-baseline",
+    "androidApi": 36,
+    "webview": "133.0.6943.137",
+    "passed": true,
+    "version": "0.2.2"
+  },
+  "oldCalendar": {
+    "phase": "calendar-baseline",
+    "androidApi": 36,
+    "webview": "133.0.6943.137",
+    "passed": true,
+    "monthHeight": 320,
+    "version": "0.2.2"
+  },
+  "sameSignatureUpgrade": true,
+  "calendar": {
+    "phase": "calendar-layout",
+    "androidApi": 36,
+    "webview": "133.0.6943.137",
+    "baselineMonthHeight": 320,
+    "monthHeight": 397,
+    "viewport": {
+      "width": 412,
+      "height": 820
+    },
+    "passed": true,
+    "findings": [
+      {
+        "check": "delivery version 0.2.3",
+        "passed": true
+      },
+      {
+        "check": "existing transactions schedules and tasks survive signed upgrade",
+        "passed": true
+      },
+      {
+        "check": "embedded application opens offline",
+        "passed": true
+      },
+      {
+        "check": "month calendar is substantially taller than installed v0.2.2",
+        "passed": true
+      },
+      {
+        "check": "daily details start below first screen",
+        "passed": true
+      },
+      {
+        "check": "month footer fits above navigation and scroll hint is visible",
+        "passed": true
+      },
+      {
+        "check": "header add accessible and floating add cannot cover dates",
+        "passed": true
+      },
+      {
+        "check": "holiday names remain visible in larger month",
+        "passed": true
+      },
+      {
+        "check": "real Android touch scroll reveals selected daily details",
+        "passed": true
+      },
+      {
+        "check": "scrolling keeps month height stable",
+        "passed": true
+      },
+      {
+        "check": "same-month refresh preserves daily reading position",
+        "passed": true
+      },
+      {
+        "check": "six-row month fits with daily details below first screen",
+        "passed": true
+      },
+      {
+        "check": "week view remains reachable without month scroll hint",
+        "passed": true
+      },
+      {
+        "check": "day view remains reachable",
+        "passed": true
+      },
+      {
+        "check": "layout and scrolling never modify business records",
+        "passed": true
+      }
+    ]
+  },
+  "reopened": {
+    "phase": "calendar-layout",
+    "androidApi": 36,
+    "webview": "133.0.6943.137",
+    "baselineMonthHeight": 320,
+    "monthHeight": 397,
+    "viewport": {
+      "width": 412,
+      "height": 820
+    },
+    "passed": true,
+    "findings": [
+      {
+        "check": "delivery version 0.2.3",
+        "passed": true
+      },
+      {
+        "check": "existing transactions schedules and tasks survive signed upgrade",
+        "passed": true
+      },
+      {
+        "check": "embedded application opens offline",
+        "passed": true
+      },
+      {
+        "check": "month calendar is substantially taller than installed v0.2.2",
+        "passed": true
+      },
+      {
+        "check": "daily details start below first screen",
+        "passed": true
+      },
+      {
+        "check": "month footer fits above navigation and scroll hint is visible",
+        "passed": true
+      },
+      {
+        "check": "header add accessible and floating add cannot cover dates",
+        "passed": true
+      },
+      {
+        "check": "holiday names remain visible in larger month",
+        "passed": true
+      },
+      {
+        "check": "real Android touch scroll reveals selected daily details",
+        "passed": true
+      },
+      {
+        "check": "scrolling keeps month height stable",
+        "passed": true
+      },
+      {
+        "check": "same-month refresh preserves daily reading position",
+        "passed": true
+      },
+      {
+        "check": "six-row month fits with daily details below first screen",
+        "passed": true
+      },
+      {
+        "check": "week view remains reachable without month scroll hint",
+        "passed": true
+      },
+      {
+        "check": "day view remains reachable",
+        "passed": true
+      },
+      {
+        "check": "layout and scrolling never modify business records",
+        "passed": true
+      }
+    ]
+  },
+  "androidChecks": 30,
+  "apkSha256": "cb7e32c66ec8b9e7d1a4bc5d36843e457901c83b61f8a089eddbc519128580ba"
+}

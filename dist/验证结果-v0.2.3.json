@@ -1,0 +1,774 @@
+{
+  "version": "0.2.3",
+  "passed": true,
+  "checkedAt": "2026-10-05T11:33:43.265595+00:00",
+  "apk": {
+    "filename": "CalendarLedgerAI-v0.2.3.apk",
+    "bytes": 51628355,
+    "sha256": "cb7e32c66ec8b9e7d1a4bc5d36843e457901c83b61f8a089eddbc519128580ba",
+    "package": "org.calendarledger.preview",
+    "minSdk": 26,
+    "targetSdk": 35,
+    "version": "0.2.3",
+    "versionCode": 7
+  },
+  "browser": {
+    "passed": true,
+    "count": 35,
+    "calendar": {
+      "passed": true,
+      "version": "0.2.3",
+      "findings": [
+        {
+          "check": "month displays festival, vacation and adjusted-workday names directly",
+          "passed": true
+        },
+        {
+          "check": "festival names remain visible for every content filter",
+          "passed": true
+        },
+        {
+          "check": "week view includes holiday names and workday badges",
+          "passed": true
+        },
+        {
+          "check": "day view includes full festival and days-off detail",
+          "passed": true
+        },
+        {
+          "check": "visible 除夕 on 2026-02-16",
+          "passed": true
+        },
+        {
+          "check": "visible 春节 on 2026-02-17",
+          "passed": true
+        },
+        {
+          "check": "visible 元宵节 on 2026-03-03",
+          "passed": true
+        },
+        {
+          "check": "visible 清明节 on 2026-04-05",
+          "passed": true
+        },
+        {
+          "check": "visible 端午节 on 2026-06-19",
+          "passed": true
+        },
+        {
+          "check": "visible 七夕 on 2026-08-19",
+          "passed": true
+        },
+        {
+          "check": "visible 中秋节 on 2026-09-25",
+          "passed": true
+        },
+        {
+          "check": "visible 重阳节 on 2026-10-18",
+          "passed": true
+        },
+        {
+          "check": "2027 festival visible without inventing unannounced leave schedules",
+          "passed": true
+        },
+        {
+          "check": "Mid-Autumn festival remains distinct inside National Day vacation",
+          "passed": true
+        },
+        {
+          "check": "festival layout 412x850 2026-10",
+          "passed": true,
+          "width": 412,
+          "doc": 412,
+          "rows": 5,
+          "bottom": 748.28125,
+          "navTop": 769,
+          "mainBottom": 757,
+          "detailTop": 772.28125,
+          "gridHeight": 427,
+          "clippedLabels": 0
+        },
+        {
+          "check": "festival layout 412x850 2026-08",
+          "passed": true,
+          "width": 412,
+          "doc": 412,
+          "rows": 6,
+          "bottom": 748.28125,
+          "navTop": 769,
+          "mainBottom": 757,
+          "detailTop": 772.28125,
+          "gridHeight": 427,
+          "clippedLabels": 0
+        },
+        {
+          "check": "festival layout 384x820 2026-10",
+          "passed": true,
+          "width": 384,
+          "doc": 384,
+          "rows": 5,
+          "bottom": 718.28125,
+          "navTop": 739,
+          "mainBottom": 727,
+          "detailTop": 742.28125,
+          "gridHeight": 397,
+          "clippedLabels": 0
+        },
+        {
+          "check": "festival layout 384x820 2026-08",
+          "passed": true,
+          "width": 384,
+          "doc": 384,
+          "rows": 6,
+          "bottom": 718.28125,
+          "navTop": 739,
+          "mainBottom": 727,
+          "detailTop": 742.28125,
+          "gridHeight": 397,
+          "clippedLabels": 0
+        },
+        {
+          "check": "festival layout 360x800 2026-10",
+          "passed": true,
+          "width": 360,
+          "doc": 360,
+          "rows": 5,
+          "bottom": 698.984375,
+          "navTop": 719,
+          "mainBottom": 707,
+          "detailTop": 722.984375,
+          "gridHeight": 381,
+          "clippedLabels": 0
+        },
+        {
+          "check": "festival layout 360x800 2026-08",
+          "passed": true,
+          "width": 360,
+          "doc": 360,
+          "rows": 6,
+          "bottom": 701.984375,
+          "navTop": 719,
+          "mainBottom": 707,
+          "detailTop": 725.984375,
+          "gridHeight": 384,
+          "clippedLabels": 0
+        },
+        {
+          "check": "scroll reveals selected daily schedules and records while month keeps its height",
+          "passed": true
+        },
+        {
+          "check": "daily reading position survives a same-month content update",
+          "passed": true
+        },
+        {
+          "check": "month dates are not covered by a floating add button and header add remains available",
+          "passed": true
+        },
+        {
+          "check": "festival dark theme and large font",
+          "width": 412,
+          "doc": 412,
+          "buttons": 55
+        },
+        {
+          "check": "browser console errors",
+          "count": 0
+        }
+      ],
+      "errors": []
+    },
+    "chat": {
+      "passed": true,
+      "version": "0.2.3",
+      "findings": [
+        {
+          "check": "waiting reply keeps the same focused enabled textarea",
+          "passed": true
+        },
+        {
+          "check": "tool operations preserve panel list and history nodes",
+          "passed": true
+        },
+        {
+          "check": "reply completion retains focus and next-message draft",
+          "passed": true
+        },
+        {
+          "check": "smooth new-message trajectory without history flashing",
+          "passed": true,
+          "start": 3570,
+          "end": 4283,
+          "intermediatePositions": 30
+        },
+        {
+          "check": "reply arriving while reading history does not pull to bottom",
+          "passed": true
+        },
+        {
+          "check": "background holiday refresh keeps chat position and DOM",
+          "passed": true
+        },
+        {
+          "check": "return to latest messages follows the current bottom",
+          "passed": true
+        },
+        {
+          "check": "keyboard-sized viewport preserves textarea and composer visibility",
+          "passed": true
+        },
+        {
+          "check": "restoring viewport does not discard a history reading position",
+          "passed": true
+        },
+        {
+          "check": "reduced-motion preference skips message animations",
+          "passed": true
+        }
+      ],
+      "errors": [],
+      "trace": {
+        "from": 3570,
+        "samples": [
+          {
+            "time": 126.466,
+            "top": 3570,
+            "opacity": "1"
+          },
+          {
+            "time": 143,
+            "top": 3592,
+            "opacity": "1"
+          },
+          {
+            "time": 159.8,
+            "top": 3622,
+            "opacity": "1"
+          },
+          {
+            "time": 176.4,
+            "top": 3649,
+            "opacity": "1"
+          },
+          {
+            "time": 193,
+            "top": 3671,
+            "opacity": "1"
+          },
+          {
+            "time": 209.7,
+            "top": 3691,
+            "opacity": "1"
+          },
+          {
+            "time": 226.4,
+            "top": 3708,
+            "opacity": "1"
+          },
+          {
+            "time": 243,
+            "top": 3722,
+            "opacity": "1"
+          },
+          {
+            "time": 259.7,
+            "top": 3733,
+            "opacity": "1"
+          },
+          {
+            "time": 276.4,
+            "top": 3743,
+            "opacity": "1"
+          },
+          {
+            "time": 293.1,
+            "top": 3750,
+            "opacity": "1"
+          },
+          {
+            "time": 309.7,
+            "top": 3755,
+            "opacity": "1"
+          },
+          {
+            "time": 326.4,
+            "top": 3759,
+            "opacity": "1"
+          },
+          {
+            "time": 343,
+            "top": 3762,
+            "opacity": "1"
+          },
+          {
+            "time": 359.7,
+            "top": 3764,
+            "opacity": "1"
+          },
+          {
+            "time": 376.4,
+            "top": 3765,
+            "opacity": "1"
+          },
+          {
+            "time": 393.1,
+            "top": 3765,
+            "opacity": "1"
+          },
+          {
+            "time": 409.7,
+            "top": 3800,
+            "opacity": "1"
+          },
+          {
+            "time": 426.3,
+            "top": 3882,
+            "opacity": "1"
+          },
+          {
+            "time": 443.1,
+            "top": 3955,
+            "opacity": "1"
+          },
+          {
+            "time": 459.7,
+            "top": 4019,
+            "opacity": "1"
+          },
+          {
+            "time": 476.4,
+            "top": 4074,
+            "opacity": "1"
+          },
+          {
+            "time": 493,
+            "top": 4120,
+            "opacity": "1"
+          },
+          {
+            "time": 509.7,
+            "top": 4159,
+            "opacity": "1"
+          },
+          {
+            "time": 526.4,
+            "top": 4192,
+            "opacity": "1"
+          },
+          {
+            "time": 543.1,
+            "top": 4218,
+            "opacity": "1"
+          },
+          {
+            "time": 559.7,
+            "top": 4238,
+            "opacity": "1"
+          },
+          {
+            "time": 576.4,
+            "top": 4254,
+            "opacity": "1"
+          },
+          {
+            "time": 593,
+            "top": 4266,
+            "opacity": "1"
+          },
+          {
+            "time": 609.7,
+            "top": 4274,
+            "opacity": "1"
+          },
+          {
+            "time": 626.4,
+            "top": 4279,
+            "opacity": "1"
+          },
+          {
+            "time": 643,
+            "top": 4281,
+            "opacity": "1"
+          },
+          {
+            "time": 659.7,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 676.4,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 693.1,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 709.7,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 726.4,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 743,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 759.7,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 776.4,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 793,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 809.7,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 826.4,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 843,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 859.7,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 876.3,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 893.1,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 909.7,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 926.4,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 943,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 959.7,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 976.4,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 993,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1009.6,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1026.3,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1043,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1059.7,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1076.4,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1093.1,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1109.7,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1126.3,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1143,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1159.7,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1176.4,
+            "top": 4283,
+            "opacity": "1"
+          },
+          {
+            "time": 1193,
+            "top": 4283,
+            "opacity": "1"
+          }
+        ],
+        "to": 4283
+      },
+      "defaultReducedMotion": true,
+      "harnessReportedVersion": "0.2.0",
+      "metadataNote": "Application 0.2.3 was tested; original harness had a fixed 0.2.0 report label. Assertions and measurements are unchanged."
+    }
+  },
+  "android": {
+    "passed": true,
+    "version": "0.2.3",
+    "device": "emulator-5580",
+    "actualSamsungPhone": false,
+    "apiKeyUsed": false,
+    "baseline": {
+      "phase": "upgrade-baseline",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "passed": true,
+      "version": "0.2.2"
+    },
+    "oldCalendar": {
+      "phase": "calendar-baseline",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "passed": true,
+      "monthHeight": 320,
+      "version": "0.2.2"
+    },
+    "sameSignatureUpgrade": true,
+    "calendar": {
+      "phase": "calendar-layout",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "baselineMonthHeight": 320,
+      "monthHeight": 397,
+      "viewport": {
+        "width": 412,
+        "height": 820
+      },
+      "passed": true,
+      "findings": [
+        {
+          "check": "delivery version 0.2.3",
+          "passed": true
+        },
+        {
+          "check": "existing transactions schedules and tasks survive signed upgrade",
+          "passed": true
+        },
+        {
+          "check": "embedded application opens offline",
+          "passed": true
+        },
+        {
+          "check": "month calendar is substantially taller than installed v0.2.2",
+          "passed": true
+        },
+        {
+          "check": "daily details start below first screen",
+          "passed": true
+        },
+        {
+          "check": "month footer fits above navigation and scroll hint is visible",
+          "passed": true
+        },
+        {
+          "check": "header add accessible and floating add cannot cover dates",
+          "passed": true
+        },
+        {
+          "check": "holiday names remain visible in larger month",
+          "passed": true
+        },
+        {
+          "check": "real Android touch scroll reveals selected daily details",
+          "passed": true
+        },
+        {
+          "check": "scrolling keeps month height stable",
+          "passed": true
+        },
+        {
+          "check": "same-month refresh preserves daily reading position",
+          "passed": true
+        },
+        {
+          "check": "six-row month fits with daily details below first screen",
+          "passed": true
+        },
+        {
+          "check": "week view remains reachable without month scroll hint",
+          "passed": true
+        },
+        {
+          "check": "day view remains reachable",
+          "passed": true
+        },
+        {
+          "check": "layout and scrolling never modify business records",
+          "passed": true
+        }
+      ]
+    },
+    "reopened": {
+      "phase": "calendar-layout",
+      "androidApi": 36,
+      "webview": "133.0.6943.137",
+      "baselineMonthHeight": 320,
+      "monthHeight": 397,
+      "viewport": {
+        "width": 412,
+        "height": 820
+      },
+      "passed": true,
+      "findings": [
+        {
+          "check": "delivery version 0.2.3",
+          "passed": true
+        },
+        {
+          "check": "existing transactions schedules and tasks survive signed upgrade",
+          "passed": true
+        },
+        {
+          "check": "embedded application opens offline",
+          "passed": true
+        },
+        {
+          "check": "month calendar is substantially taller than installed v0.2.2",
+          "passed": true
+        },
+        {
+          "check": "daily details start below first screen",
+          "passed": true
+        },
+        {
+          "check": "month footer fits above navigation and scroll hint is visible",
+          "passed": true
+        },
+        {
+          "check": "header add accessible and floating add cannot cover dates",
+          "passed": true
+        },
+        {
+          "check": "holiday names remain visible in larger month",
+          "passed": true
+        },
+        {
+          "check": "real Android touch scroll reveals selected daily details",
+          "passed": true
+        },
+        {
+          "check": "scrolling keeps month height stable",
+          "passed": true
+        },
+        {
+          "check": "same-month refresh preserves daily reading position",
+          "passed": true
+        },
+        {
+          "check": "six-row month fits with daily details below first screen",
+          "passed": true
+        },
+        {
+          "check": "week view remains reachable without month scroll hint",
+          "passed": true
+        },
+        {
+          "check": "day view remains reachable",
+          "passed": true
+        },
+        {
+          "check": "layout and scrolling never modify business records",
+          "passed": true
+        }
+      ]
+    },
+    "androidChecks": 30,
+    "apkSha256": "cb7e32c66ec8b9e7d1a4bc5d36843e457901c83b61f8a089eddbc519128580ba"
+  },
+  "packaging": {
+    "passed": true,
+    "v2Signature": true,
+    "v3Signature": true,
+    "certificateSha256": "a8b4cc279545aa05bd5e29db2e3284bff300ec5ac0b637c98b5588605657a114",
+    "signedUpgradeFrom": "0.2.2",
+    "voiceModelAndNativeLibrariesUnchanged": {
+      "assets/speech/vosk-model-small-cn-0.22.zip": true,
+      "lib/arm64-v8a/libjnidispatch.so": true,
+      "lib/arm64-v8a/libvosk.so": true,
+      "lib/x86_64/libjnidispatch.so": true,
+      "lib/x86_64/libvosk.so": true
+    }
+  },
+  "unitTests": {
+    "runInThisVersion": false,
+    "reason": "Layout and scroll-position change; browser and native interaction checks were used."
+  },
+  "historicalVoiceValidation": {
+    "version": "0.2.2",
+    "report": "验证结果-v0.2.2.json",
+    "rerunInThisVersion": false
+  },
+  "limitations": {
+    "actualSamsungPhone": false,
+    "actualDeepSeekApi": false,
+    "microphoneRecognitionRetested": false,
+    "systemNotificationsTested": false
+  },
+  "previews": [
+    "手机月历预览-v0.2.3.png",
+    "手机每日详情预览-v0.2.3.png",
+    "Android月历验证-v0.2.3.png",
+    "Android每日详情验证-v0.2.3.png"
+  ]
+}
