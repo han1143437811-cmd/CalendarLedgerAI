@@ -75,8 +75,11 @@ try {
 
     $publishSource = Join-Path $publishAssets 'CalendarLedgerAI-v0.2.3-public-source.zip'
     Invoke-PublishCommand 'git' @('archive','--format=zip',"--output=$publishSource",$publishCommit)
-    Copy-Item -LiteralPath (Join-Path $publishRoot 'dist/手机安装说明.md') -Destination (Join-Path $publishAssets 'INSTALL.md') -Force
-    Copy-Item -LiteralPath (Join-Path $publishRoot 'dist/验证结果-v0.2.3.json') -Destination (Join-Path $publishAssets 'VALIDATION-v0.2.3.json') -Force
+    # Keep this script ASCII so Windows PowerShell 5 reads it without a BOM.
+    $publishInstallName = '"\u624b\u673a\u5b89\u88c5\u8bf4\u660e.md"' | ConvertFrom-Json
+    $publishValidationName = '"\u9a8c\u8bc1\u7ed3\u679c-v0.2.3.json"' | ConvertFrom-Json
+    Copy-Item -LiteralPath (Join-Path $publishRoot ('dist/' + $publishInstallName)) -Destination (Join-Path $publishAssets 'INSTALL.md') -Force
+    Copy-Item -LiteralPath (Join-Path $publishRoot ('dist/' + $publishValidationName)) -Destination (Join-Path $publishAssets 'VALIDATION-v0.2.3.json') -Force
     Copy-Item -LiteralPath (Join-Path $publishRoot 'LICENSE') -Destination (Join-Path $publishAssets 'LICENSE-GPL-3.0.txt') -Force
     Copy-Item -LiteralPath (Join-Path $publishRoot 'prototype/THIRD_PARTY_NOTICES.txt') -Destination (Join-Path $publishAssets 'THIRD_PARTY_NOTICES.txt') -Force
     $publishAssetNames = @('CalendarLedgerAI-v0.2.3.apk','CalendarLedgerAI-v0.2.3-public-source.zip','INSTALL.md','VALIDATION-v0.2.3.json','LICENSE-GPL-3.0.txt','THIRD_PARTY_NOTICES.txt')
