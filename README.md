@@ -4,6 +4,8 @@
 
 当前版本 **0.2.3**，APK 构建及功能验证日期 **2026-10-05**，开源发布资料整理日期 **2026-10-09**。支持 Android 8.0 及以上，无需 Root。包名：`org.calendarledger.preview`。
 
+下载：[Android APK](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/download/v0.2.3/CalendarLedgerAI-v0.2.3.apk) · [Release 与完整源码](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/tag/v0.2.3)
+
 ## 致以最热烈、最诚挚的感谢
 
 **向 [Fossify Calendar](https://github.com/FossifyOrg/Calendar) 的原作者、维护者、翻译者和每一位贡献者，致以最热烈、最诚挚的感谢！**
@@ -45,7 +47,7 @@ Fossify 社区长期维护开放、重视隐私、可由用户掌握的 Android 
 
 ## 安装
 
-从本仓库的 **Releases** 下载 `CalendarLedgerAI-v0.2.3.apk`。已有试用版时直接覆盖安装，沿用包名和签名；不要先卸载或清除数据。APK 约 49.2 MiB，自带普通话模型，首次准备模型还需约 68 MB 私有存储。
+从本仓库的 [Releases](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/tag/v0.2.3) 下载 `CalendarLedgerAI-v0.2.3.apk`。已有试用版时直接覆盖安装，沿用包名和签名；不要先卸载或清除数据。APK 约 49.2 MiB，自带普通话模型，首次准备模型还需约 68 MB 私有存储。
 
 打开后可先使用示例账本。真实记账前按 [手机安装说明](dist/手机安装说明.md) 导出备份，再选择清空示例。AI 设置位于 **更多 → AI 与设置**；填写实际可用的 API 地址、模型及 Key。
 
