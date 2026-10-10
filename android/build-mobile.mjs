@@ -2,6 +2,7 @@ import {build} from '../build-tools/js/node_modules/esbuild/lib/main.js';
 import {readFile,mkdir,writeFile,readdir} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {writeWidgetFestivalIndex} from './build-widget-festivals.mjs';
 
 const project=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 export async function makeMobileDocument(){
@@ -20,5 +21,7 @@ export async function makeMobileDocument(){
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const directory=process.argv[2]??path.join(project,'android','build','web');await mkdir(directory,{recursive:true});
   const html=await makeMobileDocument();await writeFile(path.join(directory,'mobile-shell.html'),html,'utf8');
+  const count=await writeWidgetFestivalIndex(path.join(directory,'widget-festivals.json'));
   console.log(`OFFLINE_MOBILE_DOCUMENT_READY bytes=${Buffer.byteLength(html)}`);
+  console.log(`OFFLINE_WIDGET_FESTIVALS_READY dates=${count} years=2020-2100`);
 }

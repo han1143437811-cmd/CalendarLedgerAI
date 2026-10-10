@@ -4,9 +4,22 @@
 
 CalendarLedgerAI 是一款面向 Android 的个人日程与记账应用。在日历中同时查看安排和每日收支，通过文字、普通话语音或消费截图与 AI 交互，完成记账、日程管理、信息查询和收支分析。日历和基础账本无需联网即可使用；自由对话与图片理解需自行配置可用的 AI 接口。
 
-当前公开版本为 **v0.2.3 预览版**，支持 Android 8.0 及以上，无需 Root。应用独立实现并维护，不包含 Fossify Calendar 的源码。
+当前公开版本为 **v0.3.0 预览版**（2026-10-10 构建与验证），支持 Android 8.0 及以上，无需 Root。应用独立实现并维护，不包含 Fossify Calendar 的源码。
 
-[**下载 Android APK**](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/download/v0.2.3/CalendarLedgerAI-v0.2.3.apk) · [版本与源码](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/tag/v0.2.3) · [安装指南](dist/手机安装说明.md)
+[**下载 Android APK**](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/download/v0.3.0/CalendarLedgerAI-v0.3.0.apk) · [版本与源码](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/tag/v0.3.0) · [安装指南](dist/手机安装说明.md)
+
+## 桌面月历与 AI
+
+0.3.0 新增 **月历与 AI** 原生小组件，默认请求 **4×5 格**，可横向、纵向调整大小。白色圆角的大号单月月历，配薄荷绿 AI 按钮，保留月份切换、日程摘要、节日和休/班标记；实际占格由桌面网格决定。
+
+<p>
+  <img src="dist/桌面小组件预览-v0.3.0.png" width="300" alt="原生大号月历与 AI 按钮，示例日程">
+  <img src="dist/桌面小组件深色预览-v0.3.0.png" width="300" alt="原生月历小组件的深色大字样式">
+</p>
+
+<sub>以上为交付 APK 在 Android 16 模拟器的真实 AppWidgetHost 中的截图，使用测试日程；宿主仅存在于测试 APK，未使用三星 One UI 桌面。</sub>
+
+长按桌面空白处 → **小组件 → 日历账本 AI → 月历与 AI**，拖到桌面；也可从应用 **更多 → 桌面小组件** 请求添加。点 AI 打开现有聊天并保留未发送草稿；点日期直接进入当天详情。日程新增、修改、删除和节假日缓存更新后刷新组件。浅色/深色、大字和周起始日跟随应用设置，多个组件各自记住月份。
 
 ## 界面预览
 
@@ -46,12 +59,12 @@ APK 内置 Vosk 普通话模型，语音在设备上转为可修改的文字草�
 
 ## 安装与快速开始
 
-1. 下载并安装 [CalendarLedgerAI v0.2.3 APK](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/download/v0.2.3/CalendarLedgerAI-v0.2.3.apk)。包名为 `org.calendarledger.preview`；已安装同签名试用版时可覆盖更新。卸载或清除数据前请先备份。
+1. 下载并安装 [CalendarLedgerAI v0.3.0 APK](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/download/v0.3.0/CalendarLedgerAI-v0.3.0.apk)。包名为 `org.calendarledger.preview`；已安装同签名试用版时直接覆盖更新，保留原数据；不要先卸载或清除数据，建议先导出备份。
 2. 首次打开可使用示例账本体验日历、记账和本地演示指令。开始记录真实数据前，建议导出备份并清空示例内容。
 3. 需要自由 AI 对话或截图理解时，进入 **更多 → AI 与设置**，填写实际可用的 API 地址、模型名称和 API Key，测试连接后保存。
 4. 在 **AI 助手** 页面输入文字、选择图片，或点击麦克风生成普通话文字草稿。保存图片识别卡片前，请仔细核对金额、日期和分类。
 
-APK 约 **49.2 MiB**，内置语音模型首次准备还会占用额外本地存储。详细步骤、权限及问题排查参见 [手机安装说明](dist/手机安装说明.md)。
+APK 约 **49.1 MiB**，内置语音模型首次准备还会占用额外本地存储。详细步骤、权限及问题排查参见 [手机安装说明](dist/手机安装说明.md)。
 
 ## 数据、隐私与联网
 
@@ -61,11 +74,11 @@ APK 约 **49.2 MiB**，内置语音模型首次准备还会占用额外本地存
 
 ## 当前范围与验证
 
-这是一个**功能预览版本**，不是已完成所有适配的正式产品。当前不支持系统日历同步、桌面小组件、自动读取微信或支付宝流水、账户余额和跨设备同步，也没有集成 Fossify Calendar 源码。
+这是一个**功能预览版本**，不是已完成所有适配的正式产品。当前不支持系统日历同步、自动读取微信或支付宝流水、账户余额和跨设备同步，也没有集成 Fossify Calendar 源码。
 
-v0.2.3 在 **2026-10-05** 完成的检查包括 **35 项浏览器检查和 30 项 Android 16 模拟器检查**，涵盖主要布局、日历滚动、节日显示、聊天界面及已有数据覆盖升级等流程。
+v0.3.0 在 **2026-10-10** 通过 **35 项 Node 自动测试、1,944 组原生月份/周起始日组合和 51 项 Android 16 小组件运行检查**，覆盖原签名覆盖升级、旧记录及 API 配置保留、4/5/6 行月历、两种尺寸、深色/大字、系统字体 1.3 倍、两个组件独立翻月、AI 与日期冷/热启动跳转、日程增改删刷新、聊天更新不重绘、进程重启、离线节日和年度缓存替换。运行检查使用真实 AppWidgetHost、RemoteViews 与触摸事件，宿主仅存在于测试 APK。
 
-**尚未验证**：三星 S24 Ultra / One UI 8.5 真机上的完整表现、有效 DeepSeek Key 下的模型交互质量，以及该版本的完整真实语音使用体验。模拟器检查和模拟 API 返回不能代替这些验证。具体结果见 [验证报告](dist/验证结果-v0.2.3.json)；各版本的技术变更记录见 [开发历史](docs/DEVELOPMENT_HISTORY.md)。
+**尚未验证**：三星 S24 Ultra / One UI 8.5 桌面的占格、留白和后台表现，以及真实 DeepSeek Key 下的交互质量。AI 创建日程使用既有本地演示流程；本次未重新检查麦克风音频解码、系统提醒或省电限制。语音模型与原生语音库共 5 个文件与旧发布 APK 字节一致。具体结果见 [验证报告](dist/验证结果-v0.3.0.json)；原有布局与语音测试及各版本技术变更记录见 [开发历史](docs/DEVELOPMENT_HISTORY.md)。
 
 ## 开发与构建
 
@@ -103,7 +116,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File android/build.ps1
 
 本项目独立实现的代码以 **GNU GPL v3.0** 开源，详见 [LICENSE](LICENSE)。随附的第三方依赖、数据与语音资源遵循各自的许可证，详见 [依赖及致谢](ACKNOWLEDGEMENTS.md) 与 [第三方许可声明](prototype/THIRD_PARTY_NOTICES.txt)。
 
-特别感谢 **[Fossify Calendar](https://github.com/FossifyOrg/Calendar)** 的作者、维护者和开源贡献者。其开放、重视隐私的 Android 应用设计为本项目早期探索提供了重要参考。**CalendarLedgerAI 并非 Fossify Calendar 的分支，也未合并其源码或提交历史**；项目的功能实现、版本发布与问题反馈均独立维护。
+**向 [Fossify Calendar](https://github.com/FossifyOrg/Calendar) 的原作者、维护者、翻译者和每一位贡献者，致以最热烈、最诚挚的感谢！**其开放、重视隐私的 Android 应用设计为本项目早期探索提供了重要参考。**CalendarLedgerAI 并非 Fossify Calendar 的分支，也未合并其源码或提交历史**；项目的功能实现、版本发布与问题反馈均独立维护。
+
+**Our warmest and most heartfelt thanks to the authors, maintainers, translators, and all contributors of Fossify Calendar.** Please visit and support the original project.
 
 欢迎通过 [GitHub Issues](https://github.com/han1143437811-cmd/CalendarLedgerAI/issues) 反馈问题或改进建议。
 

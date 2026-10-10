@@ -16,6 +16,7 @@ backups/
 build-tools/sdk/
 build-tools/android-repository.xml
 build-tools/sdk-packages.json
+build-tools/runtime-location.json
 build-tools/*.zip
 build-tools/voice/*.aar
 build-tools/voice/*.jar
@@ -37,6 +38,8 @@ prototype/qa/*.json
 !prototype/qa/android-calendar-v0.2.3-results.json
 !prototype/qa/chat-scroll-results-v0.2.3.json
 !prototype/qa/festival-results-v0.2.3.json
+!prototype/qa/android-widget-v0.3.0-results.json
+prototype/qa/android-widget-*.txt
 
 # Editor / OS files
 .DS_Store

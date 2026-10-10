@@ -5,9 +5,15 @@ import json
 import re
 import subprocess
 import zipfile
+import xml.etree.ElementTree as ET
 
 root = Path(__file__).resolve().parents[1]
-original_apk_hash = 'cb7e32c66ec8b9e7d1a4bc5d36843e457901c83b61f8a089eddbc519128580ba'
+info = json.loads((root / 'dist/apk-info.json').read_text(encoding='utf-8-sig'))
+manifest = ET.parse(root / 'android/AndroidManifest.xml').getroot()
+android = '{http://schemas.android.com/apk/res/android}'
+version = manifest.attrib[android + 'versionName']
+assert info['version'] == version and info['versionCode'] == int(manifest.attrib[android + 'versionCode'])
+assert info['filename'] == f'CalendarLedgerAI-v{version}.apk'
 tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=root).decode('utf-8').split('\0')
 tracked = [name for name in tracked if name]
 assert tracked, 'Stage the reviewed publication files before verifying.'
@@ -30,13 +36,18 @@ for name in tracked:
             if pattern.search(data):
                 findings.append({'file': name, 'type': 'possible credential'})
 assert not findings, json.dumps(findings)
-apk = root / 'release-assets/CalendarLedgerAI-v0.2.3.apk'
-assert hashlib.sha256(apk.read_bytes()).hexdigest() == original_apk_hash
+apk = root / 'release-assets' / info['filename']
+assert hashlib.sha256(apk.read_bytes()).hexdigest() == info['sha256']
+assert apk.stat().st_size == info['bytes']
+validation = json.loads((root / f'dist/验证结果-v{version}.json').read_text(encoding='utf-8'))
+assert validation['passed'] and validation['apk']['sha256'] == info['sha256']
 with zipfile.ZipFile(apk) as archive:
     assert archive.testzip() is None
+    assert 'assets/web/widget-festivals.json' in archive.namelist()
+    assert not any('\\' in name for name in archive.namelist() if name.startswith('assets/'))
 assert 'LICENSE' in tracked and 'ACKNOWLEDGEMENTS.md' in tracked
 assert 'prototype/THIRD_PARTY_NOTICES.txt' in tracked
 assert 'prototype/vendor/lunar-LICENSE.txt' in tracked
 assert 'build-tools/voice/voice-dependencies.json' in tracked
 assert '向' in (root / 'ACKNOWLEDGEMENTS.md').read_text(encoding='utf-8')
-print(json.dumps({'passed': True, 'trackedFiles': len(tracked), 'credentialPatternFindings': 0, 'apkHashUnchanged': True}))
+print(json.dumps({'passed': True, 'version': version, 'trackedFiles': len(tracked), 'credentialPatternFindings': 0, 'apkMatchesVerifiedBuild': True}))

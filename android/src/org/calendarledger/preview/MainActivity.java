@@ -31,10 +31,11 @@ public class MainActivity extends Activity {
     private ValueCallback<Uri[]> fileCallback;
     private SharedPreferences preferences;
     private VoiceInput voice;
-    private static final Object STATE_LOCK=new Object();
+    private JSONObject pendingWidgetNavigation;
+    private boolean widgetPageReady;
     private static final String ORIGIN="https://calendar-ledger.local/",KEY_ALIAS="calendar-ledger-api-v1";
     @Override public void onCreate(Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);preferences=getSharedPreferences("api-config",MODE_PRIVATE);
+        super.onCreate(savedInstanceState);preferences=getSharedPreferences("api-config",MODE_PRIVATE);acceptWidgetIntent(getIntent());
         FrameLayout frame=new FrameLayout(this);frame.setBackgroundColor(Color.WHITE);web=new WebView(this);frame.addView(web,new FrameLayout.LayoutParams(-1,-1));setContentView(frame);voice=new VoiceInput(this,web);
         if(Build.VERSION.SDK_INT>=30){getWindow().setDecorFitsSystemWindows(false);getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);frame.setOnApplyWindowInsetsListener((v,insets)->{android.graphics.Insets bars=insets.getInsets(WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout());android.graphics.Insets ime=insets.getInsets(WindowInsets.Type.ime());v.setPadding(bars.left,bars.top,bars.right,Math.max(bars.bottom,ime.bottom));return insets;});}
         else{frame.setFitsSystemWindows(true);getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);}
@@ -47,6 +48,25 @@ public class MainActivity extends Activity {
         if(Build.VERSION.SDK_INT>=33)getOnBackInvokedDispatcher().registerOnBackInvokedCallback(android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,()->handleBack());
         loadLocalUI();
     }
+    private void acceptWidgetIntent(Intent intent){
+        if(intent==null||!CalendarWidgetProvider.OPEN.equals(intent.getAction()))return;
+        String target=intent.getStringExtra("widgetTarget"),date=intent.getStringExtra("widgetDate");
+        try{
+            if(!"ai".equals(target)&&!"date".equals(target))return;
+            if("date".equals(target)){
+                if(date==null||!date.matches("\\d{4}-\\d{2}-\\d{2}"))return;
+                java.time.LocalDate parsed=java.time.LocalDate.parse(date);
+                if(parsed.getYear()<2020||parsed.getYear()>2100)return;
+            }
+            pendingWidgetNavigation=new JSONObject().put("target",target).put("date","date".equals(target)?date:"");
+        }catch(Exception ignored){}
+    }
+    private void deliverWidgetNavigation(){
+        if(!widgetPageReady||web==null||isFinishing()||pendingWidgetNavigation==null)return;
+        JSONObject navigation=pendingWidgetNavigation;pendingWidgetNavigation=null;
+        web.evaluateJavascript("globalThis.__calendarWidgetNavigate && globalThis.__calendarWidgetNavigate("+navigation.toString()+")",null);
+    }
+    @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);acceptWidgetIntent(intent);deliverWidgetNavigation();}
     private void loadLocalUI(){
         try(InputStream input=getResources().openRawResource(R.raw.mobile_shell)){
             ByteArrayOutputStream bytes=new ByteArrayOutputStream();byte[] buffer=new byte[8192];int count;
@@ -78,13 +98,20 @@ public class MainActivity extends Activity {
     private JSONObject saveDownload(JSONObject body)throws Exception{String name=body.getString("filename").replaceAll("[\\\\/:*?\"<>|\\r\\n]","_");if(name.length()>100)name=name.substring(0,100);String data=body.getString("data");if(data.length()>8_000_000)throw new IOException("导出文件过大。");Uri uri;if(Build.VERSION.SDK_INT>=29){ContentValues values=new ContentValues();values.put(MediaStore.Downloads.DISPLAY_NAME,name);values.put(MediaStore.Downloads.MIME_TYPE,"csv".equals(body.optString("format"))?"text/csv":"application/json");values.put(MediaStore.Downloads.RELATIVE_PATH,Environment.DIRECTORY_DOWNLOADS+"/日历账本");uri=getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI,values);if(uri==null)throw new IOException("无法创建下载文件。");try(OutputStream output=getContentResolver().openOutputStream(uri)){output.write(data.getBytes(StandardCharsets.UTF_8));}}else{File directory=new File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),"日历账本");directory.mkdirs();File file=new File(directory,name);try(OutputStream output=new FileOutputStream(file)){output.write(data.getBytes(StandardCharsets.UTF_8));}uri=Uri.fromFile(file);}return new JSONObject().put("ok",true).put("filename",name).put("location","下载/日历账本").put("uri",uri.toString());}
     private void theme(String name){ui.post(()->{boolean dark="dark".equals(name);int background=dark?Color.rgb(32,46,37):Color.WHITE;getWindow().setStatusBarColor(background);getWindow().setNavigationBarColor(background);web.setBackgroundColor(background);if(web.getParent() instanceof View)((View)web.getParent()).setBackgroundColor(background);if(Build.VERSION.SDK_INT>=30){WindowInsetsController controller=getWindow().getInsetsController();if(controller!=null)controller.setSystemBarsAppearance(dark?0:WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS|WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS|WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS);}else getWindow().getDecorView().setSystemUiVisibility(dark?0:View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR|View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);});}
     public final class Bridge{
+        @JavascriptInterface public void widgetReady(){ui.post(()->{widgetPageReady=true;deliverWidgetNavigation();});}
+        @JavascriptInterface public void addCalendarWidget(){ui.post(()->{
+            android.appwidget.AppWidgetManager manager=android.appwidget.AppWidgetManager.getInstance(MainActivity.this);
+            boolean requested=false;
+            try{if(manager.isRequestPinAppWidgetSupported())requested=manager.requestPinAppWidget(new ComponentName(MainActivity.this,CalendarWidgetProvider.class),null,null);}catch(Exception ignored){}
+            android.widget.Toast.makeText(MainActivity.this,requested?"请在桌面弹出的系统窗口中添加月历。":"请长按桌面空白处 → 小组件 → 日历账本 AI → 月历与 AI。",android.widget.Toast.LENGTH_LONG).show();
+        });}
         @JavascriptInterface public void startVoice(String session){ui.post(()->{if(!isFinishing())voice.start(session);});}
         @JavascriptInterface public void stopVoice(String session){ui.post(()->{if(!isFinishing())voice.stop(session);});}
         @JavascriptInterface public void cancelVoice(String session){ui.post(()->{if(!isFinishing())voice.cancel(session);});}
         @JavascriptInterface public void openMicrophoneSettings(){ui.post(()->{try{startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:"+getPackageName())));}catch(Exception ignored){}});}
         @JavascriptInterface public void showKeyboard(){ui.post(()->{web.requestFocus();android.view.inputmethod.InputMethodManager keyboard=(android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);if(keyboard!=null)keyboard.showSoftInput(web,android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);});}
-        @JavascriptInterface public String loadSnapshot(){synchronized(STATE_LOCK){android.util.AtomicFile file=new android.util.AtomicFile(new File(getFilesDir(),"ledger-state-v1.json"));try(InputStream input=file.openRead()){ByteArrayOutputStream bytes=new ByteArrayOutputStream();byte[] buffer=new byte[8192];int count;while((count=input.read(buffer))!=-1)bytes.write(buffer,0,count);return new String(bytes.toByteArray(),StandardCharsets.UTF_8);}catch(FileNotFoundException missing){return"";}catch(IOException error){android.util.Log.e("CalendarLedger","Cannot read saved app data",error);return"";}}}
-        @JavascriptInterface public boolean saveSnapshot(String json){synchronized(STATE_LOCK){android.util.AtomicFile file=new android.util.AtomicFile(new File(getFilesDir(),"ledger-state-v1.json"));FileOutputStream output=null;try{JSONObject snapshot=new JSONObject(json);if(snapshot.optInt("version")!=1||snapshot.getJSONObject("state").optInt("version")!=1||snapshot.getJSONObject("aiConfig").has("apiKey"))return false;output=file.startWrite();output.write(json.getBytes(StandardCharsets.UTF_8));file.finishWrite(output);return true;}catch(Exception error){if(output!=null)file.failWrite(output);android.util.Log.e("CalendarLedger","Cannot save app data",error);return false;}}}
+        @JavascriptInterface public String loadSnapshot(){return SnapshotStore.read(MainActivity.this);}
+        @JavascriptInterface public boolean saveSnapshot(String json){JSONObject state=SnapshotStore.save(MainActivity.this,json);if(state==null)return false;try{CalendarWidgetProvider.snapshotChanged(MainActivity.this,state);}catch(Exception error){android.util.Log.e("CalendarWidget","Cannot queue widget refresh",error);}return true;}
         @JavascriptInterface public void request(String id,String route,String json){pool.execute(()->{int status=200;JSONObject result;try{JSONObject body=new JSONObject(json);if(route.equals("/api/config")){if(body.length()>0){String base=body.optString("baseURL","https://api.deepseek.com").replaceAll("/+$","");URL url=new URL(base);if(!"https".equals(url.getProtocol())||url.getUserInfo()!=null||url.getQuery()!=null||url.getRef()!=null)throw new IOException("请填写不含凭据或查询参数的 HTTPS API 地址。");String model=body.optString("model","deepseek-flash").trim();if(model.isEmpty()||model.length()>128)throw new IOException("模型名称无效。");String key=body.optString("apiKey","").trim();if(key.length()>2000||key.indexOf('\n')>=0||key.indexOf('\r')>=0)throw new IOException("API Key 长度或格式异常。");if(!key.isEmpty())saveKey(key);if(readKey().isEmpty())throw new IOException("请填写 API Key。");preferences.edit().putString("baseURL",base).putString("model",model).apply();}result=publicConfig();}
                     else if(route.equals("/api/chat"))result=completion(body);
                     else if(route.equals("/api/test")){JSONObject completed=completion(new JSONObject().put("messages",new JSONArray().put(new JSONObject().put("role","user").put("content","请只回复 OK，用于测试 API 连接。"))));result=new JSONObject().put("ok",true).put("model",completed.getString("model"));}

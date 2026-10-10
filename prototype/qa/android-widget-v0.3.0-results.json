@@ -1,0 +1,295 @@
+{
+  "passed": true,
+  "version": "0.3.0",
+  "device": "emulator-5580",
+  "actualSamsungPhone": false,
+  "apiKeyUsed": false,
+  "host": "actual Android AppWidgetHost, test-only overlay",
+  "baseline": "published signed v0.2.3",
+  "phases": {
+    "baseline": {
+      "phase": "baseline",
+      "androidApi": 36,
+      "actualSamsungPhone": false,
+      "host": "Android AppWidgetHost in instrumentation overlay",
+      "version": "0.2.3",
+      "passed": true,
+      "findings": [
+        {
+          "check": "old release has saved business data",
+          "passed": true
+        }
+      ]
+    },
+    "widget": {
+      "phase": "widget",
+      "androidApi": 36,
+      "actualSamsungPhone": false,
+      "host": "Android AppWidgetHost in instrumentation overlay",
+      "version": "0.3.0",
+      "largeSizeDp": [
+        370,
+        540
+      ],
+      "frameworkUpdates": 16,
+      "passed": true,
+      "findings": [
+        {
+          "check": "same-signature upgrade retains every saved record",
+          "passed": true
+        },
+        {
+          "check": "same-signature upgrade retains encrypted API configuration",
+          "passed": true
+        },
+        {
+          "check": "upgrade retains private preference marker",
+          "passed": true
+        },
+        {
+          "check": "fixtures use the real atomic snapshot bridge",
+          "passed": true
+        },
+        {
+          "check": "test launcher binds a real widget instance 8",
+          "passed": true
+        },
+        {
+          "check": "test launcher binds a real widget instance 9",
+          "passed": true
+        },
+        {
+          "check": "provider is discoverable by Android's widget framework",
+          "passed": true
+        },
+        {
+          "check": "native RemoteViews inflate into five calendar rows",
+          "passed": true
+        },
+        {
+          "check": "calendar annotates official holiday and adjusted workday",
+          "passed": true
+        },
+        {
+          "check": "saved schedule appears on the native calendar",
+          "passed": true
+        },
+        {
+          "check": "repeated schedule respects excluded occurrence",
+          "passed": true
+        },
+        {
+          "check": "native month uses actual app calendar colors and only calendar controls",
+          "passed": true
+        },
+        {
+          "check": "large month has no overflowing date or schedule views",
+          "passed": true
+        },
+        {
+          "check": "month arrow changes only the tapped widget",
+          "passed": true
+        },
+        {
+          "check": "six-week month retains all 42 clickable dates",
+          "passed": true
+        },
+        {
+          "check": "six-week large calendar fits its allocated rectangle",
+          "passed": true
+        },
+        {
+          "check": "AI button opens the existing chat through its native PendingIntent",
+          "passed": true
+        },
+        {
+          "check": "warm AI entry preserves the unsent draft and never sends automatically",
+          "passed": true
+        },
+        {
+          "check": "AI button does not start recording",
+          "passed": true
+        },
+        {
+          "check": "date PendingIntent opens that day's details below the month",
+          "passed": true
+        },
+        {
+          "check": "different dates have independent PendingIntent identities",
+          "passed": true
+        },
+        {
+          "check": "existing AI workflow creates the requested schedule",
+          "passed": true
+        },
+        {
+          "check": "AI-created schedule is reflected in saved widget data",
+          "passed": true
+        },
+        {
+          "check": "editing a schedule refreshes its widget date",
+          "passed": true
+        },
+        {
+          "check": "deleting a schedule removes it from the widget",
+          "passed": true
+        },
+        {
+          "check": "chat-only updates do not redraw an unchanged calendar",
+          "passed": true
+        },
+        {
+          "check": "resizing to a compact widget retains all dates",
+          "passed": true
+        },
+        {
+          "check": "widget follows Sunday-first and large-text app settings",
+          "passed": true
+        },
+        {
+          "check": "widget follows the application's dark theme",
+          "passed": true
+        },
+        {
+          "check": "dark large-text widget remains within the calendar rectangle",
+          "passed": true
+        },
+        {
+          "check": "native offline lunar festivals match the app across years",
+          "passed": true
+        },
+        {
+          "check": "four-week February contains all 28 dates",
+          "passed": true
+        },
+        {
+          "check": "widget month navigation never changes application business records",
+          "passed": true
+        }
+      ]
+    },
+    "reopened": {
+      "phase": "reopened",
+      "androidApi": 36,
+      "actualSamsungPhone": false,
+      "host": "Android AppWidgetHost in instrumentation overlay",
+      "version": "0.3.0",
+      "passed": true,
+      "findings": [
+        {
+          "check": "saved fixture survives process restart",
+          "passed": true
+        },
+        {
+          "check": "system retains widget binding across app restart",
+          "passed": true
+        },
+        {
+          "check": "independent widget month survives restart",
+          "passed": true
+        }
+      ]
+    },
+    "cold-ai": {
+      "phase": "cold-ai",
+      "androidApi": 36,
+      "actualSamsungPhone": false,
+      "host": "Android AppWidgetHost in instrumentation overlay",
+      "version": "0.3.0",
+      "passed": true,
+      "findings": [
+        {
+          "check": "cold start consumes AI entry after JavaScript is ready",
+          "passed": true
+        },
+        {
+          "check": "AI entry does not start microphone",
+          "passed": true
+        }
+      ]
+    },
+    "cold-date": {
+      "phase": "cold-date",
+      "androidApi": 36,
+      "actualSamsungPhone": false,
+      "host": "Android AppWidgetHost in instrumentation overlay",
+      "version": "0.3.0",
+      "passed": true,
+      "findings": [
+        {
+          "check": "cold start opens requested daily details",
+          "passed": true
+        }
+      ]
+    },
+    "system-font": {
+      "phase": "system-font",
+      "androidApi": 36,
+      "actualSamsungPhone": false,
+      "host": "Android AppWidgetHost in instrumentation overlay",
+      "version": "0.3.0",
+      "fontScale": 1.2999999523162842,
+      "passed": true,
+      "findings": [
+        {
+          "check": "saved fixture survives process restart",
+          "passed": true
+        },
+        {
+          "check": "system retains widget binding across app restart",
+          "passed": true
+        },
+        {
+          "check": "independent widget month survives restart",
+          "passed": true
+        },
+        {
+          "check": "six-week widget fits at system font scale 1.3",
+          "passed": true
+        }
+      ]
+    },
+    "data-projection": {
+      "phase": "data-projection",
+      "androidApi": 36,
+      "actualSamsungPhone": false,
+      "host": "Android AppWidgetHost in instrumentation overlay",
+      "version": "0.3.0",
+      "responsiveFallback": true,
+      "passed": true,
+      "findings": [
+        {
+          "check": "cache-free snapshot remains valid",
+          "passed": true
+        },
+        {
+          "check": "widget loads official bundled workdays without app holiday cache",
+          "passed": true
+        },
+        {
+          "check": "corrected cached year remains valid",
+          "passed": true
+        },
+        {
+          "check": "a removed cached holiday does not reappear from an old bundle",
+          "passed": true
+        },
+        {
+          "check": "coincident festivals retain both names",
+          "passed": true
+        },
+        {
+          "check": "monthly day 31 is displayed without moving it to February 28",
+          "passed": true
+        },
+        {
+          "check": "responsive RemoteViews fallback inflates when launcher omits sizes",
+          "passed": true
+        }
+      ]
+    }
+  },
+  "sameSignatureUpgrade": true,
+  "nativeWidgetChecks": 51,
+  "apkSha256": "4d8df968a9bcae605b9300381c6eb0a2357fb7282a7ea78b978c3ed0d7ac23f6"
+}

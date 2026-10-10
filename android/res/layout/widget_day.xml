@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/widget_day"
+    android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:orientation="vertical"
+    android:gravity="top|center_horizontal" android:paddingStart="1dp" android:paddingEnd="1dp" android:paddingTop="1dp">
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="30dp">
+        <TextView android:id="@+id/widget_date" android:layout_width="28dp" android:layout_height="28dp" android:layout_centerHorizontal="true"
+            android:gravity="center" android:fontFamily="sans-serif-medium" android:textSize="16sp" android:textColor="#203B30" />
+        <TextView android:id="@+id/widget_holiday_badge" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true" android:layout_alignParentTop="true" android:textSize="8sp" android:textColor="#AE7060" android:visibility="gone" />
+    </RelativeLayout>
+    <TextView android:id="@+id/widget_observance" android:layout_width="match_parent" android:layout_height="14dp"
+        android:gravity="center" android:textSize="9sp" android:textColor="#8A6557" android:singleLine="true" android:ellipsize="end" />
+    <TextView android:id="@+id/widget_event" android:layout_width="match_parent" android:layout_height="16dp"
+        android:layout_marginTop="3dp" android:paddingStart="3dp" android:paddingEnd="2dp" android:gravity="center_vertical"
+        android:textSize="9sp" android:singleLine="true" android:ellipsize="end" android:background="@drawable/widget_event_background" android:visibility="gone" />
+    <TextView android:id="@+id/widget_event_second" android:layout_width="match_parent" android:layout_height="16dp"
+        android:layout_marginTop="2dp" android:paddingStart="3dp" android:paddingEnd="2dp" android:gravity="center_vertical"
+        android:textSize="9sp" android:singleLine="true" android:ellipsize="end" android:background="@drawable/widget_event_background" android:visibility="gone" />
+</LinearLayout>

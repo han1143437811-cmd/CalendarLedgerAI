@@ -20,3 +20,9 @@ jobs:
           package-manager-cache: false
       - name: Business and bridge tests
         run: node --test prototype/tests/*.test.mjs
+      - name: Native calendar dates and recurrence
+        run: |
+          mkdir -p "$RUNNER_TEMP/calendar-date-tests"
+          javac --release 8 -d "$RUNNER_TEMP/calendar-date-tests" android/src/org/calendarledger/preview/CalendarMonth.java android/src/org/calendarledger/preview/ReminderDates.java android/tests/CalendarMonthTest.java android/tests/ReminderDatesTest.java
+          java -cp "$RUNNER_TEMP/calendar-date-tests" CalendarMonthTest
+          java -cp "$RUNNER_TEMP/calendar-date-tests" ReminderDatesTest

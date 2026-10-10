@@ -12,5 +12,17 @@
   "apiKeysIncluded": false,
   "browserProfilesIncluded": false,
   "originalApplicationRuntimeCodeChanged": false,
-  "filesCopied": 80
+  "filesCopied": 80,
+  "subsequentReleases": [
+    {
+      "version": "0.3.0",
+      "date": "2026-10-10",
+      "apkSha256": "4d8df968a9bcae605b9300381c6eb0a2357fb7282a7ea78b978c3ed0d7ac23f6",
+      "runtimeCodeChanged": true,
+      "feature": "Native resizable month-calendar widget with AI and date navigation",
+      "samePackageAndSigningIdentity": true,
+      "upstreamSourceImported": false
+    }
+  ],
+  "scope": "Initial v0.2.3 public release; newer runtime changes are recorded in subsequentReleases."
 }
