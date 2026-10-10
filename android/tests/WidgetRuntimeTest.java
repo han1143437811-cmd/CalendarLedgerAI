@@ -418,7 +418,22 @@ public class WidgetRuntimeTest extends Instrumentation {
     private void waitFor(String expression,long timeout)throws Exception{long end=SystemClock.elapsedRealtime()+timeout;while(SystemClock.elapsedRealtime()<end){if(truth(expression))return;SystemClock.sleep(100);}throw new AssertionError("Condition not reached: "+expression);}
     private void sendChat(String message)throws Exception{evaluate("document.querySelector('[data-action=open-ai]').click();var input=document.querySelector('#chat-input');input.value="+JSONObject.quote(message)+";input.dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#chat-form').requestSubmit()");waitFor("!document.querySelector('#chat-form button[type=submit]').disabled",15000);}
     private String business()throws Exception{return evaluate("(()=>{const s=calendarLedgerPreview.getState();const canonical=v=>Array.isArray(v)?v.map(canonical):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])])):v;return JSON.stringify(canonical({transactions:s.transactions.filter(t=>!t.id.startsWith('qa-widget-money-')),events:s.events.filter(e=>!e.id.startsWith('qa-widget-')),tasks:s.tasks,budgets:s.budgets,calendars:s.calendars,ledgers:s.ledgers}));})()");}
-    private void screenshot(String name,View crop)throws Exception{if(crop==null)waitFor("!document.querySelector('#toast').classList.contains('show')",7000);Bitmap screen=getUiAutomation().takeScreenshot();if(screen==null)throw new AssertionError("No Android screenshot");Bitmap image=screen;if(crop!=null){Rect rect=new Rect();onUi(()->crop.getGlobalVisibleRect(rect));image=Bitmap.createBitmap(screen,rect.left,rect.top,rect.width(),rect.height());}try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.1.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}finally{if(image!=screen)image.recycle();screen.recycle();}}
+    private void screenshot(String name,View crop)throws Exception{
+        if(crop==null){
+            waitFor("!document.querySelector('#toast').classList.contains('show')",7000);
+            CountDownLatch painted=new CountDownLatch(1);
+            onUi(()->web.postVisualStateCallback(SystemClock.uptimeMillis(),new WebView.VisualStateCallback(){
+                @Override public void onComplete(long requestId){web.invalidate();painted.countDown();}
+            }));
+            if(!painted.await(5,TimeUnit.SECONDS))throw new AssertionError("WebView did not paint "+name);
+            waitForIdleSync();SystemClock.sleep(250);
+        }
+        Bitmap screen=getUiAutomation().takeScreenshot();if(screen==null)throw new AssertionError("No Android screenshot");
+        Bitmap image=screen;
+        if(crop!=null){Rect rect=new Rect();onUi(()->crop.getGlobalVisibleRect(rect));image=Bitmap.createBitmap(screen,rect.left,rect.top,rect.width(),rect.height());}
+        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.1.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
+        finally{if(image!=screen)image.recycle();screen.recycle();}
+    }
     private void check(String name,boolean passed)throws Exception{findings.put(new JSONObject().put("check",name).put("passed",passed));if(!passed)throw new AssertionError(name);}
     private static class CountingHostView extends AppWidgetHostView {volatile int updates;int widthDp,heightDp;CountingHostView(Context context){super(context);}@Override public void updateAppWidget(RemoteViews views){updates++;super.updateAppWidget(views);}}
 }
