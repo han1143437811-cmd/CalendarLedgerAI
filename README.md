@@ -1,110 +1,112 @@
 # 日历账本 AI · CalendarLedgerAI
 
-把日程和收支放在同一张日历里，用文字、截图和普通话语音与 AI 交互。Android 手机应用，可自行配置 DeepSeek 或兼容 Chat Completions API；本地演示和日历可以离线使用。
+**把日程、收支和 AI 助手放进同一张日历。**
 
-当前版本 **0.2.3**，APK 构建及功能验证日期 **2026-10-05**，开源发布资料整理日期 **2026-10-09**。支持 Android 8.0 及以上，无需 Root。包名：`org.calendarledger.preview`。
+CalendarLedgerAI 是一款面向 Android 的个人日程与记账应用。在日历中同时查看安排和每日收支，通过文字、普通话语音或消费截图与 AI 交互，完成记账、日程管理、信息查询和收支分析。日历和基础账本无需联网即可使用；自由对话与图片理解需自行配置可用的 AI 接口。
 
-下载：[Android APK](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/download/v0.2.3/CalendarLedgerAI-v0.2.3.apk) · [Release 与完整源码](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/tag/v0.2.3)
+当前公开版本为 **v0.2.3 预览版**，支持 Android 8.0 及以上，无需 Root。应用独立实现并维护，不包含 Fossify Calendar 的源码。
 
-## 致以最热烈、最诚挚的感谢
+[**下载 Android APK**](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/download/v0.2.3/CalendarLedgerAI-v0.2.3.apk) · [版本与源码](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/tag/v0.2.3) · [安装指南](dist/手机安装说明.md)
 
-**向 [Fossify Calendar](https://github.com/FossifyOrg/Calendar) 的原作者、维护者、翻译者和每一位贡献者，致以最热烈、最诚挚的感谢！**
-
-Fossify 社区长期维护开放、重视隐私、可由用户掌握的 Android 工具，为本项目最初的可行性研究、日历功能梳理和产品方向提供了宝贵参照。公开源码、文档和社区协作背后，是作者与贡献者持续投入的时间和心血。我们衷心感谢这份付出，并鼓励使用本项目的朋友去了解原项目、为它点亮 Star、参与贡献，或通过其官方渠道支持维护工作。
-
-本仓库发布的是独立实现的 CalendarLedgerAI。当前版本没有导入 Fossify Calendar 源码或 Git 提交历史；最初考虑的 Fossify 源码扩展方案保留在历史规格中。Fossify Calendar 是本项目的重要研究参照，本项目独立维护自己的功能、联网行为和问题反馈。
-
-- 原项目：[Fossify Calendar](https://github.com/FossifyOrg/Calendar)
-- 原项目贡献者：[Contributors](https://github.com/FossifyOrg/Calendar/graphs/contributors)
-- Fossify 官方网站：[fossify.org](https://www.fossify.org/)
-- 参与或支持 Fossify：[Contribute](https://www.fossify.org/contribute/) · [Fund](https://www.fossify.org/donate/)
-- 完整致谢与依赖关系：[ACKNOWLEDGEMENTS.md](ACKNOWLEDGEMENTS.md)
-
-**Our warmest and most heartfelt thanks to the authors, maintainers, translators, and all contributors of Fossify Calendar.** Your work on open, privacy-conscious Android applications provided valuable references for this project's initial research and feature planning. This release is independently implemented and maintained; it does not import Fossify Calendar source code or its Git history. Please visit and support the original project.
-
-## 界面
+## 界面预览
 
 <p>
-  <img src="dist/手机月历预览-v0.2.3.png" width="260" alt="放大的月历首屏，节日和收支同屏显示">
-  <img src="dist/手机每日详情预览-v0.2.3.png" width="260" alt="向下滚动后查看每日详细日程和账目">
-  <img src="dist/手机AI对话预览.png" width="260" alt="AI 对话界面，示例账本">
+  <img src="dist/手机月历预览-v0.2.3.png" width="260" alt="日历月视图，显示节日、日程与收支">
+  <img src="dist/手机每日详情预览-v0.2.3.png" width="260" alt="每日收支和日程详情">
+  <img src="dist/手机AI对话预览.png" width="260" alt="AI 助手聊天界面">
 </p>
 
-截图使用示例数据。前两张为 0.2.3 布局，AI 截图展示沿用的聊天界面。
+<sub>截图为示例数据。日历截图来自 v0.2.3 布局，AI 对话截图展示沿用的界面。</sub>
 
-## 功能
+## 主要功能
 
-- 月、周、日视图；日程、每日收支、节日名称、假期与补班。0.2.3 放大首屏月历，每日详细记录在下方滚动查看。
-- 收入、支出、退款、转账；账目新增、修改、删除、分类、账户、多个账本、筛选与撤销。金额在设备上以整数“分”计算。
-- 日程提醒、每日/每周/每月重复、待办，以及按工作日空档排程。
-- 按日期、分类、账户和账本分析收支，与上月同期比较；模型根据本地计算结果解释。
-- AI 通过应用的操作工具执行记账、修改、排程、分析和设置。自由对话需要自行配置实际 API；本地演示支持有限中文指令。
-- 最多 3 张截图或照片，生成可编辑的核对卡片后保存；图像理解需配置同时支持图片和工具调用的模型。
-- APK 内置 Vosk 普通话离线模型，语音转为可修改草稿，点击发送后处理。
-- 中国节假日公开数据镜像联网更新、离线农历节日、浅色/深色、大字、JSON 备份与 CSV 导出。
+**📅 日历与日程**
 
-当前未实现系统日历同步、Fossify 源码合并、桌面小组件、自动微信/支付宝流水采集、账户余额与跨设备同步。
+月、周、日视图集中展示日程、每天的收入与支出、中国传统节日及法定节假日。支持日程提醒、待办事项、每日/每周/每月重复，以及按工作日空档安排任务。月视图优先展示整月概览，点选日期后可向下滚动查看详情。
 
-## 安装
+**💰 本地记账与统计**
 
-从本仓库的 [Releases](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/tag/v0.2.3) 下载 `CalendarLedgerAI-v0.2.3.apk`。已有试用版时直接覆盖安装，沿用包名和签名；不要先卸载或清除数据。APK 约 49.2 MiB，自带普通话模型，首次准备模型还需约 68 MB 私有存储。
+管理收入、支出、退款、转账、分类、账户和多个账本；可新增、修改、删除、筛选与撤销操作。收支统计在本地按整数“分”计算，支持按日期、类别或账本分析，也可与上月同期比较。支持 CSV 导出和 JSON 备份。
 
-打开后可先使用示例账本。真实记账前按 [手机安装说明](dist/手机安装说明.md) 导出备份，再选择清空示例。AI 设置位于 **更多 → AI 与设置**；填写实际可用的 API 地址、模型及 Key。
+**🤖 AI 助手**
 
-APK SHA256：
+可以通过自然语言要求助手新增或修改账目、管理日程、查找空档、分析收支和调整部分设置。助手通过应用提供的工具执行操作，分析结果基于本地计算数据。使用自由对话需自行配置 DeepSeek 或兼容 Chat Completions 的服务；不配置 API 时可使用有限中文指令的本地演示。
 
-```text
-cb7e32c66ec8b9e7d1a4bc5d36843e457901c83b61f8a089eddbc519128580ba
-```
+**🖼️ 截图与照片辅助录入**
 
-## 数据与联网
+在 AI 对话中最多选择三张图片，使用支持图像理解及工具调用的模型提取候选账目或日程，并生成可编辑的核对卡片。**识别内容不会直接写入账本**，需要检查并确认保存。识别结果的准确性取决于所配置的模型与图片质量。
 
-账目和日程保存在应用本地。Android API Key 经 Keystore 与 AES/GCM 加密保存，业务备份不包含 Key。远程 AI 请求会发送当前对话、必要的账目/日程上下文，以及主动选择的图片到用户配置的服务。录音在设备上转写，音频不发送给 AI。
+**🎙️ 普通话离线语音输入**
 
-节假日更新使用 [NateScarlet/holiday-cn](https://github.com/NateScarlet/holiday-cn) 公开数据镜像，保留政府通知来源；未公布的年份不会推测调休日期。本项目包含联网功能，其数据行为以本说明为准。
+APK 内置 Vosk 普通话模型，语音在设备上转为可修改的文字草稿。核对后再发送给助手，不会自动记账，也无需上传录音至 AI 服务。
 
-## 验证范围
+**🎨 使用体验**
 
-2026-10-05 的 0.2.3 交付通过 **35 项浏览器检查、30 项 Android 16 模拟器检查**，覆盖三种手机宽度、五/六行月份、详情滚动、节日、深色/大字、聊天，以及原签名覆盖升级和旧记录保留。报告：[验证结果-v0.2.3.json](dist/验证结果-v0.2.3.json)。
+提供浅色与深色界面、大字显示、离线农历节日，以及从公开数据镜像更新中国节假日及调休安排。尚未公布的年份不会自行推测假期。
 
-未在用户的 Samsung S24 Ultra / One UI 8.5 上验证，也未使用真实 DeepSeek Key。0.2.3 沿用此前语音实现，没有重新进行语音音频解码或通知实测。模拟器结果不代表真实设备的麦克风、系统省电和通知表现。历史验证记录位于 `dist`，详细沿革见 [开发历史](docs/DEVELOPMENT_HISTORY.md)。
+## 安装与快速开始
+
+1. 下载并安装 [CalendarLedgerAI v0.2.3 APK](https://github.com/han1143437811-cmd/CalendarLedgerAI/releases/download/v0.2.3/CalendarLedgerAI-v0.2.3.apk)。包名为 `org.calendarledger.preview`；已安装同签名试用版时可覆盖更新。卸载或清除数据前请先备份。
+2. 首次打开可使用示例账本体验日历、记账和本地演示指令。开始记录真实数据前，建议导出备份并清空示例内容。
+3. 需要自由 AI 对话或截图理解时，进入 **更多 → AI 与设置**，填写实际可用的 API 地址、模型名称和 API Key，测试连接后保存。
+4. 在 **AI 助手** 页面输入文字、选择图片，或点击麦克风生成普通话文字草稿。保存图片识别卡片前，请仔细核对金额、日期和分类。
+
+APK 约 **49.2 MiB**，内置语音模型首次准备还会占用额外本地存储。详细步骤、权限及问题排查参见 [手机安装说明](dist/手机安装说明.md)。
+
+## 数据、隐私与联网
+
+账目、日程和应用数据默认保存在设备本地。Android 端 API Key 使用 **Android Keystore 与 AES-GCM** 加密保存，不包含在业务备份中。离线语音识别不上传音频。
+
+使用远程 AI 时，当前对话、执行任务所需的账目或日程上下文，以及主动选取的图片会发送至用户配置的 API 服务，可能产生费用。节假日联网更新使用 [NateScarlet/holiday-cn](https://github.com/NateScarlet/holiday-cn) 的公开数据镜像；未联网时仍可使用已缓存或内置的数据。
+
+## 当前范围与验证
+
+这是一个**功能预览版本**，不是已完成所有适配的正式产品。当前不支持系统日历同步、桌面小组件、自动读取微信或支付宝流水、账户余额和跨设备同步，也没有集成 Fossify Calendar 源码。
+
+v0.2.3 在 **2026-10-05** 完成的检查包括 **35 项浏览器检查和 30 项 Android 16 模拟器检查**，涵盖主要布局、日历滚动、节日显示、聊天界面及已有数据覆盖升级等流程。
+
+**尚未验证**：三星 S24 Ultra / One UI 8.5 真机上的完整表现、有效 DeepSeek Key 下的模型交互质量，以及该版本的完整真实语音使用体验。模拟器检查和模拟 API 返回不能代替这些验证。具体结果见 [验证报告](dist/验证结果-v0.2.3.json)；各版本的技术变更记录见 [开发历史](docs/DEVELOPMENT_HISTORY.md)。
 
 ## 开发与构建
 
-需要 Node.js 20+、Python 3、Windows PowerShell；Android 构建还需 JDK 21 和官方 Android SDK。
+项目包含浏览器预览和 Android WebView 应用，核心界面与业务逻辑位于 `prototype/`，Android 入口及原生桥接位于 `android/`。
 
-浏览器预览无需安装第三方包：
+浏览器本地预览需要 **Node.js 20+**：
 
 ```powershell
 cd prototype
 node server.mjs
 ```
 
-在电脑打开 `http://127.0.0.1:8788`，或双击 `prototype/打开预览.cmd`。本机地址不能直接用于手机访问。
-
-运行业务检查：
+启动后在电脑浏览器访问 `http://127.0.0.1:8788`。运行业务测试：
 
 ```powershell
 cd prototype
 node --test tests/*.test.mjs
 ```
 
-构建 Android APK：
+构建 Android APK 还需 **Python 3、JDK 21 和 Android SDK**，Windows PowerShell 下可参考以下步骤：
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File build-tools/setup-android.ps1
 python build-tools/setup-voice.py
 npm.cmd ci --prefix build-tools/js
-# 将 android/build.ps1 中的 $buildJavaHome 改为自己的 JDK 21 路径。
+# 先把 android/build.ps1 中的 JDK 路径改为本机的 JDK 21 路径
 powershell -NoProfile -ExecutionPolicy Bypass -File android/build.ps1
 ```
 
-首次构建会在本机生成新的开发签名。自行构建的签名与已发布 APK 不同，无法直接覆盖已发布版本；先导出需要保留的数据。已发布版本的私钥不进入仓库。
+自行构建使用的开发签名可能与 Release APK 不同，无法直接覆盖已发布安装包；请先备份需要保留的数据。
 
-## 开源许可证
+更多资料：[安装指南](dist/手机安装说明.md) · [版本说明](RELEASE_NOTES.md) · [开发历史](docs/DEVELOPMENT_HISTORY.md) · [参与贡献](CONTRIBUTING.md)
 
-本项目独立编写的代码以 **GNU GPL v3.0** 发布，见 [LICENSE](LICENSE)。这是本项目的开源选择；Fossify Calendar 自身的代码遵循其原仓库的 GPL v3.0 许可证。
+## 开源、参考与致谢
 
-随附第三方代码、公开节假日数据和语音依赖保留各自许可证、版权与来源。完整条款见 [THIRD_PARTY_NOTICES.txt](prototype/THIRD_PARTY_NOTICES.txt) 及 [依赖与来源](ACKNOWLEDGEMENTS.md)。
+本项目独立实现的代码以 **GNU GPL v3.0** 开源，详见 [LICENSE](LICENSE)。随附的第三方依赖、数据与语音资源遵循各自的许可证，详见 [依赖及致谢](ACKNOWLEDGEMENTS.md) 与 [第三方许可声明](prototype/THIRD_PARTY_NOTICES.txt)。
 
-欢迎通过 Issue 反馈设备、系统版本和具体操作，也欢迎贡献代码、翻译和界面改进。
+特别感谢 **[Fossify Calendar](https://github.com/FossifyOrg/Calendar)** 的作者、维护者和开源贡献者。其开放、重视隐私的 Android 应用设计为本项目早期探索提供了重要参考。**CalendarLedgerAI 并非 Fossify Calendar 的分支，也未合并其源码或提交历史**；项目的功能实现、版本发布与问题反馈均独立维护。
+
+欢迎通过 [GitHub Issues](https://github.com/han1143437811-cmd/CalendarLedgerAI/issues) 反馈问题或改进建议。
+
+---
+
+*CalendarLedgerAI is an independently implemented Android calendar, expense tracker, and optional AI assistant. Local calendar and ledger features work offline; AI services require user configuration. Thanks to the Fossify Calendar community for inspiration and reference.*
