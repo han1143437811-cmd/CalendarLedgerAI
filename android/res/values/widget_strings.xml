@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="calendar_widget_label">月历与 AI</string>
-    <string name="calendar_widget_description">大号月历，显示日程与中国节假日；一键打开 AI 助手。</string>
+    <string name="calendar_widget_label">大号月历与账本</string>
+    <string name="calendar_widget_description">大号月历，显示每日收支、日程与中国节假日；一键打开 AI 助手。</string>
     <string name="widget_previous">上个月</string>
     <string name="widget_next">下个月</string>
     <string name="widget_ai">打开 AI 助手</string>

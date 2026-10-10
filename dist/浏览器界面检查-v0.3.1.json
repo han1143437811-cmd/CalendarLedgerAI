@@ -1,0 +1,135 @@
+{
+  "passed": true,
+  "findings": [
+    {
+      "check": "desktop initial",
+      "width": 1440,
+      "doc": 1425,
+      "buttons": 63
+    },
+    {
+      "check": "UI multi-operation chat",
+      "passed": true
+    },
+    {
+      "check": "UI continuous edits",
+      "passed": true
+    },
+    {
+      "check": "desktop chat results",
+      "width": 1440,
+      "doc": 1425,
+      "buttons": 78
+    },
+    {
+      "check": "desktop reports",
+      "width": 1440,
+      "doc": 1440,
+      "buttons": 35
+    },
+    {
+      "check": "manual transaction form",
+      "passed": true
+    },
+    {
+      "check": "task completion button",
+      "passed": true
+    },
+    {
+      "check": "desktop dark theme",
+      "width": 1440,
+      "doc": 1440,
+      "buttons": 36
+    },
+    {
+      "check": "calendar statutory holidays and adjusted workdays",
+      "passed": true
+    },
+    {
+      "check": "S24U layout 412px",
+      "width": 412,
+      "doc": 412,
+      "buttons": 56
+    },
+    {
+      "check": "whole month fits phone viewport",
+      "gridBottom": 748.28125,
+      "navTop": 769
+    },
+    {
+      "check": "six-week month fits phone viewport",
+      "rows": "6",
+      "bottom": 748.28125,
+      "navTop": 769
+    },
+    {
+      "check": "S24U chat 412px",
+      "width": 412,
+      "doc": 412,
+      "buttons": 24
+    },
+    {
+      "check": "keyboard viewport retains input and send button",
+      "top": 335.5,
+      "bottom": 391.5,
+      "height": 420
+    },
+    {
+      "check": "mobile analysis",
+      "width": 412,
+      "doc": 412,
+      "buttons": 14
+    },
+    {
+      "check": "mobile ledger",
+      "width": 412,
+      "doc": 412,
+      "buttons": 38
+    },
+    {
+      "check": "S24U settings 412px",
+      "width": 412,
+      "doc": 412,
+      "buttons": 63
+    },
+    {
+      "check": "small phone 360px",
+      "width": 360,
+      "doc": 360,
+      "buttons": 54
+    },
+    {
+      "check": "phone 384px",
+      "width": 384,
+      "doc": 384,
+      "buttons": 54
+    },
+    {
+      "check": "mobile dark theme large font",
+      "width": 384,
+      "doc": 384,
+      "buttons": 54
+    },
+    {
+      "check": "persistence after reload",
+      "passed": true
+    },
+    {
+      "check": "full API tool loop with mock provider and duplicate prevention",
+      "passed": true
+    },
+    {
+      "check": "partial API failure retains write and undo card",
+      "passed": true
+    },
+    {
+      "check": "browser console errors",
+      "count": 0,
+      "expectedProviderErrors": 1
+    }
+  ],
+  "errors": [],
+  "expectedNetworkErrors": [
+    "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+  ]
+}

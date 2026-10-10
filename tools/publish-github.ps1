@@ -104,7 +104,7 @@ try {
         if (-not $publishExistingRelease.isDraft) { throw 'This release is already published; no published assets were changed.' }
         Invoke-PublishCommand 'gh' (@('release','upload',$publishTag,'--repo',$publishRepository,'--clobber') + $publishAssetPaths)
     } else {
-        Invoke-PublishCommand 'gh' (@('release','create',$publishTag,'--repo',$publishRepository,'--verify-tag','--draft','--prerelease','--title',"CalendarLedgerAI $publishVersion - calendar widget and AI",'--notes-file',(Join-Path $publishRoot 'RELEASE_NOTES.md')) + $publishAssetPaths)
+        Invoke-PublishCommand 'gh' (@('release','create',$publishTag,'--repo',$publishRepository,'--verify-tag','--draft','--prerelease','--title',"CalendarLedgerAI $publishVersion - calendar, ledger and AI",'--notes-file',(Join-Path $publishRoot 'RELEASE_NOTES.md')) + $publishAssetPaths)
     }
     $publishUploadedNames = & gh release view $publishTag --repo $publishRepository --json assets --jq '.assets[].name'
     if ($LASTEXITCODE -ne 0 -or (@(Compare-Object $publishAssetNames @($publishUploadedNames)).Length -gt 0)) { throw 'Release attachment verification failed; the release remains a draft.' }

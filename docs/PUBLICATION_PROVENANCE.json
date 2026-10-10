@@ -22,6 +22,15 @@
       "feature": "Native resizable month-calendar widget with AI and date navigation",
       "samePackageAndSigningIdentity": true,
       "upstreamSourceImported": false
+    },
+    {
+      "version": "0.3.1",
+      "date": "2026-10-10",
+      "apkSha256": "7838d70187c5803a64d45c5a6f927f07c5622246f5c3a84c630ceab45fdc73f4",
+      "runtimeCodeChanged": true,
+      "feature": "Daily accounting and Morandi UI; S24 Ultra large month widget layout with separately reserved schedule and accounting areas",
+      "samePackageAndSigningIdentity": true,
+      "upstreamSourceImported": false
     }
   ],
   "scope": "Initial v0.2.3 public release; newer runtime changes are recorded in subsequentReleases."

@@ -9,11 +9,12 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
 
-/** A read-only projection of schedules and holidays. No API key or chat access. */
+/** A read-only projection of accounting, schedules and holidays. No API key or chat access. */
 final class WidgetCalendarData {
     private static JSONObject festivalIndex;
     final List<LocalDate> days;
     final Map<String, List<JSONObject>> events = new HashMap<>();
+    final Map<String, CalendarMoney.Day> money = new HashMap<>();
     final Map<String, Integer> calendarColors = new HashMap<>();
     final Map<String, JSONObject> holidays = new HashMap<>();
     final JSONObject festivals;
@@ -30,6 +31,20 @@ final class WidgetCalendarData {
         largeFont = settings != null && "large".equals(settings.optString("fontSize"));
         weekStart = settings != null && settings.optInt("weekStart", 1) == 0 ? 0 : 1;
         days = CalendarMonth.grid(month, weekStart);
+        JSONArray transactions = state.optJSONArray("transactions");
+        if (transactions != null) for (int i = 0; i < transactions.length(); i++) {
+            JSONObject transaction = transactions.optJSONObject(i);
+            if (transaction == null) continue;
+            String date = transaction.optString("date");
+            if (date.compareTo(days.get(0).toString()) < 0 || date.compareTo(days.get(days.size() - 1).toString()) > 0) continue;
+            try {
+                Object raw = transaction.opt("amount");
+                // Snapshots contain integer cents, never the yuan entered into a form.
+                if (!(raw instanceof Number)) continue;
+                java.math.BigDecimal amount = new java.math.BigDecimal(raw.toString());
+                CalendarMoney.add(money, date, transaction.optString("kind"), amount.longValueExact());
+            } catch (RuntimeException damaged) { /* Preserve the other valid records. */ }
+        }
         festivals = festivals(context);
         JSONObject cached = state.optJSONObject("holidayDays");
         JSONObject cachedYears = state.optJSONObject("holidayMeta");

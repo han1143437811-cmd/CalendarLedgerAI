@@ -1,5 +1,5 @@
 export const STORAGE_KEY = 'calendar-ledger-ai-v01';
-export const CATEGORY_COLORS = { '餐饮': '#ef9268', '交通': '#6c9be9', '购物': '#a28be1', '居住': '#e6b34c', '娱乐': '#e787af', '学习': '#67afa2', '医疗': '#68b7c7', '其他': '#9cabbc', '工资': '#58a991', '报销': '#85b4a5', '退款': '#83b49b', '转账': '#9cabbc' };
+export const CATEGORY_COLORS = { '餐饮': '#b59079', '交通': '#879eae', '购物': '#aa9bae', '居住': '#b7a17e', '娱乐': '#ba9398', '学习': '#8aa397', '医疗': '#8fa7ac', '其他': '#9ca5a0', '工资': '#7f9b86', '报销': '#98ad9f', '退款': '#8fa791', '转账': '#9ca5a0' };
 export const uid = prefix => `${prefix}_${globalThis.crypto?.randomUUID?.() ?? `${Date.now()}_${Math.random().toString(36).slice(2)}`}`;
 export const isoDate = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 export const todayISO = () => isoDate(new Date());

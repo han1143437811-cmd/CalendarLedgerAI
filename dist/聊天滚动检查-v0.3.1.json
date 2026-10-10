@@ -1,0 +1,382 @@
+{
+  "passed": true,
+  "version": "0.3.1",
+  "findings": [
+    {
+      "check": "waiting reply keeps the same focused enabled textarea",
+      "passed": true
+    },
+    {
+      "check": "tool operations preserve panel list and history nodes",
+      "passed": true
+    },
+    {
+      "check": "reply completion retains focus and next-message draft",
+      "passed": true
+    },
+    {
+      "check": "smooth new-message trajectory without history flashing",
+      "passed": true,
+      "start": 3618,
+      "end": 4335,
+      "intermediatePositions": 30
+    },
+    {
+      "check": "reply arriving while reading history does not pull to bottom",
+      "passed": true
+    },
+    {
+      "check": "background holiday refresh keeps chat position and DOM",
+      "passed": true
+    },
+    {
+      "check": "return to latest messages follows the current bottom",
+      "passed": true
+    },
+    {
+      "check": "keyboard-sized viewport preserves textarea and composer visibility",
+      "passed": true
+    },
+    {
+      "check": "restoring viewport does not discard a history reading position",
+      "passed": true
+    },
+    {
+      "check": "reduced-motion preference skips message animations",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "trace": {
+    "from": 3618,
+    "samples": [
+      {
+        "time": 319.2,
+        "top": 3618,
+        "opacity": "1"
+      },
+      {
+        "time": 335.8,
+        "top": 3641,
+        "opacity": "1"
+      },
+      {
+        "time": 352.4,
+        "top": 3672,
+        "opacity": "1"
+      },
+      {
+        "time": 369.1,
+        "top": 3698,
+        "opacity": "1"
+      },
+      {
+        "time": 385.9,
+        "top": 3722,
+        "opacity": "1"
+      },
+      {
+        "time": 402.5,
+        "top": 3742,
+        "opacity": "1"
+      },
+      {
+        "time": 419.1,
+        "top": 3759,
+        "opacity": "1"
+      },
+      {
+        "time": 435.8,
+        "top": 3773,
+        "opacity": "1"
+      },
+      {
+        "time": 452.5,
+        "top": 3785,
+        "opacity": "1"
+      },
+      {
+        "time": 469.1,
+        "top": 3794,
+        "opacity": "1"
+      },
+      {
+        "time": 485.8,
+        "top": 3802,
+        "opacity": "1"
+      },
+      {
+        "time": 502.5,
+        "top": 3807,
+        "opacity": "1"
+      },
+      {
+        "time": 519.1,
+        "top": 3811,
+        "opacity": "1"
+      },
+      {
+        "time": 535.8,
+        "top": 3814,
+        "opacity": "1"
+      },
+      {
+        "time": 552.5,
+        "top": 3816,
+        "opacity": "1"
+      },
+      {
+        "time": 569.1,
+        "top": 3817,
+        "opacity": "1"
+      },
+      {
+        "time": 585.8,
+        "top": 3817,
+        "opacity": "1"
+      },
+      {
+        "time": 602.4,
+        "top": 3843,
+        "opacity": "1"
+      },
+      {
+        "time": 619.2,
+        "top": 3926,
+        "opacity": "1"
+      },
+      {
+        "time": 635.8,
+        "top": 4001,
+        "opacity": "1"
+      },
+      {
+        "time": 652.5,
+        "top": 4065,
+        "opacity": "1"
+      },
+      {
+        "time": 669.1,
+        "top": 4121,
+        "opacity": "1"
+      },
+      {
+        "time": 685.8,
+        "top": 4168,
+        "opacity": "1"
+      },
+      {
+        "time": 702.5,
+        "top": 4208,
+        "opacity": "1"
+      },
+      {
+        "time": 719.1,
+        "top": 4241,
+        "opacity": "1"
+      },
+      {
+        "time": 735.8,
+        "top": 4267,
+        "opacity": "1"
+      },
+      {
+        "time": 752.5,
+        "top": 4289,
+        "opacity": "1"
+      },
+      {
+        "time": 769.2,
+        "top": 4305,
+        "opacity": "1"
+      },
+      {
+        "time": 785.8,
+        "top": 4317,
+        "opacity": "1"
+      },
+      {
+        "time": 802.5,
+        "top": 4325,
+        "opacity": "1"
+      },
+      {
+        "time": 819.2,
+        "top": 4330,
+        "opacity": "1"
+      },
+      {
+        "time": 835.8,
+        "top": 4333,
+        "opacity": "1"
+      },
+      {
+        "time": 852.5,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 869.1,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 885.8,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 902.4,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 919.1,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 935.8,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 952.4,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 969.1,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 985.8,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1002.4,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1019.1,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1035.8,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1052.4,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1069.1,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1085.8,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1102.5,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1119.1,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1135.8,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1152.4,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1169.1,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1185.8,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1202.4,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1219.1,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1235.8,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1252.5,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1269.1,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1285.7,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1302.4,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1319.1,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1335.7,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1352.5,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1369.1,
+        "top": 4335,
+        "opacity": "1"
+      },
+      {
+        "time": 1385.8,
+        "top": 4335,
+        "opacity": "1"
+      }
+    ],
+    "to": 4335
+  },
+  "defaultReducedMotion": true
+}

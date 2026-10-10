@@ -1,28 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root" android:layout_width="match_parent" android:layout_height="match_parent"
-    android:orientation="vertical" android:padding="14dp" android:background="@drawable/widget_background"
+    android:orientation="vertical" android:padding="12dp" android:background="@drawable/widget_background"
     android:theme="@android:style/Theme.Material.Light.NoActionBar">
-    <LinearLayout android:layout_width="match_parent" android:layout_height="58dp" android:gravity="center_vertical">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="38dp" android:gravity="center_vertical">
         <LinearLayout android:id="@+id/widget_month_home" android:layout_width="0dp" android:layout_height="match_parent"
-            android:layout_weight="1" android:orientation="vertical" android:gravity="center_vertical">
+            android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical">
             <TextView android:id="@+id/widget_month" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="10月" android:textSize="27sp" android:fontFamily="sans-serif-medium" android:textColor="#203B30" android:singleLine="true" />
+                android:includeFontPadding="false" android:text="10月" android:textSize="18dp" android:fontFamily="sans-serif-medium" android:textColor="#37433F" android:singleLine="true" />
             <TextView android:id="@+id/widget_year" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="2026" android:textSize="11sp" android:textColor="#71847A" />
+                android:layout_marginStart="7dp" android:includeFontPadding="false" android:text="2026" android:textSize="10dp" android:textColor="#7B837B" android:singleLine="true" />
         </LinearLayout>
-        <ImageView android:id="@+id/widget_previous" android:layout_width="36dp" android:layout_height="48dp"
-            android:padding="9dp" android:src="@drawable/widget_previous_icon" android:contentDescription="@string/widget_previous" />
-        <ImageView android:id="@+id/widget_next" android:layout_width="36dp" android:layout_height="48dp"
-            android:padding="9dp" android:src="@drawable/widget_next_icon" android:contentDescription="@string/widget_next" />
-        <LinearLayout android:id="@+id/widget_ai" android:layout_width="64dp" android:layout_height="44dp"
-            android:layout_marginStart="6dp" android:orientation="horizontal" android:gravity="center"
+        <ImageView android:id="@+id/widget_previous" android:layout_width="30dp" android:layout_height="36dp"
+            android:padding="8dp" android:src="@drawable/widget_previous_icon" android:contentDescription="@string/widget_previous" />
+        <ImageView android:id="@+id/widget_next" android:layout_width="30dp" android:layout_height="36dp"
+            android:padding="8dp" android:src="@drawable/widget_next_icon" android:contentDescription="@string/widget_next" />
+        <LinearLayout android:id="@+id/widget_ai" android:layout_width="44dp" android:layout_height="28dp"
+            android:layout_marginStart="5dp" android:orientation="horizontal" android:gravity="center"
             android:background="@drawable/widget_ai_background" android:contentDescription="@string/widget_ai">
-            <ImageView android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/widget_spark" />
+            <ImageView android:layout_width="12dp" android:layout_height="12dp" android:src="@drawable/widget_spark" />
             <TextView android:id="@+id/widget_ai_text" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:layout_marginStart="5dp" android:text="AI" android:textSize="14sp" android:fontFamily="sans-serif-medium" android:textColor="#247453" />
+                android:layout_marginStart="3dp" android:includeFontPadding="false" android:text="AI" android:textSize="10dp" android:fontFamily="sans-serif-medium" android:textColor="#526B61" />
         </LinearLayout>
     </LinearLayout>
-    <LinearLayout android:id="@+id/widget_weekdays" android:layout_width="match_parent" android:layout_height="32dp" android:orientation="horizontal" />
+    <LinearLayout android:id="@+id/widget_weekdays" android:layout_width="match_parent" android:layout_height="24dp" android:orientation="horizontal" />
+    <ImageView android:id="@+id/widget_weekday_rule" android:layout_width="match_parent" android:layout_height="1dp" android:background="#E5E8E0" android:importantForAccessibility="no" />
     <LinearLayout android:id="@+id/widget_weeks" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="vertical" />
 </LinearLayout>
