@@ -16,7 +16,7 @@ function validate(value, spec, path='参数') {
   if (spec.enum && !spec.enum.includes(value)) throw new Error(`${path}不在支持范围内。`);
 }
 export async function runToolConversation({messages, tools, request, execute, isReadOnly, onResult=()=>{}, describe, maxTurns=12, prompt=''}) {
-  const results=[], successfulWrites=new Map(); let final='', completionRepair=false;
+  const results=[], successfulWrites=new Map(),wireStart=messages.length; let final='', completionRepair=false;
   const requested = /^(?:请|帮我)?记住|以后默认/.test(prompt) ? ['remember_preference']
     : /均摊|分摊|平摊/.test(prompt) ? [/取消|不再/.test(prompt)?'remove_expense_allocation':'allocate_expense'] : [];
   const supportedRequest=requested.length&&requested.every(name=>tools.some(tool=>tool.function.name===name));
@@ -27,7 +27,7 @@ export async function runToolConversation({messages, tools, request, execute, is
       if (!message || message.role !== 'assistant') throw new Error('API 回复格式异常。');
       const calls=message.tool_calls ?? [];
       if (!Array.isArray(calls) || calls.length>30) throw new Error('一次工具调用过多，请分批处理。');
-      messages.push({role:'assistant',content:message.content ?? null,...(calls.length?{tool_calls:calls}:{})});
+      messages.push({role:'assistant',content:message.content ?? null,...(typeof message.reasoning_content==='string'?{reasoning_content:message.reasoning_content}:{}),...(calls.length?{tool_calls:calls}:{})});
       if (!calls.length) {
         const answer=message.content ?? '';
         const claimsDone=/已(?:经)?[^。！\n]{0,12}(?:完成|保存|记账|均摊|分摊|记住|更新|处理|取消)/.test(answer);
@@ -63,6 +63,6 @@ export async function runToolConversation({messages, tools, request, execute, is
       }
     }
     if (!final) final=(results.length?results.map(row=>describe(row.result)).join('\n'):'未收到完整回复。')+'\n本轮已到工具执行上限；上面的结果为实际完成状态，可继续描述下一步。';
-    return {text:final,results};
+    return {text:final,results,apiMessages:messages.slice(wireStart).filter(row=>row.role!=='system')};
   } catch (error) { error.completedResults=results; throw error; }
 }

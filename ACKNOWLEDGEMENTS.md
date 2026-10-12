@@ -36,3 +36,8 @@ CalendarLedgerAI 0.2.3 是独立的 Android WebView 应用，包名 `org.calenda
 向这些项目的作者、维护者和贡献者一并致以衷心感谢。其原创工作和许可证保留原有归属。
 
 完整许可证正文见 [prototype/THIRD_PARTY_NOTICES.txt](prototype/THIRD_PARTY_NOTICES.txt)。农历依赖的原许可证见 [lunar-LICENSE.txt](prototype/vendor/lunar-LICENSE.txt)，来源见 [lunar-provenance.json](prototype/vendor/lunar-provenance.json)。语音构建依赖的地址和 SHA256 见 [voice-dependencies.json](build-tools/voice/voice-dependencies.json)。
+# AI 记忆与交互机制的参考
+
+在 v0.3.5 的调研与设计中，向 [Operit](https://github.com/AAswordman/Operit)、[Open WebUI](https://github.com/open-webui/open-webui)、[Mem0](https://github.com/mem0ai/mem0)、[Cline](https://github.com/cline/cline) 和 [Aider](https://github.com/Aider-AI/aider) 的作者及贡献者致以诚挚感谢。它们公开的记忆管理、上下文摘要、模型配置与思考档位映射为移动端实现提供了有价值的参考。
+
+本应用独立实现适合日历和账本的轻量方案，未复制这些项目源码或引入其运行时。逐项技术来源、采用范围及验证边界见 [AI 记忆调研](docs/AI_MEMORY_RESEARCH.md)。对 Fossify 和既有依赖的致谢与许可说明继续保留。

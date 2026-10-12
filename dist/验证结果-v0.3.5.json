@@ -1,0 +1,1998 @@
+{
+  "passed": true,
+  "version": "0.3.5",
+  "date": "2026-10-13",
+  "apk": {
+    "filename": "CalendarLedgerAI-v0.3.5.apk",
+    "bytes": 51665049,
+    "sha256": "984a415e8d4e987a22303449a4994e7dffbb44346e6696ad46650645bc0d4748",
+    "package": "org.calendarledger.preview",
+    "minSdk": 26,
+    "targetSdk": 35,
+    "version": "0.3.5",
+    "versionCode": 13
+  },
+  "signingCertificateSha256": "a8b4cc279545aa05bd5e29db2e3284bff300ec5ac0b637c98b5588605657a114",
+  "javascriptTests": {
+    "passed": true,
+    "count": 77,
+    "command": "node --test prototype/tests/*.test.mjs"
+  },
+  "nativeAllocationTests": {
+    "passed": true,
+    "count": 1838
+  },
+  "nativeAccountingTests": {
+    "passed": true,
+    "count": 13
+  },
+  "nativeDateTests": {
+    "passed": true,
+    "calendarEdgeCases": 6,
+    "monthWeekStartCombinations": 1944,
+    "recurrenceChecks": 6
+  },
+  "nativeWeatherPolicyTests": {
+    "passed": true,
+    "count": 12
+  },
+  "androidRuntime": {
+    "passed": true,
+    "version": "0.3.5",
+    "device": "emulator-5580",
+    "actualSamsungPhone": false,
+    "apiKeyUsed": false,
+    "host": "actual Android AppWidgetHost, test-only overlay",
+    "baseline": "published signed v0.3.4",
+    "phases": {
+      "baseline": {
+        "phase": "baseline",
+        "androidApi": 36,
+        "actualSamsungPhone": false,
+        "host": "Android AppWidgetHost in instrumentation overlay",
+        "version": "0.3.4",
+        "passed": true,
+        "findings": [
+          {
+            "check": "baseline has encrypted test-only API configuration",
+            "passed": true
+          },
+          {
+            "check": "old release has saved business data",
+            "passed": true
+          }
+        ]
+      },
+      "widget": {
+        "phase": "widget",
+        "androidApi": 36,
+        "actualSamsungPhone": false,
+        "host": "Android AppWidgetHost in instrumentation overlay",
+        "version": "0.3.5",
+        "largeSizeDp": [
+          370,
+          540
+        ],
+        "frameworkUpdates": 20,
+        "passed": true,
+        "findings": [
+          {
+            "check": "same-signature upgrade retains every saved record",
+            "passed": true
+          },
+          {
+            "check": "same-signature upgrade retains encrypted API configuration",
+            "passed": true
+          },
+          {
+            "check": "upgrade retains private preference marker",
+            "passed": true
+          },
+          {
+            "check": "fixtures use the real atomic snapshot bridge",
+            "passed": true
+          },
+          {
+            "check": "test launcher binds a real widget instance 51",
+            "passed": true
+          },
+          {
+            "check": "test launcher binds a real widget instance 52",
+            "passed": true
+          },
+          {
+            "check": "provider is discoverable by Android's widget framework",
+            "passed": true
+          },
+          {
+            "check": "native RemoteViews inflate into five calendar rows",
+            "passed": true
+          },
+          {
+            "check": "calendar annotates official holiday and adjusted workday",
+            "passed": true
+          },
+          {
+            "check": "saved schedule appears on the native calendar",
+            "passed": true
+          },
+          {
+            "check": "busy holiday retains a visible two-line schedule alongside both accounting rows",
+            "passed": true
+          },
+          {
+            "check": "widget displays both daily expense and income in their date cells",
+            "passed": true
+          },
+          {
+            "check": "refund reduces recorded expense without increasing income",
+            "passed": true
+          },
+          {
+            "check": "refund-only day displays a refund marker and exact accessible total",
+            "passed": true
+          },
+          {
+            "check": "transfer-only day has a separate marker and is excluded from income and expense",
+            "passed": true
+          },
+          {
+            "check": "fully refunded transactions remain visible at zero",
+            "passed": true
+          },
+          {
+            "check": "repeated schedule respects excluded occurrence",
+            "passed": true
+          },
+          {
+            "check": "native month uses actual app calendar colors and only calendar controls",
+            "passed": true
+          },
+          {
+            "check": "large month has no overflowing date or schedule views",
+            "passed": true
+          },
+          {
+            "check": "month arrow changes only the tapped widget",
+            "passed": true
+          },
+          {
+            "check": "six-week month retains all 42 clickable dates",
+            "passed": true
+          },
+          {
+            "check": "six-week large calendar fits its allocated rectangle",
+            "passed": true
+          },
+          {
+            "check": "six-week calendar keeps both income and expense",
+            "passed": true
+          },
+          {
+            "check": "AI button opens the existing chat through its native PendingIntent",
+            "passed": true
+          },
+          {
+            "check": "warm AI entry preserves the unsent draft and never sends automatically",
+            "passed": true
+          },
+          {
+            "check": "AI button does not start recording",
+            "passed": true
+          },
+          {
+            "check": "date PendingIntent opens that day's details below the month",
+            "passed": true
+          },
+          {
+            "check": "different dates have independent PendingIntent identities",
+            "passed": true
+          },
+          {
+            "check": "existing AI workflow creates the requested schedule",
+            "passed": true
+          },
+          {
+            "check": "AI-created schedule is reflected in saved widget data",
+            "passed": true
+          },
+          {
+            "check": "editing a schedule refreshes its widget date",
+            "passed": true
+          },
+          {
+            "check": "deleting a schedule removes it from the widget",
+            "passed": true
+          },
+          {
+            "check": "existing AI workflow creates the requested transaction",
+            "passed": true
+          },
+          {
+            "check": "AI bookkeeping refreshes the native widget immediately",
+            "passed": true
+          },
+          {
+            "check": "AI transaction edit refreshes the daily total",
+            "passed": true
+          },
+          {
+            "check": "moving a transaction refreshes both old and new dates",
+            "passed": true
+          },
+          {
+            "check": "deleting the final transaction clears the widget amount",
+            "passed": true
+          },
+          {
+            "check": "chat-only updates do not redraw an unchanged calendar",
+            "passed": true
+          },
+          {
+            "check": "resizing to a compact widget retains all dates",
+            "passed": true
+          },
+          {
+            "check": "compact widget retains money even alongside a holiday",
+            "passed": true
+          },
+          {
+            "check": "widget follows Sunday-first and large-text app settings",
+            "passed": true
+          },
+          {
+            "check": "widget follows the application's dark Morandi theme",
+            "passed": true
+          },
+          {
+            "check": "dark widget retains readable daily accounting totals",
+            "passed": true
+          },
+          {
+            "check": "dark large-text widget remains within the calendar rectangle",
+            "passed": true
+          },
+          {
+            "check": "native offline lunar festivals match the app across years",
+            "passed": true
+          },
+          {
+            "check": "four-week February contains all 28 dates",
+            "passed": true
+          },
+          {
+            "check": "widget month navigation never changes application business records",
+            "passed": true
+          }
+        ]
+      },
+      "reopened": {
+        "phase": "reopened",
+        "androidApi": 36,
+        "actualSamsungPhone": false,
+        "host": "Android AppWidgetHost in instrumentation overlay",
+        "version": "0.3.5",
+        "passed": true,
+        "findings": [
+          {
+            "check": "saved fixture survives process restart",
+            "passed": true
+          },
+          {
+            "check": "system retains widget binding across app restart",
+            "passed": true
+          },
+          {
+            "check": "independent widget month survives restart",
+            "passed": true
+          },
+          {
+            "check": "saved accounting totals survive process restart",
+            "passed": true
+          }
+        ]
+      },
+      "cold-ai": {
+        "phase": "cold-ai",
+        "androidApi": 36,
+        "actualSamsungPhone": false,
+        "host": "Android AppWidgetHost in instrumentation overlay",
+        "version": "0.3.5",
+        "passed": true,
+        "findings": [
+          {
+            "check": "cold start consumes AI entry after JavaScript is ready",
+            "passed": true
+          },
+          {
+            "check": "AI entry does not start microphone",
+            "passed": true
+          }
+        ]
+      },
+      "cold-date": {
+        "phase": "cold-date",
+        "androidApi": 36,
+        "actualSamsungPhone": false,
+        "host": "Android AppWidgetHost in instrumentation overlay",
+        "version": "0.3.5",
+        "passed": true,
+        "findings": [
+          {
+            "check": "cold start opens requested daily details",
+            "passed": true
+          }
+        ]
+      },
+      "system-font": {
+        "phase": "system-font",
+        "androidApi": 36,
+        "actualSamsungPhone": false,
+        "host": "Android AppWidgetHost in instrumentation overlay",
+        "version": "0.3.5",
+        "fontScale": 1.2999999523162842,
+        "passed": true,
+        "findings": [
+          {
+            "check": "saved fixture survives process restart",
+            "passed": true
+          },
+          {
+            "check": "system retains widget binding across app restart",
+            "passed": true
+          },
+          {
+            "check": "independent widget month survives restart",
+            "passed": true
+          },
+          {
+            "check": "saved accounting totals survive process restart",
+            "passed": true
+          },
+          {
+            "check": "six-week widget fits at system font scale 1.3",
+            "passed": true
+          },
+          {
+            "check": "compact six-week money stays visible at font scale 1.3",
+            "passed": true
+          },
+          {
+            "check": "minimum-size six-week holiday keeps both accounting lines",
+            "passed": true
+          },
+          {
+            "check": "minimum-size holiday schedule is not displaced by accounting",
+            "passed": true
+          }
+        ]
+      },
+      "data-projection": {
+        "phase": "data-projection",
+        "androidApi": 36,
+        "actualSamsungPhone": false,
+        "host": "Android AppWidgetHost in instrumentation overlay",
+        "version": "0.3.5",
+        "responsiveFallback": true,
+        "passed": true,
+        "findings": [
+          {
+            "check": "cache-free snapshot remains valid",
+            "passed": true
+          },
+          {
+            "check": "widget loads official bundled workdays without app holiday cache",
+            "passed": true
+          },
+          {
+            "check": "corrected cached year remains valid",
+            "passed": true
+          },
+          {
+            "check": "a removed cached holiday does not reappear from an old bundle",
+            "passed": true
+          },
+          {
+            "check": "coincident festivals retain both names",
+            "passed": true
+          },
+          {
+            "check": "monthly day 31 is displayed without moving it to February 28",
+            "passed": true
+          },
+          {
+            "check": "responsive RemoteViews fallback inflates when launcher omits sizes",
+            "passed": true
+          }
+        ]
+      },
+      "sparse-grid": {
+        "phase": "sparse-grid",
+        "androidApi": 36,
+        "actualSamsungPhone": false,
+        "host": "Android AppWidgetHost in instrumentation overlay",
+        "version": "0.3.5",
+        "scheduleCounts": [
+          0,
+          1,
+          3
+        ],
+        "passed": true,
+        "findings": [
+          {
+            "check": "empty six-week month has a framed surface for every clickable date",
+            "passed": true
+          },
+          {
+            "check": "empty month uses quiet distinct weekday, weekend and outside surfaces",
+            "passed": true
+          },
+          {
+            "check": "ordinary empty dates display a lunar sublabel",
+            "passed": true
+          },
+          {
+            "check": "empty schedule state preserves accounting and holiday labels",
+            "passed": true
+          },
+          {
+            "check": "one scheduled holiday keeps the title and both accounting rows visible",
+            "passed": true
+          },
+          {
+            "check": "schedule and accounting remain grouped inside the same date frame",
+            "passed": true
+          },
+          {
+            "check": "three sparse schedules retain their full accessible titles and fit the frames",
+            "passed": true
+          },
+          {
+            "check": "minimum six-week grid retains frames, a holiday schedule and both money lines",
+            "passed": true
+          }
+        ]
+      },
+      "weather": {
+        "phase": "weather",
+        "androidApi": 36,
+        "actualSamsungPhone": false,
+        "host": "Android AppWidgetHost in instrumentation overlay",
+        "version": "0.3.5",
+        "minimumWeatherHeaderFits": true,
+        "minimumWeatherBodyFits": true,
+        "staleCacheStatus": {
+          "city": {
+            "name": "北京",
+            "latitude": 39.9075,
+            "longitude": 116.39723,
+            "timezone": "Asia/Shanghai",
+            "admin1": "北京市",
+            "country": "中国"
+          },
+          "today": "2026-10-13",
+          "updatedAt": 1791739660782,
+          "lastAttemptAt": 1791829659975,
+          "lastError": "本次天气更新未成功，请检查网络；已有缓存会保留。",
+          "refreshing": false,
+          "stale": true,
+          "expired": false,
+          "days": [
+            {
+              "date": "2026-10-13",
+              "code": 0,
+              "min": 13,
+              "max": 24,
+              "icon": "sun",
+              "description": "晴"
+            },
+            {
+              "date": "2026-10-14",
+              "code": 2,
+              "min": 14,
+              "max": 25,
+              "icon": "partly",
+              "description": "多云"
+            },
+            {
+              "date": "2026-10-15",
+              "code": 3,
+              "min": 15,
+              "max": 26,
+              "icon": "cloud",
+              "description": "阴"
+            },
+            {
+              "date": "2026-10-16",
+              "code": 61,
+              "min": 13,
+              "max": 24,
+              "icon": "rain",
+              "description": "小雨"
+            },
+            {
+              "date": "2026-10-17",
+              "code": 95,
+              "min": 14,
+              "max": 25,
+              "icon": "storm",
+              "description": "雷雨"
+            },
+            {
+              "date": "2026-10-18",
+              "code": 71,
+              "min": 15,
+              "max": 26,
+              "icon": "snow",
+              "description": "小雪"
+            },
+            {
+              "date": "2026-10-19",
+              "code": 45,
+              "min": 13,
+              "max": 24,
+              "icon": "fog",
+              "description": "雾"
+            },
+            {
+              "date": "2026-10-20",
+              "code": 0,
+              "icon": "sun",
+              "description": "晴"
+            },
+            {
+              "date": "2026-10-23",
+              "code": 61,
+              "min": 14,
+              "max": 25,
+              "icon": "rain",
+              "description": "小雨"
+            },
+            {
+              "date": "2026-10-24",
+              "code": 95,
+              "min": 15,
+              "max": 26,
+              "icon": "storm",
+              "description": "雷雨"
+            },
+            {
+              "date": "2026-10-25",
+              "code": 71,
+              "min": 13,
+              "max": 24,
+              "icon": "snow",
+              "description": "小雪"
+            },
+            {
+              "date": "2026-10-26",
+              "code": 45,
+              "min": 14,
+              "max": 25,
+              "icon": "fog",
+              "description": "雾"
+            },
+            {
+              "date": "2026-10-27",
+              "code": 0,
+              "min": 15,
+              "max": 26,
+              "icon": "sun",
+              "description": "晴"
+            },
+            {
+              "date": "2026-10-28",
+              "code": 2,
+              "min": 13,
+              "max": 24,
+              "icon": "partly",
+              "description": "多云"
+            }
+          ],
+          "forecastEnd": "2026-10-28"
+        },
+        "weatherRequests": 8,
+        "forecastRequests": 7,
+        "weatherCacheBytes": 904,
+        "providerResponses": "synthetic; real native networking path and lifecycle",
+        "fontScale": 1,
+        "passed": true,
+        "findings": [
+          {
+            "check": "unconfigured app does not make a weather request",
+            "passed": true
+          },
+          {
+            "check": "city search requires an explicit choice instead of choosing the first result",
+            "passed": true
+          },
+          {
+            "check": "selected city receives one forecast through the real native bridge",
+            "passed": true
+          },
+          {
+            "check": "null or unknown WMO codes are omitted rather than made into sunny days",
+            "passed": true
+          },
+          {
+            "check": "missing temperatures remain absent",
+            "passed": true
+          },
+          {
+            "check": "new forecast covers only the supplied up-to-16-day dates",
+            "passed": true
+          },
+          {
+            "check": "durable weather cache is small and excludes accounting, messages and API credentials",
+            "passed": true
+          },
+          {
+            "check": "reading and configuring weather leaves accounting, events, budgets and ledgers unchanged",
+            "passed": true
+          },
+          {
+            "check": "incomplete provider arrays are rejected",
+            "passed": true
+          },
+          {
+            "check": "a stale provider date range is rejected",
+            "passed": true
+          },
+          {
+            "check": "unexpected Fahrenheit data cannot be shown as Celsius",
+            "passed": true
+          },
+          {
+            "check": "invalid city coordinates cannot replace the saved city",
+            "passed": true
+          },
+          {
+            "check": "weather modal fits the real phone viewport and displays cached update time",
+            "passed": true
+          },
+          {
+            "check": "weather icon shares the existing date header while both money lines and schedule remain visible",
+            "passed": true
+          },
+          {
+            "check": "date accessibility describes the full forecast and temperature",
+            "passed": true
+          },
+          {
+            "check": "widget carries a visible weather-source link",
+            "passed": true
+          },
+          {
+            "check": "crowded header preserves exact +N and holiday badge without overlap",
+            "passed": true
+          },
+          {
+            "check": "minimum width omits only the optional icon on a crowded day",
+            "passed": true
+          },
+          {
+            "check": "minimum width still shows weather on an uncrowded date",
+            "passed": true
+          },
+          {
+            "check": "dark and large-font widget retains native weather icons and uncut content",
+            "passed": true
+          },
+          {
+            "check": "status reads, resume, widget refresh and resize do not poll weather",
+            "passed": true
+          },
+          {
+            "check": "background widget flip, midnight and local reads make zero weather network requests",
+            "passed": true
+          },
+          {
+            "check": "background cannot initiate city configuration or forecast networking",
+            "passed": true
+          },
+          {
+            "check": "returning to the app foreground refreshes once",
+            "passed": true
+          },
+          {
+            "check": "network failure preserves last successful forecast and timestamp",
+            "passed": true
+          },
+          {
+            "check": "older-than-24-hour cache is explicitly marked stale",
+            "passed": true
+          },
+          {
+            "check": "expired forecast is hidden without a background update",
+            "passed": true
+          },
+          {
+            "check": "cancellation test actually starts an in-flight request",
+            "passed": true
+          },
+          {
+            "check": "leaving the app cancels an in-flight response and prevents a new cache timestamp",
+            "passed": true
+          },
+          {
+            "check": "turning weather off removes forecast and city",
+            "passed": true
+          },
+          {
+            "check": "disabled weather does not fetch when the app opens again",
+            "passed": true
+          },
+          {
+            "check": "switching city immediately clears the previous city's cache",
+            "passed": true
+          },
+          {
+            "check": "late old-city responses cannot overwrite the chosen city",
+            "passed": true
+          }
+        ]
+      },
+      "weather-system-font": {
+        "phase": "weather-system-font",
+        "androidApi": 36,
+        "actualSamsungPhone": false,
+        "host": "Android AppWidgetHost in instrumentation overlay",
+        "version": "0.3.5",
+        "minimumWeatherHeaderFits": true,
+        "minimumWeatherBodyFits": true,
+        "staleCacheStatus": {
+          "city": {
+            "name": "北京",
+            "latitude": 39.9075,
+            "longitude": 116.39723,
+            "timezone": "Asia/Shanghai",
+            "admin1": "北京市",
+            "country": "中国"
+          },
+          "today": "2026-10-13",
+          "updatedAt": 1791739678067,
+          "lastAttemptAt": 1791829677294,
+          "lastError": "本次天气更新未成功，请检查网络；已有缓存会保留。",
+          "refreshing": false,
+          "stale": true,
+          "expired": false,
+          "days": [
+            {
+              "date": "2026-10-13",
+              "code": 0,
+              "min": 13,
+              "max": 24,
+              "icon": "sun",
+              "description": "晴"
+            },
+            {
+              "date": "2026-10-14",
+              "code": 2,
+              "min": 14,
+              "max": 25,
+              "icon": "partly",
+              "description": "多云"
+            },
+            {
+              "date": "2026-10-15",
+              "code": 3,
+              "min": 15,
+              "max": 26,
+              "icon": "cloud",
+              "description": "阴"
+            },
+            {
+              "date": "2026-10-16",
+              "code": 61,
+              "min": 13,
+              "max": 24,
+              "icon": "rain",
+              "description": "小雨"
+            },
+            {
+              "date": "2026-10-17",
+              "code": 95,
+              "min": 14,
+              "max": 25,
+              "icon": "storm",
+              "description": "雷雨"
+            },
+            {
+              "date": "2026-10-18",
+              "code": 71,
+              "min": 15,
+              "max": 26,
+              "icon": "snow",
+              "description": "小雪"
+            },
+            {
+              "date": "2026-10-19",
+              "code": 45,
+              "min": 13,
+              "max": 24,
+              "icon": "fog",
+              "description": "雾"
+            },
+            {
+              "date": "2026-10-20",
+              "code": 0,
+              "icon": "sun",
+              "description": "晴"
+            },
+            {
+              "date": "2026-10-23",
+              "code": 61,
+              "min": 14,
+              "max": 25,
+              "icon": "rain",
+              "description": "小雨"
+            },
+            {
+              "date": "2026-10-24",
+              "code": 95,
+              "min": 15,
+              "max": 26,
+              "icon": "storm",
+              "description": "雷雨"
+            },
+            {
+              "date": "2026-10-25",
+              "code": 71,
+              "min": 13,
+              "max": 24,
+              "icon": "snow",
+              "description": "小雪"
+            },
+            {
+              "date": "2026-10-26",
+              "code": 45,
+              "min": 14,
+              "max": 25,
+              "icon": "fog",
+              "description": "雾"
+            },
+            {
+              "date": "2026-10-27",
+              "code": 0,
+              "min": 15,
+              "max": 26,
+              "icon": "sun",
+              "description": "晴"
+            },
+            {
+              "date": "2026-10-28",
+              "code": 2,
+              "min": 13,
+              "max": 24,
+              "icon": "partly",
+              "description": "多云"
+            }
+          ],
+          "forecastEnd": "2026-10-28"
+        },
+        "weatherRequests": 8,
+        "forecastRequests": 7,
+        "weatherCacheBytes": 904,
+        "providerResponses": "synthetic; real native networking path and lifecycle",
+        "fontScale": 1.2999999523162842,
+        "passed": true,
+        "findings": [
+          {
+            "check": "unconfigured app does not make a weather request",
+            "passed": true
+          },
+          {
+            "check": "city search requires an explicit choice instead of choosing the first result",
+            "passed": true
+          },
+          {
+            "check": "selected city receives one forecast through the real native bridge",
+            "passed": true
+          },
+          {
+            "check": "null or unknown WMO codes are omitted rather than made into sunny days",
+            "passed": true
+          },
+          {
+            "check": "missing temperatures remain absent",
+            "passed": true
+          },
+          {
+            "check": "new forecast covers only the supplied up-to-16-day dates",
+            "passed": true
+          },
+          {
+            "check": "durable weather cache is small and excludes accounting, messages and API credentials",
+            "passed": true
+          },
+          {
+            "check": "reading and configuring weather leaves accounting, events, budgets and ledgers unchanged",
+            "passed": true
+          },
+          {
+            "check": "incomplete provider arrays are rejected",
+            "passed": true
+          },
+          {
+            "check": "a stale provider date range is rejected",
+            "passed": true
+          },
+          {
+            "check": "unexpected Fahrenheit data cannot be shown as Celsius",
+            "passed": true
+          },
+          {
+            "check": "invalid city coordinates cannot replace the saved city",
+            "passed": true
+          },
+          {
+            "check": "weather modal fits the real phone viewport and displays cached update time",
+            "passed": true
+          },
+          {
+            "check": "weather icon shares the existing date header while both money lines and schedule remain visible",
+            "passed": true
+          },
+          {
+            "check": "date accessibility describes the full forecast and temperature",
+            "passed": true
+          },
+          {
+            "check": "widget carries a visible weather-source link",
+            "passed": true
+          },
+          {
+            "check": "crowded header preserves exact +N and holiday badge without overlap",
+            "passed": true
+          },
+          {
+            "check": "minimum width omits only the optional icon on a crowded day",
+            "passed": true
+          },
+          {
+            "check": "minimum width still shows weather on an uncrowded date",
+            "passed": true
+          },
+          {
+            "check": "dark and large-font widget retains native weather icons and uncut content",
+            "passed": true
+          },
+          {
+            "check": "status reads, resume, widget refresh and resize do not poll weather",
+            "passed": true
+          },
+          {
+            "check": "background widget flip, midnight and local reads make zero weather network requests",
+            "passed": true
+          },
+          {
+            "check": "background cannot initiate city configuration or forecast networking",
+            "passed": true
+          },
+          {
+            "check": "returning to the app foreground refreshes once",
+            "passed": true
+          },
+          {
+            "check": "network failure preserves last successful forecast and timestamp",
+            "passed": true
+          },
+          {
+            "check": "older-than-24-hour cache is explicitly marked stale",
+            "passed": true
+          },
+          {
+            "check": "expired forecast is hidden without a background update",
+            "passed": true
+          },
+          {
+            "check": "cancellation test actually starts an in-flight request",
+            "passed": true
+          },
+          {
+            "check": "leaving the app cancels an in-flight response and prevents a new cache timestamp",
+            "passed": true
+          },
+          {
+            "check": "turning weather off removes forecast and city",
+            "passed": true
+          },
+          {
+            "check": "disabled weather does not fetch when the app opens again",
+            "passed": true
+          },
+          {
+            "check": "switching city immediately clears the previous city's cache",
+            "passed": true
+          },
+          {
+            "check": "late old-city responses cannot overwrite the chosen city",
+            "passed": true
+          }
+        ]
+      },
+      "ai-operations": {
+        "phase": "ai-operations",
+        "androidApi": 36,
+        "actualSamsungPhone": false,
+        "host": "Android AppWidgetHost in instrumentation overlay",
+        "version": "0.3.5",
+        "apiKeyUsed": false,
+        "actualProvider": false,
+        "mode": "installed delivery APK, native bridge, local operation parser",
+        "passed": true,
+        "findings": [
+          {
+            "check": "native conversation records a single subscription payment",
+            "passed": true
+          },
+          {
+            "check": "native conversation allocates without creating daily payments",
+            "passed": true
+          },
+          {
+            "check": "monthly period defaults to actual payment month",
+            "passed": true
+          },
+          {
+            "check": "test launcher binds a real widget instance 53",
+            "passed": true
+          },
+          {
+            "check": "native widget displays first-day integer-cent share",
+            "passed": true
+          },
+          {
+            "check": "native widget preserves exact remainder on the final day",
+            "passed": true
+          },
+          {
+            "check": "native widget identifies daily-cost accounting",
+            "passed": true
+          },
+          {
+            "check": "native allocation stays within date cells",
+            "passed": true
+          },
+          {
+            "check": "native chat saves explicit persistent preference",
+            "passed": true
+          },
+          {
+            "check": "cold restart retains preference and previous dialogue",
+            "passed": true
+          },
+          {
+            "check": "cold restart retains source reference and allocation",
+            "passed": true
+          },
+          {
+            "check": "follow-up after restart modifies the same real payment",
+            "passed": true
+          },
+          {
+            "check": "native shares immediately follow source amount update",
+            "passed": true
+          },
+          {
+            "check": "undo restores source amount while keeping its allocation",
+            "passed": true
+          },
+          {
+            "check": "memory settings exposes saved preferences and controls",
+            "passed": true
+          },
+          {
+            "check": "memory settings fits native phone width",
+            "passed": true
+          },
+          {
+            "check": "forget preference does not remove payment or allocation",
+            "passed": true
+          },
+          {
+            "check": "forget preference can be undone",
+            "passed": true
+          },
+          {
+            "check": "native model sheet and slider fit phone",
+            "passed": true
+          },
+          {
+            "check": "native model and max thinking setting reach saved configuration",
+            "passed": true
+          },
+          {
+            "check": "native official thinking wire mapping none",
+            "passed": true
+          },
+          {
+            "check": "native official thinking wire mapping low",
+            "passed": true
+          },
+          {
+            "check": "native official thinking wire mapping high",
+            "passed": true
+          },
+          {
+            "check": "native official thinking wire mapping max",
+            "passed": true
+          },
+          {
+            "check": "native summary wire is bounded JSON without thinking",
+            "passed": true
+          },
+          {
+            "check": "native suggestion shows original quote and confirmation",
+            "passed": true
+          },
+          {
+            "check": "native confirmed preference preserves provenance",
+            "passed": true
+          },
+          {
+            "check": "native cold restart retains model effort and confirmed preference",
+            "passed": true
+          }
+        ]
+      },
+      "appearance": {
+        "phase": "appearance",
+        "androidApi": 36,
+        "actualSamsungPhone": false,
+        "host": "Android AppWidgetHost in instrumentation overlay",
+        "version": "0.3.5",
+        "passed": true,
+        "findings": [
+          {
+            "check": "native phone month fits above navigation; agenda remains below",
+            "passed": true
+          },
+          {
+            "check": "native phone ledger has no horizontal overflow",
+            "passed": true
+          },
+          {
+            "check": "native phone reports has no horizontal overflow",
+            "passed": true
+          },
+          {
+            "check": "native phone more has no horizontal overflow",
+            "passed": true
+          },
+          {
+            "check": "native Morandi chat retains image, microphone and send controls",
+            "passed": true
+          },
+          {
+            "check": "native phone settings modal fits the screen",
+            "passed": true
+          }
+        ]
+      }
+    },
+    "sameSignatureUpgrade": true,
+    "nativeWidgetChecks": 179,
+    "apkSha256": "984a415e8d4e987a22303449a4994e7dffbb44346e6696ad46650645bc0d4748"
+  },
+  "browserLayoutAndTools": {
+    "passed": true,
+    "findings": [
+      {
+        "check": "desktop initial",
+        "width": 1440,
+        "doc": 1425,
+        "buttons": 67
+      },
+      {
+        "check": "UI multi-operation chat",
+        "passed": true
+      },
+      {
+        "check": "UI continuous edits",
+        "passed": true
+      },
+      {
+        "check": "desktop chat results",
+        "width": 1440,
+        "doc": 1425,
+        "buttons": 82
+      },
+      {
+        "check": "desktop reports",
+        "width": 1440,
+        "doc": 1440,
+        "buttons": 39
+      },
+      {
+        "check": "manual transaction form",
+        "passed": true
+      },
+      {
+        "check": "task completion button",
+        "passed": true
+      },
+      {
+        "check": "desktop dark theme",
+        "width": 1440,
+        "doc": 1440,
+        "buttons": 40
+      },
+      {
+        "check": "calendar statutory holidays and adjusted workdays",
+        "passed": true
+      },
+      {
+        "check": "S24U layout 412px",
+        "width": 412,
+        "doc": 412,
+        "buttons": 56
+      },
+      {
+        "check": "whole month fits phone viewport",
+        "gridBottom": 748.28125,
+        "navTop": 769
+      },
+      {
+        "check": "six-week month fits phone viewport",
+        "rows": "6",
+        "bottom": 748.28125,
+        "navTop": 769
+      },
+      {
+        "check": "S24U chat 412px",
+        "width": 412,
+        "doc": 412,
+        "buttons": 28
+      },
+      {
+        "check": "keyboard viewport retains input and send button",
+        "top": 335.5,
+        "bottom": 391.5,
+        "height": 420
+      },
+      {
+        "check": "mobile analysis",
+        "width": 412,
+        "doc": 412,
+        "buttons": 14
+      },
+      {
+        "check": "mobile ledger",
+        "width": 412,
+        "doc": 412,
+        "buttons": 44
+      },
+      {
+        "check": "S24U settings 412px",
+        "width": 412,
+        "doc": 412,
+        "buttons": 64
+      },
+      {
+        "check": "small phone 360px",
+        "width": 360,
+        "doc": 360,
+        "buttons": 54
+      },
+      {
+        "check": "phone 384px",
+        "width": 384,
+        "doc": 384,
+        "buttons": 54
+      },
+      {
+        "check": "mobile dark theme large font",
+        "width": 384,
+        "doc": 384,
+        "buttons": 54
+      },
+      {
+        "check": "persistence after reload",
+        "passed": true
+      },
+      {
+        "check": "full API tool loop with mock provider and duplicate prevention",
+        "passed": true
+      },
+      {
+        "check": "partial API failure retains write and undo card",
+        "passed": true
+      },
+      {
+        "check": "browser console errors",
+        "count": 0,
+        "expectedProviderErrors": 1
+      }
+    ],
+    "errors": [],
+    "expectedNetworkErrors": [
+      "Failed to load resource: the server responded with a status of 400 (Bad Request)"
+    ]
+  },
+  "browserAIWorkflow": {
+    "passed": true,
+    "version": "0.3.5",
+    "actualProvider": false,
+    "apiKeyUsed": false,
+    "requests": 25,
+    "findings": [
+      {
+        "check": "allocation receives the actual queried source ID",
+        "passed": true
+      },
+      {
+        "check": "API sees locally verified conserved total and 31 daily costs",
+        "passed": true
+      },
+      {
+        "check": "real application uses one payment plus one allocation",
+        "passed": true
+      },
+      {
+        "check": "page reload keeps memory and saved conversation",
+        "passed": true
+      },
+      {
+        "check": "follow-up API query sees updated daily cost",
+        "passed": true
+      },
+      {
+        "check": "cold API request carries previous dialogue, preference and exact ID",
+        "passed": true
+      },
+      {
+        "check": "follow-up changes one source, not creating duplicated payments",
+        "passed": true
+      },
+      {
+        "check": "mobile memory panel fits screen",
+        "passed": true
+      },
+      {
+        "check": "memory input uses the app styling and touch target",
+        "passed": true
+      },
+      {
+        "check": "memory settings adds preferences through the real dispatcher",
+        "passed": true
+      },
+      {
+        "check": "forget memory preserves payment and allocation",
+        "passed": true
+      },
+      {
+        "check": "calendar clearly labels allocation and shows two-yuan daily share",
+        "passed": true
+      },
+      {
+        "check": "all API rounds advertise local memory and allocation tools",
+        "passed": true
+      },
+      {
+        "check": "API wire histories contain paired call/result IDs",
+        "passed": true
+      },
+      {
+        "check": "API suggestion uses exact user quote and remains inactive",
+        "passed": true
+      },
+      {
+        "check": "suggestion buttons meet phone touch size without overflow",
+        "passed": true
+      },
+      {
+        "check": "accept replaces same-key memory and preserves source",
+        "passed": true
+      },
+      {
+        "check": "accepted preference survives cold reload",
+        "passed": true
+      },
+      {
+        "check": "model sees recalled confirmed preference",
+        "passed": true
+      },
+      {
+        "check": "phone setting disables suggestions",
+        "passed": true
+      },
+      {
+        "check": "disabled policy blocks provider memory writes",
+        "passed": true
+      },
+      {
+        "check": "older chat excerpt is automatically recalled",
+        "passed": true
+      },
+      {
+        "check": "history tool searches archived original text",
+        "passed": true
+      },
+      {
+        "check": "model selector retrieves official endpoint model IDs",
+        "passed": true
+      },
+      {
+        "check": "model and real max-effort slider persist",
+        "passed": true
+      },
+      {
+        "check": "control sheet fits narrow phone",
+        "passed": true
+      },
+      {
+        "check": "max effort reaches upstream wire with complete thinking tool round",
+        "passed": true
+      },
+      {
+        "check": "manual summary calls selected model without tools or thinking",
+        "passed": true
+      },
+      {
+        "check": "manual API compaction preserves original chat and payment",
+        "passed": true
+      },
+      {
+        "check": "model effort and summary survive app-like reload",
+        "passed": true
+      },
+      {
+        "check": "next tool conversation receives durable summary and complete recent thinking messages",
+        "passed": true
+      },
+      {
+        "check": "clear context removes archive and messages but keeps confirmed preference and money",
+        "passed": true
+      },
+      {
+        "check": "API key is absent from local memory and ledger snapshot",
+        "passed": true
+      }
+    ],
+    "errors": []
+  },
+  "chatScroll": {
+    "passed": true,
+    "version": "0.3.4",
+    "findings": [
+      {
+        "check": "waiting reply keeps the same focused enabled textarea",
+        "passed": true
+      },
+      {
+        "check": "tool operations preserve panel list and history nodes",
+        "passed": true
+      },
+      {
+        "check": "reply completion retains focus and next-message draft",
+        "passed": true
+      },
+      {
+        "check": "smooth new-message trajectory without history flashing",
+        "passed": true,
+        "start": 3677,
+        "end": 4394,
+        "intermediatePositions": 30
+      },
+      {
+        "check": "reply arriving while reading history does not pull to bottom",
+        "passed": true
+      },
+      {
+        "check": "background holiday refresh keeps chat position and DOM",
+        "passed": true
+      },
+      {
+        "check": "return to latest messages follows the current bottom",
+        "passed": true
+      },
+      {
+        "check": "keyboard-sized viewport preserves textarea and composer visibility",
+        "passed": true
+      },
+      {
+        "check": "restoring viewport does not discard a history reading position",
+        "passed": true
+      },
+      {
+        "check": "reduced-motion preference skips message animations",
+        "passed": true
+      }
+    ],
+    "errors": [],
+    "trace": {
+      "from": 3677,
+      "samples": [
+        {
+          "time": 136.1,
+          "top": 3677,
+          "opacity": "1"
+        },
+        {
+          "time": 152.7,
+          "top": 3693,
+          "opacity": "1"
+        },
+        {
+          "time": 169.4,
+          "top": 3724,
+          "opacity": "1"
+        },
+        {
+          "time": 186.1,
+          "top": 3752,
+          "opacity": "1"
+        },
+        {
+          "time": 202.7,
+          "top": 3776,
+          "opacity": "1"
+        },
+        {
+          "time": 219.4,
+          "top": 3797,
+          "opacity": "1"
+        },
+        {
+          "time": 236.1,
+          "top": 3815,
+          "opacity": "1"
+        },
+        {
+          "time": 252.7,
+          "top": 3830,
+          "opacity": "1"
+        },
+        {
+          "time": 269.4,
+          "top": 3842,
+          "opacity": "1"
+        },
+        {
+          "time": 286.1,
+          "top": 3852,
+          "opacity": "1"
+        },
+        {
+          "time": 302.8,
+          "top": 3859,
+          "opacity": "1"
+        },
+        {
+          "time": 319.4,
+          "top": 3865,
+          "opacity": "1"
+        },
+        {
+          "time": 336.1,
+          "top": 3870,
+          "opacity": "1"
+        },
+        {
+          "time": 352.8,
+          "top": 3873,
+          "opacity": "1"
+        },
+        {
+          "time": 369.4,
+          "top": 3874,
+          "opacity": "1"
+        },
+        {
+          "time": 386.1,
+          "top": 3875,
+          "opacity": "1"
+        },
+        {
+          "time": 402.7,
+          "top": 3876,
+          "opacity": "1"
+        },
+        {
+          "time": 419.4,
+          "top": 3876,
+          "opacity": "1"
+        },
+        {
+          "time": 436.1,
+          "top": 3936,
+          "opacity": "1"
+        },
+        {
+          "time": 452.7,
+          "top": 4016,
+          "opacity": "1"
+        },
+        {
+          "time": 469.4,
+          "top": 4086,
+          "opacity": "1"
+        },
+        {
+          "time": 486.1,
+          "top": 4147,
+          "opacity": "1"
+        },
+        {
+          "time": 502.7,
+          "top": 4199,
+          "opacity": "1"
+        },
+        {
+          "time": 519.3,
+          "top": 4243,
+          "opacity": "1"
+        },
+        {
+          "time": 536,
+          "top": 4280,
+          "opacity": "1"
+        },
+        {
+          "time": 552.7,
+          "top": 4311,
+          "opacity": "1"
+        },
+        {
+          "time": 569.3,
+          "top": 4335,
+          "opacity": "1"
+        },
+        {
+          "time": 586.1,
+          "top": 4354,
+          "opacity": "1"
+        },
+        {
+          "time": 602.7,
+          "top": 4369,
+          "opacity": "1"
+        },
+        {
+          "time": 619.4,
+          "top": 4379,
+          "opacity": "1"
+        },
+        {
+          "time": 636,
+          "top": 4386,
+          "opacity": "1"
+        },
+        {
+          "time": 652.7,
+          "top": 4391,
+          "opacity": "1"
+        },
+        {
+          "time": 669.4,
+          "top": 4393,
+          "opacity": "1"
+        },
+        {
+          "time": 686,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 702.7,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 719.4,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 736,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 752.7,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 769.4,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 786,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 802.7,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 819.3,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 836,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 852.7,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 869.4,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 886,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 902.7,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 919.4,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 936.1,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 952.7,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 969.3,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 986,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 1002.7,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 1019.4,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 1036,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 1052.7,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 1069.4,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 1086.1,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 1102.7,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 1119.4,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 1136,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 1152.7,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 1169.4,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 1186,
+          "top": 4394,
+          "opacity": "1"
+        },
+        {
+          "time": 1202.7,
+          "top": 4394,
+          "opacity": "1"
+        }
+      ],
+      "to": 4394
+    },
+    "defaultReducedMotion": true
+  },
+  "browserMultimodalWorkflow": {
+    "passed": true,
+    "findings": [
+      {
+        "check": "four reachable mobile tabs and readable calendar",
+        "passed": true
+      },
+      {
+        "check": "more page retains analysis tasks settings and backup",
+        "passed": true
+      },
+      {
+        "check": "actual decoded image thumbnail without replacing composer",
+        "passed": true
+      },
+      {
+        "check": "demo does not invent recognition or send image upstream",
+        "passed": true
+      },
+      {
+        "check": "upstream receives actual encoded image with read-only recognition tools",
+        "passed": true
+      },
+      {
+        "check": "recognition returns two cards without writing business data",
+        "passed": true
+      },
+      {
+        "check": "AI follow-up edits only the identified draft and releases previous full image",
+        "passed": true
+      },
+      {
+        "check": "editing recognition changes only the card",
+        "passed": true
+      },
+      {
+        "check": "selected cards save exact cents and real event reminder",
+        "passed": true
+      },
+      {
+        "check": "tab navigation retains history node and input",
+        "passed": true
+      },
+      {
+        "check": "AI explicit save writes selected draft once and excludes duplicate meeting",
+        "passed": true
+      },
+      {
+        "check": "process-like reload preserves records cards and image thumbnail",
+        "passed": true
+      },
+      {
+        "check": "microphone shows recording and disables send",
+        "passed": true
+      },
+      {
+        "check": "recognized speech is editable and never submits automatically",
+        "passed": true
+      },
+      {
+        "check": "cancelling voice keeps existing typed draft",
+        "passed": true
+      },
+      {
+        "check": "small keyboard viewport keeps image voice and send accessible",
+        "passed": true
+      },
+      {
+        "check": "image request failure retains photo and editable message for retry",
+        "passed": true
+      }
+    ],
+    "errors": [],
+    "mockedProvider": true,
+    "realDeepSeekKeyUsed": false
+  },
+  "totalAndroidChecks": 179,
+  "totalBrowserChecks": 84,
+  "packageChecks": {
+    "passed": true,
+    "sameFiveSpeechPayloads": true,
+    "unchangedFestivalIndex": true,
+    "assetsMatchFrozenSource": true,
+    "newPermissions": [],
+    "testNetworkStubsIncluded": false,
+    "increaseBytes": -180010
+  },
+  "memory": {
+    "confirmedLimit": 40,
+    "suggestionLimit": 20,
+    "originalUserEvidenceRequired": true,
+    "modelCannotAcceptSuggestions": true,
+    "confirmedSourceRetained": true,
+    "localLexicalRetrieval": true,
+    "preferenceContextCharacterBudget": 4000,
+    "chatLimit": 200,
+    "archiveLimit": 80
+  },
+  "contextCompression": {
+    "additionalApiRequest": true,
+    "automaticThresholdMessages": 24,
+    "automaticThresholdCharacters": 18000,
+    "retainedRecentTurns": 3,
+    "summaryFailurePreservesHistory": true,
+    "summaryOutputTokens": 1600,
+    "thinkingDisabledForSummary": true,
+    "durableSummary": true,
+    "originalChatPreserved": true
+  },
+  "thinking": {
+    "provider": "api.deepseek.com",
+    "levels": [
+      "none",
+      "low",
+      "high",
+      "max"
+    ],
+    "completeCurrentToolReasoningReplayed": true,
+    "boundedWholeRecentBlocks": true,
+    "modelSwitchingPreservesBusinessData": true,
+    "authenticatedModelList": true
+  },
+  "screenshots": {
+    "type": "Installed delivery APK in isolated Android16/API36; widget host exists only in test APK",
+    "testData": true,
+    "files": [
+      "桌面小组件预览-v0.3.5.png",
+      "桌面小组件六行月历-v0.3.5.png",
+      "桌面小组件深色预览-v0.3.5.png",
+      "桌面小组件缩小预览-v0.3.5.png",
+      "桌面小组件最小尺寸预览-v0.3.5.png",
+      "桌面小组件零日程预览-v0.3.5.png",
+      "桌面小组件一条日程预览-v0.3.5.png",
+      "桌面小组件三条日程预览-v0.3.5.png",
+      "手机月历预览-v0.3.5.png",
+      "手机账本预览-v0.3.5.png",
+      "手机统计预览-v0.3.5.png",
+      "手机更多预览-v0.3.5.png",
+      "手机AI对话预览-v0.3.5.png",
+      "手机设置预览-v0.3.5.png",
+      "桌面小组件天气预览-v0.3.5.png",
+      "桌面小组件天气深色预览-v0.3.5.png",
+      "桌面小组件天气最小尺寸预览-v0.3.5.png",
+      "手机天气设置预览-v0.3.5.png",
+      "桌面小组件分摊预览-v0.3.5.png",
+      "AI记忆设置预览-v0.3.5.png",
+      "手机连续对话预览-v0.3.5.png",
+      "模型与思考设置预览-v0.3.5.png"
+    ]
+  },
+  "realApiKeyUsed": false,
+  "actualSamsungPhone": false,
+  "notValidated": [
+    "User Samsung S24 Ultra / One UI 8.5",
+    "Actual provider memory extraction, summary quality, thinking efficacy and model availability with user key"
+  ],
+  "notRerun": [
+    "Real weather HTTPS provider",
+    "Microphone audio recognition",
+    "System reminder delivery"
+  ]
+}

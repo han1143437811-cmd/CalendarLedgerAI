@@ -74,6 +74,7 @@ export function describeResult(result) {
   if(result.type==='allocation_removed')return`已取消 ${result.removed} 项分摊，实际付款保留。`;
   if(result.type==='memory')return result.items.length?result.items.map(row=>`记忆：${row.key} · ${row.value}`).join('\n'):'尚无长期偏好。';
   if(result.type==='memory_removed')return`已忘记 ${result.removed} 条偏好。`;
+  if(result.type==='memory_suggestion')return '发现一个可能的长期偏好，请核对并采纳后生效。';
   if(result.type==='chat_history')return result.items.length?`找到 ${result.items.length} 条相关历史对话。`:'未找到对应历史对话。';
   if(result.type==='transaction')return result.items.length>1?`已处理 ${result.items.length} 笔账目。`:`已保存“${result.items[0].note}”，¥${money(result.items[0].amount)}。`;
   if(result.type==='event')return`已保存 ${result.items.length} 个日程。提醒设置已记录；手机端可在设置中启用通知，示例数据不触发通知。`;

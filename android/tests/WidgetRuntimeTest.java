@@ -167,9 +167,28 @@ public class WidgetRuntimeTest extends Instrumentation {
             check("forget preference does not remove payment or allocation",truth("calendarLedgerPreview.getState().aiMemory.length===0&&calendarLedgerPreview.getState().transactions.length===1&&calendarLedgerPreview.getState().expenseAllocations.length===1"));
             evaluate("document.querySelector('[data-action=close-modal]').click()");sendChat("撤销操作");
             check("forget preference can be undone",truth("calendarLedgerPreview.getState().aiMemory.length===1"));
+            evaluate("document.querySelector('#chat-model-button').click()");
+            check("native model sheet and slider fit phone",truth("document.querySelector('[data-ai-controls] input[name=effort]').getBoundingClientRect().height>=44&&document.documentElement.scrollWidth<=innerWidth+1"));
+            evaluate("document.querySelector('[data-model-choice=\"deepseek-v4-pro\"]').click();var c=document.querySelector('[data-ai-controls]');c.elements.effort.value='3';c.elements.effort.dispatchEvent(new Event('input',{bubbles:true}));c.requestSubmit()");
+            waitFor("calendarLedgerPreview.getConfig().model==='deepseek-v4-pro'",10000);
+            check("native model and max thinking setting reach saved configuration",truth("calendarLedgerPreview.getConfig().effort==='max'&&JSON.parse(CalendarAndroid.loadSnapshot()).aiConfig.effort==='max'"));
+            screenshot("app-model-controls",null);evaluate("document.querySelector('[data-action=close-modal]').click()");
+            Class<?> optionsClass=Class.forName("org.calendarledger.preview.AiRequestOptions",true,getTargetContext().getClassLoader());
+            java.lang.reflect.Method apply=optionsClass.getDeclaredMethod("apply",JSONObject.class,JSONObject.class,String.class);apply.setAccessible(true);
+            for(String effort:new String[]{"none","low","high","max"}){JSONObject payload=new JSONObject();apply.invoke(null,payload,new JSONObject().put("effort",effort),"https://api.deepseek.com");check("native official thinking wire mapping "+effort,payload.getString("reasoning_effort").equals(effort)&&payload.getJSONObject("thinking").getString("type").equals("none".equals(effort)?"disabled":"enabled"));}
+            JSONObject summaryPayload=new JSONObject();apply.invoke(null,summaryPayload,new JSONObject().put("effort","max").put("purpose","summary"),"https://api.deepseek.com");
+            check("native summary wire is bounded JSON without thinking",summaryPayload.getInt("max_tokens")==1600&&summaryPayload.getString("reasoning_effort").equals("none")&&summaryPayload.getJSONObject("response_format").getString("type").equals("json_object"));
+            JSONObject learningSnapshot=new JSONObject(evaluate("CalendarAndroid.loadSnapshot()"));
+            learningSnapshot.getJSONObject("state").put("aiMemorySuggestions",new JSONArray().put(new JSONObject().put("id","mem_qa_account").put("key","默认账户").put("value","支付宝").put("evidence","我习惯用支付宝支付")));
+            evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(learningSnapshot.toString())+")");restartApp();
+            evaluate("document.querySelector('.mobile-nav [data-page=more]').click();document.querySelector('.main [data-action=ai-memory]').click()");
+            check("native suggestion shows original quote and confirmation",truth("document.querySelector('.memory-suggestion').textContent.includes('我习惯用支付宝支付')&&document.querySelector('[data-memory-accept]').getBoundingClientRect().height>=44"));
+            evaluate("document.querySelector('[data-memory-accept]').click()");
+            check("native confirmed preference preserves provenance",truth("calendarLedgerPreview.getState().aiMemory.some(m=>m.key==='默认账户'&&m.value==='支付宝'&&m.evidence==='我习惯用支付宝支付')&&calendarLedgerPreview.getState().aiMemorySuggestions.length===0"));
+            restartApp();check("native cold restart retains model effort and confirmed preference",truth("calendarLedgerPreview.getConfig().effort==='max'&&calendarLedgerPreview.getState().aiMemory.some(m=>m.key==='默认账户')"));
             screenshot("app-ai-context",null);
             report.put("apiKeyUsed",false).put("actualProvider",false).put("mode","installed delivery APK, native bridge, local operation parser");
-        } finally { evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(before)+")");restartApp(); }
+        } finally { JSONObject priorConfig=new JSONObject(before).getJSONObject("aiConfig");getTargetContext().getSharedPreferences("api-config",0).edit().putString("model",priorConfig.optString("model","deepseek-flash")).apply();evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(before)+")");restartApp(); }
     }
     private void acceptance(JSONObject report)throws Exception {
         check("same-signature upgrade retains every saved record",business().equals(preferences().getString("businessBefore","")));
@@ -732,7 +751,7 @@ public class WidgetRuntimeTest extends Instrumentation {
         Bitmap screen=getUiAutomation().takeScreenshot();if(screen==null)throw new AssertionError("No Android screenshot");
         Bitmap image=screen;
         if(crop!=null){Rect rect=new Rect();onUi(()->crop.getGlobalVisibleRect(rect));image=Bitmap.createBitmap(screen,rect.left,rect.top,rect.width(),rect.height());}
-        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.4.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
+        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.5.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
         finally{if(image!=screen)image.recycle();screen.recycle();}
     }
     private void check(String name,boolean passed)throws Exception{findings.put(new JSONObject().put("check",name).put("passed",passed));if(!passed)throw new AssertionError(name);}

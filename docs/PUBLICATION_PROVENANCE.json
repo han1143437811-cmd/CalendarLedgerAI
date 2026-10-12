@@ -66,6 +66,21 @@
       ],
       "realUserApiKeyUsed": false,
       "actualSamsungPhone": false
+    },
+    {
+      "date": "2026-10-13",
+      "version": "0.3.5",
+      "package": "org.calendarledger.preview",
+      "apkSha256": "984a415e8d4e987a22303449a4994e7dffbb44346e6696ad46650645bc0d4748",
+      "upstreamSourceImported": false,
+      "changes": [
+        "Reviewable preference proposals and local retrieval",
+        "API summary and context compression",
+        "DeepSeek model selection and official thinking controls",
+        "Complete thinking tool-call history"
+      ],
+      "realUserApiKeyUsed": false,
+      "actualSamsungPhone": false
     }
   ],
   "scope": "Initial v0.2.3 public release; newer runtime changes are recorded in subsequentReleases."

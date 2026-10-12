@@ -1,5 +1,5 @@
 import {allocationDays, dailyShare, projectDailyCosts, validateAllocations} from './expense-allocation.mjs';
-import {normalizeMemories, searchChatHistory} from './ai-context.mjs';
+import {normalizeMemories, normalizeSuggestions, searchMemories, searchChatHistory} from './ai-context.mjs';
 export const STORAGE_KEY = 'calendar-ledger-ai-v01';
 export const CATEGORY_COLORS = { '餐饮': '#b59079', '交通': '#879eae', '购物': '#aa9bae', '居住': '#b7a17e', '娱乐': '#ba9398', '学习': '#8aa397', '医疗': '#8fa7ac', '其他': '#9ca5a0', '工资': '#7f9b86', '报销': '#98ad9f', '退款': '#8fa791', '转账': '#9ca5a0' };
 export const uid = prefix => `${prefix}_${globalThis.crypto?.randomUUID?.() ?? `${Date.now()}_${Math.random().toString(36).slice(2)}`}`;
@@ -27,7 +27,7 @@ const enumValue = (v,values,label) => { if (!values.includes(v)) throw new Error
 const minutes = time => { if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time ?? '')) throw new Error('时间格式应为 HH:MM。'); const [h,m] = time.split(':').map(Number); return h*60+m; };
 const timeText = value => `${String(Math.floor(value/60)).padStart(2,'0')}:${String(value%60).padStart(2,'0')}`;
 const clone = value => JSON.parse(JSON.stringify(value));
-const businessKeys = ['transactions','events','tasks','budgets','settings','calendars','ledgers','dataMode','expenseAllocations','aiMemory'];
+const businessKeys = ['transactions','events','tasks','budgets','settings','calendars','ledgers','dataMode','expenseAllocations','aiMemory','aiMemorySuggestions','aiMemoryPolicy'];
 function snapshot(state) { return Object.fromEntries(businessKeys.map(k=>[k,clone(state[k])])); }
 function commit(state,label,action) {
   const before = snapshot(state); const operationId=uid('op');
@@ -38,7 +38,7 @@ function commit(state,label,action) {
 export function createInitialState(now=todayISO(),demo=true) {
   validDate(now); const month=monthKey(now), previous=changeMonth(month,-1); const day=Number(now.slice(-2));
   const state={version:1,dataMode:demo?'demo':'personal',transactions:[],events:[],tasks:[],budgets:{'全部':5000*100,'餐饮':800*100},settings:{theme:'light',weekStart:1,fontSize:'normal',defaultReminder:30,hour24:true},calendars:[{id:'personal',name:'个人日历',color:'#6882d8'},{id:'work',name:'工作日历',color:'#6ba695'}],ledgers:['个人账本','旅行账本'],undo:[],page:'calendar',viewMonth:month,selectedDate:now,calendarView:'month',contentFilter:'all',ledgerFilter:'all',categoryFilter:'all',search:'',chat:[],lastCreated:[]};
-  state.expenseAllocations=[];state.aiMemory=[];
+  state.expenseAllocations=[];state.aiMemory=[];state.aiMemorySuggestions=[];state.aiMemoryPolicy={suggestions:true};state.aiChatArchive=[];
   if(!demo)return state;
   const tx=(date,kind,amount,category,note,account='微信',ledger='个人账本')=>state.transactions.push({id:uid('tx'),date,kind,amount:toCents(amount),category,note,account,ledger});
   tx(`${month}-01`,'income',9800,'工资','本月工资','银行卡');
@@ -159,8 +159,23 @@ export function dispatch(state,name,args={},context={}) {
       case 'remove_expense_allocation':return commit(state,'取消费用分摊',()=>{if(!Array.isArray(args.transactionIds)||!args.transactionIds.length)throw new Error('请提供源账目 ID。');for(const id of args.transactionIds)requireRecord(state.transactions,id);const before=state.expenseAllocations.length;state.expenseAllocations=state.expenseAllocations.filter(row=>!args.transactionIds.includes(row.transactionId));return {type:'allocation_removed',removed:before-state.expenseAllocations.length};});
       case 'query_daily_costs':return {ok:true,type:'daily_costs',...dailyCosts(state,args)};
       case 'get_ai_memory':return {ok:true,type:'memory',items:clone(state.aiMemory)};
+      case 'search_ai_memory':return {ok:true,type:'memory',items:searchMemories(state,args.query,args.limit??8)};
+      case 'propose_preference':return commit(state,'提交记忆建议',()=>{
+        if(state.aiMemoryPolicy.suggestions===false)throw new Error('你已关闭偏好建议。');
+        const item=normalizeSuggestions([{id:uid('mem'),key:args.key,value:args.value,evidence:args.evidence}])[0];
+        if(typeof context.userPrompt!=='string'||!context.userPrompt.includes(item.evidence))throw new Error('来源必须逐字引用本轮用户原话。');
+        const duplicate=state.aiMemorySuggestions.find(row=>row.key===item.key&&row.value===item.value);
+        if(duplicate)return {type:'memory_suggestion',items:[duplicate],pending:true};
+        if(state.aiMemory.some(row=>row.key===item.key&&row.value===item.value))return {type:'memory',items:[{key:item.key,value:item.value}],alreadySaved:true};
+        state.aiMemorySuggestions=normalizeSuggestions([...state.aiMemorySuggestions.filter(row=>row.key!==item.key),item].slice(-20));
+        return {type:'memory_suggestion',items:[item],pending:true};
+      });
+      // These actions are UI-only; the model cannot accept its own suggestion.
+      case 'accept_memory_suggestion':return commit(state,'采纳记忆建议',()=>{const item=state.aiMemorySuggestions.find(row=>row.id===args.id);if(!item)throw new Error('建议已不存在。');state.aiMemory=normalizeMemories([...state.aiMemory.filter(row=>row.key!==item.key),{key:item.key,value:item.value,evidence:item.evidence}]);state.aiMemorySuggestions=state.aiMemorySuggestions.filter(row=>row.id!==item.id);return {type:'memory',items:[{key:item.key,value:item.value}]};});
+      case 'dismiss_memory_suggestion':return commit(state,'忽略记忆建议',()=>{state.aiMemorySuggestions=state.aiMemorySuggestions.filter(row=>row.id!==args.id);return {type:'memory_suggestion_removed'};});
+      case 'update_memory_policy':return commit(state,'修改偏好建议设置',()=>{if(typeof args.suggestions!=='boolean')throw new Error('偏好建议开关无效。');state.aiMemoryPolicy={suggestions:args.suggestions};return {type:'memory_policy'};});
       case 'remember_preference':return commit(state,'保存 AI 记忆',()=>{const item=normalizeMemories([{key:args.key,value:args.value}])[0];const rows=state.aiMemory.filter(row=>row.key!==item.key);state.aiMemory=normalizeMemories([...rows,item]);return {type:'memory',items:[item]};});
-      case 'forget_preference':return commit(state,'删除 AI 记忆',()=>{if(args.all===true){if(args.key)throw new Error('清空全部与单条名称请只选一种。');const removed=state.aiMemory.length;state.aiMemory=[];return {type:'memory_removed',removed};}const key=text(args.key,'记忆名称',60),before=state.aiMemory.length;state.aiMemory=state.aiMemory.filter(row=>row.key!==key);return {type:'memory_removed',removed:before-state.aiMemory.length};});
+      case 'forget_preference':return commit(state,'删除 AI 记忆',()=>{if(args.all===true){if(args.key)throw new Error('清空全部与单条名称请只选一种。');const removed=state.aiMemory.length;state.aiMemory=[];state.aiMemorySuggestions=[];return {type:'memory_removed',removed};}const key=text(args.key,'记忆名称',60),before=state.aiMemory.length;state.aiMemory=state.aiMemory.filter(row=>row.key!==key);state.aiMemorySuggestions=state.aiMemorySuggestions.filter(row=>row.key!==key);return {type:'memory_removed',removed:before-state.aiMemory.length};});
       case 'search_chat_history':return {ok:true,type:'chat_history',items:searchChatHistory(state,args.query,args.limit??8)};
       case 'get_app_context':return{ok:true,today:now,timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,selectedDate:state.selectedDate,viewMonth:state.viewMonth,dataMode:state.dataMode,calendars:clone(state.calendars),ledgers:state.ledgers,lastCreated:clone(state.lastCreated.slice(-20)),settings:clone(state.settings),currency:'CNY',holidays:state.holidayMeta??{},aiMemory:clone(state.aiMemory),expenseAllocations:clone(state.expenseAllocations.slice(-20)),expenseAllocationCount:state.expenseAllocations.length,latestOperation:state.undo.at(-1)?{id:state.undo.at(-1).id,label:state.undo.at(-1).label}:null,reminders:context.isAndroid?(context.reminderStatus??'手机提醒需在设置中授权；示例账本不触发通知。'):'浏览器版只保存提醒参数，不发送系统通知。'};
       case 'get_holidays':{const range=monthBounds(args.month??state.viewMonth);return{ok:true,type:'holidays',items:Object.values(state.holidayDays??{}).filter(d=>d.date>=(args.start??range.start)&&d.date<=(args.end??range.end)),metadata:state.holidayMeta??{}};}
@@ -186,7 +201,7 @@ export function dispatch(state,name,args={},context={}) {
       case 'update_settings':return commit(state,'修改设置',()=>{const settings=pick(args,['theme','weekStart','fontSize','defaultReminder','hour24']);if(settings.theme!==undefined)enumValue(settings.theme,['light','dark'],'主题');if(settings.weekStart!==undefined)enumValue(settings.weekStart,[0,1],'周起始日');if(settings.fontSize!==undefined)enumValue(settings.fontSize,['normal','large'],'字体');if(settings.defaultReminder!==undefined&&(!Number.isInteger(settings.defaultReminder)||settings.defaultReminder<0||settings.defaultReminder>10080))throw new Error('默认提醒时间无效。');if(settings.hour24!==undefined&&typeof settings.hour24!=='boolean')throw new Error('24小时制选项无效。');Object.assign(state.settings,settings);return{type:'settings',settings:clone(state.settings)};});
       case 'manage_calendar':return commit(state,'管理日历',()=>{const action=enumValue(args.action,['create','update'],'日历操作');if(action==='create'){const item={id:uid('cal'),name:text(args.name,'日历名称',40),color:/^#[\da-f]{6}$/i.test(args.color??'')?args.color:'#6882d8'};state.calendars.push(item);return{type:'calendar',items:[item]};}const item=requireRecord(state.calendars,args.id);if(args.name)item.name=text(args.name,'日历名称',40);if(args.color){if(!/^#[\da-f]{6}$/i.test(args.color))throw new Error('颜色格式应为 #RRGGBB。');item.color=args.color;}return{type:'calendar',items:[clone(item)]};});
       case 'create_ledger':return commit(state,'新增账本',()=>{const name=text(args.name,'账本名称',40);if(state.ledgers.includes(name))throw new Error('该账本已经存在。');state.ledgers.push(name);return{type:'ledger',name};});
-      case 'undo_operation':{const last=state.undo.at(-1);if(!last)throw new Error('当前没有可撤销的操作。');if(args.operationId&&last.id!==args.operationId)throw new Error('请先撤销更新的操作，避免覆盖后续修改。');for(const key of businessKeys)state[key]=clone(last.before[key]??(['expenseAllocations','aiMemory'].includes(key)?[]:state[key]));state.undo.pop();state.lastCreated=state.lastCreated.filter(x=>[...state.transactions,...state.events,...state.tasks].some(r=>r.id===x.id));return{ok:true,type:'undo',label:last.label};}
+      case 'undo_operation':{const last=state.undo.at(-1);if(!last)throw new Error('当前没有可撤销的操作。');if(args.operationId&&last.id!==args.operationId)throw new Error('请先撤销更新的操作，避免覆盖后续修改。');for(const key of businessKeys)state[key]=clone(last.before[key]??(['expenseAllocations','aiMemory','aiMemorySuggestions'].includes(key)?[]:key==='aiMemoryPolicy'?{suggestions:true}:state[key]));state.undo.pop();state.lastCreated=state.lastCreated.filter(x=>[...state.transactions,...state.events,...state.tasks].some(r=>r.id===x.id));return{ok:true,type:'undo',label:last.label};}
       case 'export_backup':return{ok:true,type:'download',format:'json',filename:`日历账本备份-${now}.json`,data:JSON.stringify({version:1,...snapshot(state)},null,2)};
       case 'export_csv':{const items=searchTransactions(state,args);const escape=v=>`"${String(v).replace(/"/g,'""')}"`;const safeCell=v=>/^[=+\-@\t\r]/.test(String(v))?`'${v}`:v;const rows=[['日期','类型','金额','分类','账户','账本','备注'],...items.map(t=>[t.date,{expense:'支出',income:'收入',refund:'退款',transfer:'转账'}[t.kind],(t.amount/100).toFixed(2),t.category,t.account,t.ledger,t.note])];return{ok:true,type:'download',format:'csv',filename:`账目-${now}.csv`,data:'\ufeff'+rows.map(r=>r.map(v=>escape(safeCell(v))).join(',')).join('\r\n'),count:items.length};}
       case 'open_settings':return{ok:true,type:'open_settings'};
@@ -206,6 +221,8 @@ export function restoreBackup(state,input) {
   restored.tasks=input.tasks.map(t=>({id:validID(t.id),title:text(t.title,'待办标题'),date:validDate(t.date),completed:t.completed===true}));
   restored.expenseAllocations=validateAllocations(input.expenseAllocations,restored.transactions);
   restored.aiMemory=normalizeMemories(input.aiMemory);
+  restored.aiMemorySuggestions=normalizeSuggestions(input.aiMemorySuggestions);
+  restored.aiMemoryPolicy={suggestions:input.aiMemoryPolicy?.suggestions!==false};
   const allIds=[...restored.transactions,...restored.events,...restored.tasks,...restored.calendars].map(x=>x.id);if(new Set(allIds).size!==allIds.length)throw new Error('备份含重复记录 ID。');
   const cfg=dispatch(restored,'update_settings',input.settings??{});if(!cfg.ok)throw new Error(cfg.error);
   if(input.budgets){restored.budgets=Object.create(null);for(const [key,value] of Object.entries(input.budgets)){const category=text(key,'预算分类',30);if(!Number.isSafeInteger(value)||value<=0)throw new Error('备份预算金额无效。');restored.budgets[category]=value;}}
@@ -225,6 +242,8 @@ export const TOOLS=[
   tool('remove_expense_allocation','取消指定源支出的日历分摊，保留真实付款。',{transactionIds:{type:'array',items:str('源支出 ID')}},['transactionIds']),
   tool('query_daily_costs','查询日历按天费用（包含分摊），与实际付款 query_cashflow 分开。',filterProps),
   tool('get_ai_memory','读取本机持久偏好记忆。'),
+  tool('search_ai_memory','按关键词检索已确认的长期偏好，不包括待核对建议。',{query:str('关键词1—100字'),limit:{type:'integer',description:'返回数量1—20，默认8'}},['query']),
+  tool('propose_preference','用户自然表达稳定偏好时提交待核对建议；尚未记住。evidence 必须逐字引用本轮用户原话，不能从助手或截图推断。已有同类偏好沿用其名称。',{key:str('偏好名称1—60字'),value:str('偏好内容1—300字'),evidence:str('本轮用户原话4—300字')},['key','value','evidence']),
   tool('remember_preference','仅在用户明确要求记住或以后默认时保存偏好；同名称更新。不能保存 API Key。',{key:str('偏好名称，1—60 字'),value:str('用户明确要求的偏好内容，1—300 字')},['key','value']),
   tool('forget_preference','按名称忘记一条偏好；用户明确要求忘记全部时 all=true。',{key:str('要删除的记忆名称'),all:bool('明确忘记全部偏好')}),
   tool('search_chat_history','搜索本机保存的较早聊天文字及当时操作结果；当前真实状态需另行查询。',{query:str('关键词1—100字'),limit:{type:'integer',description:'返回数量1—20，默认8'}},['query']),
