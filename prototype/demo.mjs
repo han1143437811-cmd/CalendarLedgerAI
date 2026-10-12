@@ -24,9 +24,27 @@ function resolveTarget(state,list,keyword,type) {
 }
 export function runDemo(state,message,now=todayISO()) {
   const results=[],notes=[],createdRefs=[];let lastTransaction=null;const run=(name,args)=>{const result=dispatch(state,name,args,{today:now});results.push({name,result});if(result.ok&&result.type==='transaction')lastTransaction=result.items[0];if(result.ok&&['create_transactions','create_event','create_task','schedule_in_free_slots'].includes(name))createdRefs.push(...result.items.map(x=>({id:x.id,type:result.type,note:x.note,title:x.title})));return result;};
+  if (/^记住[，,:：\s]/.test(message)) {
+    const value=message.replace(/^记住[，,:：\s]+/,'').trim(),key=/订阅|会员|分摊/.test(value)?'订阅分摊规则':/账户/.test(value)?'默认记账账户':value.slice(0,20);
+    run('remember_preference',{key,value});return{results,notes};
+  }
   const clauses=message.replace(/[，；;。]/g,',').split(',').map(x=>x.trim()).filter(Boolean),segments=[];
   for(const clause of clauses){if(segments.length&&(/^(提前.*提醒|排除|与上月|和上月|比上月|对比上月)/.test(clause)))segments[segments.length-1]+=' '+clause;else segments.push(clause);}
   for(const segment of segments){
+    if(/记忆|记住了什么|我的偏好/.test(segment)){run('get_ai_memory',{});continue;}
+    if(/忘记.*全部/.test(segment)){run('forget_preference',{all:true});continue;}
+    if(/均摊|分摊|平摊/.test(segment)){
+      const recent=state.lastCreated.filter(row=>row.type==='transaction').map(row=>state.transactions.find(item=>item.id===row.id)).filter(Boolean);
+      let candidates=/刚才|那笔|这笔/.test(segment)?recent:searchTransactions(state,{kind:'expense',...monthBounds(monthKey(now))}).filter(row=>/订阅|会员|月费|年费/.test(row.note));
+      candidates=candidates.filter(row=>row.kind==='expense');
+      const named=candidates.filter(row=>segment.includes(row.note));if(named.length)candidates=named;
+      if(candidates.length!==1&&!/全部|所有/.test(segment)){notes.push(candidates.length?'找到多笔订阅，请说明具体名称或要求全部分摊。':'未找到本月订阅付款，请先记一笔或明确选择原账目。');continue;}
+      if(!candidates.length){notes.push('没有找到可以分摊的真实付款。');continue;}
+      const dates=segment.match(/\d{4}-\d{2}-\d{2}/g),args={transactionIds:candidates.map(row=>row.id)};
+      if(dates?.length===2){args.start=dates[0];args.end=dates[1];}
+      run(/取消|不再/.test(segment)?'remove_expense_allocation':'allocate_expense',args);continue;
+    }
+
     if(/^备注/.test(segment)){if(lastTransaction)run('update_transaction',{id:lastTransaction.id,note:segment.replace(/^备注(?:为|成)?/,'').trim()});else notes.push('请先明确要修改备注的账目。');continue;}
     if(/撤销/.test(segment)){const keyword=segment.replace(/撤销|刚才|那笔|这笔|的|账目/g,'').trim();if(keyword&&keyword!=='操作'){const target=resolveTarget(state,state.transactions,keyword,'transaction');if(target.ok)run('delete_transactions',{ids:[target.item.id]});else results.push({name:'resolve',result:target});}else run('undo_operation',{});continue;}
     if(/(会议|日程).*(推迟|提前)/.test(segment)){const target=resolveTarget(state,state.events,segment.match(/(会议|日程)/)[0]==='会议'?'讨论':'','event');if(!target.ok){results.push({name:'resolve',result:target});continue;}const amount=cnNumber(segment.match(/([\d一二三两]+)小时/)?.[1]??'1')*60;const [h,m]=target.item.time.split(':').map(Number);const total=h*60+m+(segment.includes('推迟')?amount:-amount);run('update_event',{id:target.item.id,time:`${String(Math.floor(total/60)).padStart(2,'0')}:${String(total%60).padStart(2,'0')}`,scope:target.item.repeat==='none'?'series':undefined});continue;}
@@ -44,7 +62,7 @@ export function runDemo(state,message,now=todayISO()) {
     if(/新建.*账本|建一个.*账本/.test(segment)){run('create_ledger',{name:segment.match(/(?:新建|建一个)(.*?)账本/)?.[1]+'账本'});continue;}
     if(/打开|切换|只看|显示/.test(segment)){let page=segment.includes('分析')?'reports':segment.includes('明细')||segment.includes('账本')?'ledger':segment.includes('待办')?'tasks':'calendar';const args={page};if(/明天|昨天|今天/.test(segment))args.date=resolveDate(segment,now);if(segment.includes('周视图'))args.view='week';if(segment.includes('日视图'))args.view='day';if(segment.includes('月视图'))args.view='month';if(segment.includes('只看日程'))args.filter='events';if(segment.includes('只看账'))args.filter='transactions';if(segment.includes('餐饮'))args.category='餐饮';run('navigate_calendar',args);continue;}
     if(/分析|花在哪|花了多少|收支|对比|比较|统计|支出/.test(segment)&&!/(午饭|地铁|早餐|咖啡)\s*\d/.test(segment)){const args={...monthBounds(monthKey(now)),end:now};if(segment.includes('上月')&&!/比|对比/.test(segment)){const d=parseDate(now);d.setMonth(d.getMonth()-1,1);Object.assign(args,monthBounds(monthKey(isoDate(d))));}if(segment.includes('餐饮'))args.category='餐饮';if(segment.includes('交通'))args.category='交通';if(/排除.*报销/.test(segment))args.excludeCategories=['报销'];if(/排除.*旅行/.test(segment))args.excludeLedgers=['旅行账本'];if(/上月同期|对比|比上月/.test(segment))run('compare_cashflow',args);else run('query_cashflow',args);continue;}
-    const match=segment.match(/(午饭|午餐|晚饭|晚餐|早餐|咖啡|奶茶|地铁|公交|打车|购物|房租|工资|报销|退款|电影|电子书|生活用品|转账)\s*(\d+(?:\.\d{1,2})?)/);
+    const match=segment.match(/(午饭|午餐|晚饭|晚餐|早餐|咖啡|奶茶|地铁|公交|打车|购物|房租|工资|报销|退款|电影|电子书|生活用品|转账|月订阅|订阅|会员|月费)\s*(\d+(?:\.\d{1,2})?)/);
     if(match){const note=match[1],category=/饭|餐|咖啡|奶茶/.test(note)?'餐饮':/地铁|公交|打车/.test(note)?'交通':/工资|报销|退款|转账/.test(note)?note:note==='房租'?'居住':note==='电影'?'娱乐':note==='电子书'?'学习':'购物';run('create_transactions',{items:[{date:resolveDate(segment,now),note,category,amount:Number(match[2]),kind:/工资|报销/.test(note)?'income':note==='退款'?'refund':note==='转账'?'transfer':'expense',account:segment.includes('现金')?'现金':segment.includes('银行卡')?'银行卡':'微信'}]});continue;}
     notes.push(`演示指令暂未识别“${segment}”。可以试试下方示例，或在设置中接入 DeepSeek 使用自由表达。`);
   }
@@ -52,10 +70,15 @@ export function runDemo(state,message,now=todayISO()) {
 }
 export function describeResult(result) {
   if(!result.ok)return result.error;
+  if(result.type==='allocation')return result.items.map(row=>`已将“${row.note}” ¥${money(row.total)} 按 ${row.start}—${row.end} 共 ${row.days} 天分摊到日历，实际付款保留；每日约 ¥${money(row.firstDayAmount)}，总额不变。`).join('\n');
+  if(result.type==='allocation_removed')return`已取消 ${result.removed} 项分摊，实际付款保留。`;
+  if(result.type==='memory')return result.items.length?result.items.map(row=>`记忆：${row.key} · ${row.value}`).join('\n'):'尚无长期偏好。';
+  if(result.type==='memory_removed')return`已忘记 ${result.removed} 条偏好。`;
+  if(result.type==='chat_history')return result.items.length?`找到 ${result.items.length} 条相关历史对话。`:'未找到对应历史对话。';
   if(result.type==='transaction')return result.items.length>1?`已处理 ${result.items.length} 笔账目。`:`已保存“${result.items[0].note}”，¥${money(result.items[0].amount)}。`;
   if(result.type==='event')return`已保存 ${result.items.length} 个日程。提醒设置已记录；手机端可在设置中启用通知，示例数据不触发通知。`;
   if(result.type==='task')return'待办已经更新。';if(result.type==='deleted')return'已移除选定记录，可撤销。';if(result.type==='undo')return`已撤销：${result.label}。`;
-  if(result.type==='analysis') {const top=result.byCategory.filter(x=>x.amount>0)[0];return`${result.start} 至 ${result.end}，已记录收入 ¥${money(result.income)}，支出 ¥${money(result.expense)}。${top?`支出最高的是${top.name}，¥${money(top.amount)}。`:''}`;}
+  if(result.type==='analysis'||result.type==='daily_costs') {const top=result.byCategory.filter(x=>x.amount>0)[0];return`${result.start} 至 ${result.end}，已记录收入 ¥${money(result.income)}，支出 ¥${money(result.expense)}。${top?`支出最高的是${top.name}，¥${money(top.amount)}。`:''}`;}
   if(result.type==='comparison'){const change=result.changes.find(x=>x.delta>0);return`本期支出 ¥${money(result.current.expense)}，上月同期 ¥${money(result.previous.expense)}，${result.delta>=0?'增加':'减少'} ¥${money(Math.abs(result.delta))}。${change?`${change.name}增加 ¥${money(change.delta)}，可打开明细核查。`:'当前账目未显示支出增加。'}`;}
   if(result.type==='holidays')return result.items.length?result.items.map(d=>`${d.date} ${d.name}：${d.isOffDay?'放假':'调休上班'}`).join('\n'):'该范围没有已公布的节假日条目，请查看年份和更新状态。';if(result.type==='holidays_updated')return result.announced?`已获取 ${result.year} 年 ${result.count} 个放假/补班日期。${result.warning?'联网更新失败，目前使用缓存。':''}`:`${result.year} 年安排尚未公布。`;
   if(result.type==='budget')return`已将${result.category==='全部'?'总':result.category}预算设为 ¥${money(result.amount)}。`;if(result.type==='settings')return'设置已更新，页面已同步变化。';if(result.type==='navigation')return'已打开对应页面。';if(result.type==='download')return'文件已生成，浏览器将开始下载。';if(result.type==='ledger')return`已创建“${result.name}”。`;if(result.type==='calendar')return'日历已更新。';if(result.type==='open_settings')return'已打开设置，可填写你的 API 配置。';return'操作完成。';

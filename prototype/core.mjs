@@ -1,3 +1,5 @@
+import {allocationDays, dailyShare, projectDailyCosts, validateAllocations} from './expense-allocation.mjs';
+import {normalizeMemories, searchChatHistory} from './ai-context.mjs';
 export const STORAGE_KEY = 'calendar-ledger-ai-v01';
 export const CATEGORY_COLORS = { '餐饮': '#b59079', '交通': '#879eae', '购物': '#aa9bae', '居住': '#b7a17e', '娱乐': '#ba9398', '学习': '#8aa397', '医疗': '#8fa7ac', '其他': '#9ca5a0', '工资': '#7f9b86', '报销': '#98ad9f', '退款': '#8fa791', '转账': '#9ca5a0' };
 export const uid = prefix => `${prefix}_${globalThis.crypto?.randomUUID?.() ?? `${Date.now()}_${Math.random().toString(36).slice(2)}`}`;
@@ -25,7 +27,7 @@ const enumValue = (v,values,label) => { if (!values.includes(v)) throw new Error
 const minutes = time => { if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time ?? '')) throw new Error('时间格式应为 HH:MM。'); const [h,m] = time.split(':').map(Number); return h*60+m; };
 const timeText = value => `${String(Math.floor(value/60)).padStart(2,'0')}:${String(value%60).padStart(2,'0')}`;
 const clone = value => JSON.parse(JSON.stringify(value));
-const businessKeys = ['transactions','events','tasks','budgets','settings','calendars','ledgers','dataMode'];
+const businessKeys = ['transactions','events','tasks','budgets','settings','calendars','ledgers','dataMode','expenseAllocations','aiMemory'];
 function snapshot(state) { return Object.fromEntries(businessKeys.map(k=>[k,clone(state[k])])); }
 function commit(state,label,action) {
   const before = snapshot(state); const operationId=uid('op');
@@ -36,6 +38,7 @@ function commit(state,label,action) {
 export function createInitialState(now=todayISO(),demo=true) {
   validDate(now); const month=monthKey(now), previous=changeMonth(month,-1); const day=Number(now.slice(-2));
   const state={version:1,dataMode:demo?'demo':'personal',transactions:[],events:[],tasks:[],budgets:{'全部':5000*100,'餐饮':800*100},settings:{theme:'light',weekStart:1,fontSize:'normal',defaultReminder:30,hour24:true},calendars:[{id:'personal',name:'个人日历',color:'#6882d8'},{id:'work',name:'工作日历',color:'#6ba695'}],ledgers:['个人账本','旅行账本'],undo:[],page:'calendar',viewMonth:month,selectedDate:now,calendarView:'month',contentFilter:'all',ledgerFilter:'all',categoryFilter:'all',search:'',chat:[],lastCreated:[]};
+  state.expenseAllocations=[];state.aiMemory=[];
   if(!demo)return state;
   const tx=(date,kind,amount,category,note,account='微信',ledger='个人账本')=>state.transactions.push({id:uid('tx'),date,kind,amount:toCents(amount),category,note,account,ledger});
   tx(`${month}-01`,'income',9800,'工资','本月工资','银行卡');
@@ -95,6 +98,33 @@ export function compareCashflow(state,args={}) {
   const changes=[...categoryNames].map(name=>({name,current:current.byCategory.find(x=>x.name===name)?.amount??0,previous:previous.byCategory.find(x=>x.name===name)?.amount??0})).map(x=>({...x,delta:x.current-x.previous})).sort((a,b)=>b.delta-a.delta);
   return {current,previous,delta:current.expense-previous.expense,changes};
 }
+export function dailyCosts(state,args={}) {
+  const bounds=monthBounds(args.month??state.viewMonth),start=args.start??bounds.start,end=args.end??bounds.end;
+  const records=projectDailyCosts(state,start,end);
+  const result=cashflow({...state,transactions:records},{...args,start,end});
+  return {...result,allocationCount:records.filter(row=>row.allocationId).length,
+    definition:'日历按天费用；已分摊支出按服务期间分配，未分摊账目按原日期。实际付款记录保留，实际收支统计请用 query_cashflow。'};
+}
+function allocateExpenses(state,args) {
+  if(!Array.isArray(args.transactionIds)||args.transactionIds.length<1||args.transactionIds.length>50||new Set(args.transactionIds).size!==args.transactionIds.length)throw new Error('请选择 1—50 笔不重复的真实支出 ID。');
+  if(args.month&&(args.start||args.end))throw new Error('自然月与起止日期请只选一种分摊范围。');
+  if(!!args.start!==!!args.end)throw new Error('请同时提供分摊开始和结束日期。');
+  if(args.month&&(!/^\d{4}-\d{2}$/.test(args.month)||!validDate(args.month+'-01')))throw new Error('分摊月份应为有效 YYYY-MM。');
+  const plans=args.transactionIds.map(id=>{
+    const source=requireRecord(state.transactions,id);if(source.kind!=='expense')throw new Error('只有实际支出可以分摊，收入、退款和转账不支持。');
+    const range=args.start?{start:validDate(args.start),end:validDate(args.end)}:monthBounds(args.month??monthKey(source.date));
+    const days=allocationDays(range.start,range.end),existing=state.expenseAllocations.find(row=>row.transactionId===id);
+    return {id:existing?.id??uid('allocation'),transactionId:id,...range,days,total:source.amount,note:source.note,
+      firstDayAmount:dailyShare(source.amount,range.start,range.end,range.start),lastDayAmount:dailyShare(source.amount,range.start,range.end,range.end)};
+  });
+  const unchanged=plans.every(plan=>state.expenseAllocations.some(old=>old.transactionId===plan.transactionId&&old.start===plan.start&&old.end===plan.end));
+  const result={type:'allocation',items:plans,unchanged,definition:'保留实际付款，日历按天显示；余下的分从前几天各加 1 分，总额严格相等。'};
+  if(unchanged)return {ok:true,...result};
+  return commit(state,'按天分摊费用',()=>{
+    const targets=new Set(args.transactionIds);state.expenseAllocations=state.expenseAllocations.filter(row=>!targets.has(row.transactionId));
+    state.expenseAllocations.push(...plans.map(({id,transactionId,start,end})=>({id,transactionId,start,end})));return result;
+  });
+}
 export function findFreeSlots(state,args={}) {
   const start=validDate(args.start??addDays(todayISO(),1)),end=validDate(args.end??addDays(start,13));
   const duration=Number(args.duration??120),count=Number(args.count??3),buffer=Number(args.buffer??30);const from=minutes(args.from??'13:00'),to=minutes(args.to??'18:00');
@@ -125,12 +155,19 @@ export function dispatch(state,name,args={},context={}) {
   const now=context.today??todayISO();
   try {
     switch(name){
-      case 'get_app_context':return{ok:true,today:now,timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,selectedDate:state.selectedDate,viewMonth:state.viewMonth,dataMode:state.dataMode,calendars:clone(state.calendars),ledgers:state.ledgers,lastCreated:clone(state.lastCreated),settings:clone(state.settings),currency:'CNY',holidays:state.holidayMeta??{},reminders:context.isAndroid?(context.reminderStatus??'手机提醒需在设置中授权；示例账本不触发通知。'):'浏览器版只保存提醒参数，不发送系统通知。'};
+      case 'allocate_expense':return allocateExpenses(state,args);
+      case 'remove_expense_allocation':return commit(state,'取消费用分摊',()=>{if(!Array.isArray(args.transactionIds)||!args.transactionIds.length)throw new Error('请提供源账目 ID。');for(const id of args.transactionIds)requireRecord(state.transactions,id);const before=state.expenseAllocations.length;state.expenseAllocations=state.expenseAllocations.filter(row=>!args.transactionIds.includes(row.transactionId));return {type:'allocation_removed',removed:before-state.expenseAllocations.length};});
+      case 'query_daily_costs':return {ok:true,type:'daily_costs',...dailyCosts(state,args)};
+      case 'get_ai_memory':return {ok:true,type:'memory',items:clone(state.aiMemory)};
+      case 'remember_preference':return commit(state,'保存 AI 记忆',()=>{const item=normalizeMemories([{key:args.key,value:args.value}])[0];const rows=state.aiMemory.filter(row=>row.key!==item.key);state.aiMemory=normalizeMemories([...rows,item]);return {type:'memory',items:[item]};});
+      case 'forget_preference':return commit(state,'删除 AI 记忆',()=>{if(args.all===true){if(args.key)throw new Error('清空全部与单条名称请只选一种。');const removed=state.aiMemory.length;state.aiMemory=[];return {type:'memory_removed',removed};}const key=text(args.key,'记忆名称',60),before=state.aiMemory.length;state.aiMemory=state.aiMemory.filter(row=>row.key!==key);return {type:'memory_removed',removed:before-state.aiMemory.length};});
+      case 'search_chat_history':return {ok:true,type:'chat_history',items:searchChatHistory(state,args.query,args.limit??8)};
+      case 'get_app_context':return{ok:true,today:now,timeZone:Intl.DateTimeFormat().resolvedOptions().timeZone,selectedDate:state.selectedDate,viewMonth:state.viewMonth,dataMode:state.dataMode,calendars:clone(state.calendars),ledgers:state.ledgers,lastCreated:clone(state.lastCreated.slice(-20)),settings:clone(state.settings),currency:'CNY',holidays:state.holidayMeta??{},aiMemory:clone(state.aiMemory),expenseAllocations:clone(state.expenseAllocations.slice(-20)),expenseAllocationCount:state.expenseAllocations.length,latestOperation:state.undo.at(-1)?{id:state.undo.at(-1).id,label:state.undo.at(-1).label}:null,reminders:context.isAndroid?(context.reminderStatus??'手机提醒需在设置中授权；示例账本不触发通知。'):'浏览器版只保存提醒参数，不发送系统通知。'};
       case 'get_holidays':{const range=monthBounds(args.month??state.viewMonth);return{ok:true,type:'holidays',items:Object.values(state.holidayDays??{}).filter(d=>d.date>=(args.start??range.start)&&d.date<=(args.end??range.end)),metadata:state.holidayMeta??{}};}
       case 'search_transactions':return{ok:true,items:clone(searchTransactions(state,args))};
       case 'create_transactions':return commit(state,'新增账目',()=>{if(!Array.isArray(args.items)||args.items.length<1||args.items.length>50)throw new Error('一次需要提供 1—50 条账目。');const items=args.items.map(t=>validateTransaction({...t,date:t.date??now,id:uid('tx')}));state.transactions.push(...items);state.lastCreated=items.map(t=>({id:t.id,note:t.note,type:'transaction'}));return{type:'transaction',items};});
-      case 'update_transaction':return commit(state,'修改账目',()=>{const old=requireRecord(state.transactions,args.id);const changes=pick(args,['date','kind','amount','category','note','account','ledger']);const item=validateTransaction({...old,amount:old.amount/100,...changes});Object.assign(old,item);return{type:'transaction',items:[item]};});
-      case 'delete_transactions':return commit(state,'删除账目',()=>{if(!Array.isArray(args.ids)||args.ids.length<1)throw new Error('需要明确选择账目 ID。');for(const id of args.ids)requireRecord(state.transactions,id);state.transactions=state.transactions.filter(t=>!args.ids.includes(t.id));return{type:'deleted',deletedIds:args.ids};});
+      case 'update_transaction':return commit(state,'修改账目',()=>{const old=requireRecord(state.transactions,args.id);const changes=pick(args,['date','kind','amount','category','note','account','ledger']);const item=validateTransaction({...old,amount:old.amount/100,...changes});if(item.kind!=='expense'&&state.expenseAllocations.some(row=>row.transactionId===old.id))throw new Error('请先取消该账目的费用分摊，再修改收支类型。');Object.assign(old,item);return{type:'transaction',items:[item]};});
+      case 'delete_transactions':return commit(state,'删除账目',()=>{if(!Array.isArray(args.ids)||args.ids.length<1)throw new Error('需要明确选择账目 ID。');for(const id of args.ids)requireRecord(state.transactions,id);state.transactions=state.transactions.filter(t=>!args.ids.includes(t.id));state.expenseAllocations=state.expenseAllocations.filter(row=>!args.ids.includes(row.transactionId));return{type:'deleted',deletedIds:args.ids};});
       case 'query_cashflow':return{ok:true,type:'analysis',...cashflow(state,args)};
       case 'compare_cashflow':return{ok:true,type:'comparison',...compareCashflow(state,{...args,today:now})};
       case 'set_budget':return commit(state,'设置预算',()=>{const category=text(args.category??'全部','预算分类',30);if(['__proto__','constructor','prototype'].includes(category))throw new Error('该预算分类名称不允许使用。');state.budgets[category]=toCents(args.amount);return{type:'budget',category,amount:state.budgets[category]};});
@@ -149,7 +186,7 @@ export function dispatch(state,name,args={},context={}) {
       case 'update_settings':return commit(state,'修改设置',()=>{const settings=pick(args,['theme','weekStart','fontSize','defaultReminder','hour24']);if(settings.theme!==undefined)enumValue(settings.theme,['light','dark'],'主题');if(settings.weekStart!==undefined)enumValue(settings.weekStart,[0,1],'周起始日');if(settings.fontSize!==undefined)enumValue(settings.fontSize,['normal','large'],'字体');if(settings.defaultReminder!==undefined&&(!Number.isInteger(settings.defaultReminder)||settings.defaultReminder<0||settings.defaultReminder>10080))throw new Error('默认提醒时间无效。');if(settings.hour24!==undefined&&typeof settings.hour24!=='boolean')throw new Error('24小时制选项无效。');Object.assign(state.settings,settings);return{type:'settings',settings:clone(state.settings)};});
       case 'manage_calendar':return commit(state,'管理日历',()=>{const action=enumValue(args.action,['create','update'],'日历操作');if(action==='create'){const item={id:uid('cal'),name:text(args.name,'日历名称',40),color:/^#[\da-f]{6}$/i.test(args.color??'')?args.color:'#6882d8'};state.calendars.push(item);return{type:'calendar',items:[item]};}const item=requireRecord(state.calendars,args.id);if(args.name)item.name=text(args.name,'日历名称',40);if(args.color){if(!/^#[\da-f]{6}$/i.test(args.color))throw new Error('颜色格式应为 #RRGGBB。');item.color=args.color;}return{type:'calendar',items:[clone(item)]};});
       case 'create_ledger':return commit(state,'新增账本',()=>{const name=text(args.name,'账本名称',40);if(state.ledgers.includes(name))throw new Error('该账本已经存在。');state.ledgers.push(name);return{type:'ledger',name};});
-      case 'undo_operation':{const last=state.undo.at(-1);if(!last)throw new Error('当前没有可撤销的操作。');if(args.operationId&&last.id!==args.operationId)throw new Error('请先撤销更新的操作，避免覆盖后续修改。');for(const key of businessKeys)state[key]=clone(last.before[key]);state.undo.pop();state.lastCreated=state.lastCreated.filter(x=>[...state.transactions,...state.events,...state.tasks].some(r=>r.id===x.id));return{ok:true,type:'undo',label:last.label};}
+      case 'undo_operation':{const last=state.undo.at(-1);if(!last)throw new Error('当前没有可撤销的操作。');if(args.operationId&&last.id!==args.operationId)throw new Error('请先撤销更新的操作，避免覆盖后续修改。');for(const key of businessKeys)state[key]=clone(last.before[key]??(['expenseAllocations','aiMemory'].includes(key)?[]:state[key]));state.undo.pop();state.lastCreated=state.lastCreated.filter(x=>[...state.transactions,...state.events,...state.tasks].some(r=>r.id===x.id));return{ok:true,type:'undo',label:last.label};}
       case 'export_backup':return{ok:true,type:'download',format:'json',filename:`日历账本备份-${now}.json`,data:JSON.stringify({version:1,...snapshot(state)},null,2)};
       case 'export_csv':{const items=searchTransactions(state,args);const escape=v=>`"${String(v).replace(/"/g,'""')}"`;const safeCell=v=>/^[=+\-@\t\r]/.test(String(v))?`'${v}`:v;const rows=[['日期','类型','金额','分类','账户','账本','备注'],...items.map(t=>[t.date,{expense:'支出',income:'收入',refund:'退款',transfer:'转账'}[t.kind],(t.amount/100).toFixed(2),t.category,t.account,t.ledger,t.note])];return{ok:true,type:'download',format:'csv',filename:`账目-${now}.csv`,data:'\ufeff'+rows.map(r=>r.map(v=>escape(safeCell(v))).join(',')).join('\r\n'),count:items.length};}
       case 'open_settings':return{ok:true,type:'open_settings'};
@@ -167,6 +204,8 @@ export function restoreBackup(state,input) {
   restored.transactions=input.transactions.map(t=>validateTransaction({...t,amount:t.amount/100,id:text(t.id,'账目ID',100)}));
   restored.events=input.events.map(e=>validateEvent({...e,id:text(e.id,'日程ID',100)},restored));
   restored.tasks=input.tasks.map(t=>({id:validID(t.id),title:text(t.title,'待办标题'),date:validDate(t.date),completed:t.completed===true}));
+  restored.expenseAllocations=validateAllocations(input.expenseAllocations,restored.transactions);
+  restored.aiMemory=normalizeMemories(input.aiMemory);
   const allIds=[...restored.transactions,...restored.events,...restored.tasks,...restored.calendars].map(x=>x.id);if(new Set(allIds).size!==allIds.length)throw new Error('备份含重复记录 ID。');
   const cfg=dispatch(restored,'update_settings',input.settings??{});if(!cfg.ok)throw new Error(cfg.error);
   if(input.budgets){restored.budgets=Object.create(null);for(const [key,value] of Object.entries(input.budgets)){const category=text(key,'预算分类',30);if(!Number.isSafeInteger(value)||value<=0)throw new Error('备份预算金额无效。');restored.budgets[category]=value;}}
@@ -182,6 +221,13 @@ const scopeProps={id:str('必须使用查询得到的记录ID'),scope:{type:'str
 const slotProps={start:str('起始日期'),end:str('结束日期'),duration:num('每次时长分钟'),count:num('次数1到20'),buffer:num('前后缓冲分钟'),from:str('每天最早HH:MM'),to:str('每天最晚HH:MM'),workdays:bool('仅工作日，默认true'),onePerDay:bool('每天最多安排一次，默认true')};
 function tool(name,description,properties={},required=[]){return{type:'function',function:{name,description,parameters:{type:'object',properties,required,additionalProperties:false}}};}
 export const TOOLS=[
+  tool('allocate_expense','把已查询的真实支出按天均摊到日历，保留付款且不重复计入实际收支。默认源付款自然月；指定 month 或完整 start/end。金额本地精确计算；同计划重复执行不新增。',{transactionIds:{type:'array',items:str('源支出 ID，不是分摊行 ID')},month:str('自然月 YYYY-MM'),start:str('服务开始 YYYY-MM-DD'),end:str('服务结束 YYYY-MM-DD')},['transactionIds']),
+  tool('remove_expense_allocation','取消指定源支出的日历分摊，保留真实付款。',{transactionIds:{type:'array',items:str('源支出 ID')}},['transactionIds']),
+  tool('query_daily_costs','查询日历按天费用（包含分摊），与实际付款 query_cashflow 分开。',filterProps),
+  tool('get_ai_memory','读取本机持久偏好记忆。'),
+  tool('remember_preference','仅在用户明确要求记住或以后默认时保存偏好；同名称更新。不能保存 API Key。',{key:str('偏好名称，1—60 字'),value:str('用户明确要求的偏好内容，1—300 字')},['key','value']),
+  tool('forget_preference','按名称忘记一条偏好；用户明确要求忘记全部时 all=true。',{key:str('要删除的记忆名称'),all:bool('明确忘记全部偏好')}),
+  tool('search_chat_history','搜索本机保存的较早聊天文字及当时操作结果；当前真实状态需另行查询。',{query:str('关键词1—100字'),limit:{type:'integer',description:'返回数量1—20，默认8'}},['query']),
   tool('get_app_context','获取当前日期、时区、界面、最后创建对象、日历与实际能力。'),
   tool('search_transactions','查找真实账目，修改前取得ID。',filterProps),
   tool('create_transactions','一次新增一到五十笔账目。',{items:{type:'array',items:{type:'object',properties:txProps,required:['amount','note'],additionalProperties:false}}},['items']),

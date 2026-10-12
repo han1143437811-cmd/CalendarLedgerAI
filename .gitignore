@@ -42,6 +42,7 @@ prototype/qa/*.json
 !prototype/qa/android-widget-v0.3.1-results.json
 !prototype/qa/android-widget-v0.3.2-results.json
 !prototype/qa/android-widget-v0.3.3-results.json
+!prototype/qa/android-widget-v0.3.4-results.json
 prototype/qa/android-widget-*.txt
 prototype/qa/weather-native-live-*.txt
 

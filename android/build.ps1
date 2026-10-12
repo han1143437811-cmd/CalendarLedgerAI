@@ -39,7 +39,7 @@ $jnaJar = Join-Path $buildDirectory 'jna-classes.jar'
 $speechAssets = Join-Path $buildDirectory 'assets\speech'
 New-Item -ItemType Directory -Path $speechAssets -Force | Out-Null
 Copy-Item -LiteralPath $speechModel -Destination $speechAssets
-$assetNames = @('index.html','styles.css','icon.svg','app.mjs','core.mjs','demo.mjs','platform.mjs','weather-view.mjs','weather-icons.mjs','holiday-data.mjs','festivals.mjs','widget-navigation.mjs','chat-view.mjs','multimodal.mjs','THIRD_PARTY_NOTICES.txt')
+$assetNames = @('index.html','styles.css','icon.svg','app.mjs','core.mjs','demo.mjs','platform.mjs','weather-view.mjs','weather-icons.mjs','expense-allocation.mjs','ai-context.mjs','ai-agent.mjs','ai-memory-view.mjs','holiday-data.mjs','festivals.mjs','widget-navigation.mjs','chat-view.mjs','multimodal.mjs','THIRD_PARTY_NOTICES.txt')
 foreach ($assetName in $assetNames) { Copy-Item -LiteralPath (Join-Path (Join-Path $projectRoot 'prototype') $assetName) -Destination (Join-Path $assetDirectory $assetName) -Force }
 Copy-Item -LiteralPath (Join-Path $projectRoot 'prototype\holidays') -Destination $assetDirectory -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $projectRoot 'prototype\vendor') -Destination $assetDirectory -Recurse -Force

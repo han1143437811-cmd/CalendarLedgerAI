@@ -32,7 +32,7 @@ try{
   }});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
   await command('Page.enable');await command('Runtime.enable');await command('Emulation.setDeviceMetricsOverride',{width:412,height:850,deviceScaleFactor:1,mobile:true});
   await command('Page.navigate',{url:`http://127.0.0.1:${server.address().port}`});await waitFor('!!globalThis.calendarLedgerPreview');await evaluate('localStorage.clear();location.reload()');await waitFor('!!globalThis.calendarLedgerPreview');
-  await check('four reachable mobile tabs and readable calendar',`document.querySelectorAll('.mobile-nav button').length===4 && getComputedStyle(document.querySelector('.day-number')).fontSize==='14px' && document.querySelector('.calendar-foot').getBoundingClientRect().bottom<document.querySelector('.mobile-nav').getBoundingClientRect().top`);
+  await check('four reachable mobile tabs and readable calendar',`document.querySelectorAll('.mobile-nav button').length===4 && parseFloat(getComputedStyle(document.querySelector('.day-number')).fontSize)>=14 && document.querySelector('.calendar-foot').getBoundingClientRect().bottom<document.querySelector('.mobile-nav').getBoundingClientRect().top`);
   await screenshot('v0.2.0-calendar.png');
   await click('.mobile-nav [data-page=more]');await check('more page retains analysis tasks settings and backup',`['reports','tasks'].every(page=>document.querySelector('.more-list [data-page='+page+']')) && !!document.querySelector('.more-list [data-action=settings]') && !!document.querySelector('.more-list [data-action=backup]')`);await screenshot('v0.2.0-more.png');
   await click('.mobile-nav [data-action=open-ai]');

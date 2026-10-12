@@ -48,9 +48,14 @@ public class WidgetRuntimeTest extends Instrumentation {
             if(phase.startsWith("weather"))FakeWeatherConnection.install();
             startApp(intent);
             if("baseline".equals(phase)) {
+                if(getTargetContext().getSharedPreferences("api-config",0).getString("keyCipher","").isEmpty()) {
+                    evaluate("document.querySelector('[data-action=settings]').click();document.querySelector('[name=aiMode]').value='demo';document.querySelector('[name=apiKey]').value='qa-only-not-a-real-provider-key';document.querySelector('form[data-form=settings]').requestSubmit()");
+                    waitFor("!document.querySelector('.modal')",5000);
+                }
+                check("baseline has encrypted test-only API configuration",!getTargetContext().getSharedPreferences("api-config",0).getString("keyCipher","").isEmpty());
                 preferences().edit().putString("businessBefore",business())
                         .putString("keyCipherBefore",getTargetContext().getSharedPreferences("api-config",0).getString("keyCipher",""))
-                        .putString("marker","v032-to-v033").commit();
+                        .putString("marker","v033-to-v034").commit();
                 check("old release has saved business data",truth("calendarLedgerPreview.getState().transactions.length>0&&calendarLedgerPreview.getState().events.length>0"));
             } else if("cold-ai".equals(phase)) {
                 check("cold start consumes AI entry after JavaScript is ready",truth("document.body.classList.contains('ai-visible')"));
@@ -78,6 +83,8 @@ public class WidgetRuntimeTest extends Instrumentation {
                 evaluate("document.querySelector('.mobile-nav [data-page=more]').click();document.querySelector('.main [data-action=settings]').click()");SystemClock.sleep(400);
                 check("native phone settings modal fits the screen",truth("!document.body.classList.contains('ai-visible')&&document.querySelector('.modal').getBoundingClientRect().width>200&&document.querySelector('.modal').getBoundingClientRect().height>200&&document.querySelector('.modal').getBoundingClientRect().right<=innerWidth+1&&document.querySelector('.modal').getBoundingClientRect().bottom<=innerHeight+1"));
                 screenshot("app-settings",null);
+            } else if("ai-operations".equals(phase)) {
+                aiOperationsAcceptance(report);
             } else if(phase.startsWith("weather")) {
                 weatherAcceptance(report);
             } else if("live-weather".equals(phase)) {
@@ -124,10 +131,50 @@ public class WidgetRuntimeTest extends Instrumentation {
         }
         Bundle result=new Bundle();result.putString("result",report.toString());finish(resultCode,result);
     }
+    private void aiOperationsAcceptance(JSONObject report)throws Exception {
+        String before=evaluate("JSON.stringify({version:1,state:calendarLedgerPreview.getState(),aiConfig:calendarLedgerPreview.getConfig()})");
+        try {
+            JSONObject snapshot=new JSONObject(before), state=snapshot.getJSONObject("state");
+            for(String key:new String[]{"transactions","events","tasks","undo","chat","lastCreated","expenseAllocations","aiMemory"})state.put(key,new JSONArray());
+            state.put("viewMonth","2026-10").put("selectedDate","2026-10-13");snapshot.getJSONObject("aiConfig").put("mode","demo");
+            evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(snapshot.toString())+")");restartApp();
+            sendChat("2026-10-01 月订阅30元");
+            check("native conversation records a single subscription payment",truth("calendarLedgerPreview.getState().transactions.length===1&&calendarLedgerPreview.getState().transactions[0].amount===3000"));
+            sendChat("把刚才月订阅的钱均摊到每一天");
+            check("native conversation allocates without creating daily payments",truth("calendarLedgerPreview.getState().expenseAllocations.length===1&&calendarLedgerPreview.getState().transactions.length===1"));
+            check("monthly period defaults to actual payment month",truth("calendarLedgerPreview.getState().expenseAllocations[0].start==='2026-10-01'&&calendarLedgerPreview.getState().expenseAllocations[0].end==='2026-10-31'"));
+            startHost();widget=create();int id=widget.getAppWidgetId();setMonth(id,"2026-10");attach(widget,370,540);waitText(widget,"widget_month","10月");
+            check("native widget displays first-day integer-cent share",text(dayCell(widget,"2026-10-01"),"widget_expense").equals("−0.97"));
+            check("native widget preserves exact remainder on the final day",text(dayCell(widget,"2026-10-31"),"widget_expense").equals("−0.96"));
+            check("native widget identifies daily-cost accounting",text(widget,"widget_year").contains("费用按日")&&description(widget,"2026-10-13").contains("按天分摊"));
+            check("native allocation stays within date cells",fits(widget));screenshot("widget-allocation",widget);detach();
+            sendChat("记住，我的月订阅默认保留付款，按天分摊");
+            check("native chat saves explicit persistent preference",truth("calendarLedgerPreview.getState().aiMemory.length===1"));
+            String source=evaluate("calendarLedgerPreview.getState().transactions[0].id");
+            restartApp();
+            check("cold restart retains preference and previous dialogue",truth("calendarLedgerPreview.getState().aiMemory.length===1&&calendarLedgerPreview.getState().chat.length>=6"));
+            check("cold restart retains source reference and allocation",truth("calendarLedgerPreview.getState().lastCreated[0].id==="+JSONObject.quote(source)+"&&calendarLedgerPreview.getState().expenseAllocations.length===1"));
+            sendChat("刚才那笔改成62");
+            check("follow-up after restart modifies the same real payment",truth("calendarLedgerPreview.getState().transactions.length===1&&calendarLedgerPreview.getState().transactions[0].amount===6200&&calendarLedgerPreview.getState().transactions[0].id==="+JSONObject.quote(source)));
+            startHost();widget=restore(id);attach(widget,370,540);refresh(id);waitText(widget,"widget_month","10月");
+            check("native shares immediately follow source amount update",text(dayCell(widget,"2026-10-13"),"widget_expense").equals("−2"));detach();
+            sendChat("撤销操作");
+            check("undo restores source amount while keeping its allocation",truth("calendarLedgerPreview.getState().transactions[0].amount===3000&&calendarLedgerPreview.getState().expenseAllocations.length===1"));
+            evaluate("document.querySelector('.mobile-nav [data-page=more]').click();document.querySelector('.main [data-action=ai-memory]').click()");SystemClock.sleep(300);
+            check("memory settings exposes saved preferences and controls",truth("document.querySelector('#ai-memory-list').textContent.includes('订阅分摊规则')&&document.querySelector('[data-memory-clear-chat]')!==null"));
+            check("memory settings fits native phone width",truth("document.querySelector('.modal').getBoundingClientRect().right<=innerWidth+1&&document.documentElement.scrollWidth<=innerWidth+1"));screenshot("app-ai-memory",null);
+            evaluate("document.querySelector('[data-memory-delete]').click()");
+            check("forget preference does not remove payment or allocation",truth("calendarLedgerPreview.getState().aiMemory.length===0&&calendarLedgerPreview.getState().transactions.length===1&&calendarLedgerPreview.getState().expenseAllocations.length===1"));
+            evaluate("document.querySelector('[data-action=close-modal]').click()");sendChat("撤销操作");
+            check("forget preference can be undone",truth("calendarLedgerPreview.getState().aiMemory.length===1"));
+            screenshot("app-ai-context",null);
+            report.put("apiKeyUsed",false).put("actualProvider",false).put("mode","installed delivery APK, native bridge, local operation parser");
+        } finally { evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(before)+")");restartApp(); }
+    }
     private void acceptance(JSONObject report)throws Exception {
         check("same-signature upgrade retains every saved record",business().equals(preferences().getString("businessBefore","")));
         check("same-signature upgrade retains encrypted API configuration",getTargetContext().getSharedPreferences("api-config",0).getString("keyCipher","").equals(preferences().getString("keyCipherBefore","!")));
-        check("upgrade retains private preference marker","v032-to-v033".equals(preferences().getString("marker","")));
+        check("upgrade retains private preference marker","v033-to-v034".equals(preferences().getString("marker","")));
         fixture();restartApp();
         startHost();widget=create();second=create();attach(widget,370,540);
         setMonth(widget.getAppWidgetId(),"2026-10");setMonth(second.getAppWidgetId(),"2026-10");
@@ -523,7 +570,7 @@ public class WidgetRuntimeTest extends Instrumentation {
         events.put(event("fitness","周末运动","2026-10-03","17:00","personal","weekly","2026-11-30",new JSONArray().put("2026-10-10")));
         events.put(event("salary","月末整理","2026-01-31","10:00","work","monthly","",new JSONArray()));
         JSONArray previous=state.getJSONArray("transactions"),transactions=new JSONArray();
-        for(int i=0;i<previous.length();i++)if(!previous.getJSONObject(i).optString("id").startsWith("qa-widget-money-"))transactions.put(previous.get(i));
+        for(int i=0;i<previous.length();i++){JSONObject row=previous.getJSONObject(i);String date=row.optString("date");if(!row.optString("id").startsWith("qa-widget-money-")&&!date.equals("2026-10-11")&&!date.equals("2026-10-12")&&!date.equals("2026-10-13"))transactions.put(row);}
         transactions.put(transaction("holiday-expense","2026-10-01","expense",5800));
         transactions.put(transaction("holiday-income","2026-10-01","income",120000));
         transactions.put(transaction("schedule-expense","2026-10-09","expense",2850));
@@ -685,7 +732,7 @@ public class WidgetRuntimeTest extends Instrumentation {
         Bitmap screen=getUiAutomation().takeScreenshot();if(screen==null)throw new AssertionError("No Android screenshot");
         Bitmap image=screen;
         if(crop!=null){Rect rect=new Rect();onUi(()->crop.getGlobalVisibleRect(rect));image=Bitmap.createBitmap(screen,rect.left,rect.top,rect.width(),rect.height());}
-        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.3.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
+        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.4.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
         finally{if(image!=screen)image.recycle();screen.recycle();}
     }
     private void check(String name,boolean passed)throws Exception{findings.put(new JSONObject().put("check",name).put("passed",passed));if(!passed)throw new AssertionError(name);}

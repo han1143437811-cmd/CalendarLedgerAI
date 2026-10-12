@@ -80,7 +80,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         WORK.execute(() -> {
             try {
                 JSONObject projection = new JSONObject();
-                for (String key : new String[]{"transactions", "events", "calendars", "settings", "holidayDays", "holidayMeta"}) projection.put(key, state.opt(key));
+                for (String key : new String[]{"transactions", "expenseAllocations", "events", "calendars", "settings", "holidayDays", "holidayMeta"}) projection.put(key, state.opt(key));
                 byte[] digest = MessageDigest.getInstance("SHA-256").digest(projection.toString().getBytes(StandardCharsets.UTF_8));
                 String fingerprint = Base64.encodeToString(digest, Base64.NO_WRAP);
                 if (fingerprint.equals(lastDigest)) return;
@@ -151,7 +151,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         JSONObject city = data.weather.optJSONObject("city");
         String cityName = city == null ? "" : city.optString("name");
         boolean cachedWeather = data.weather.optBoolean("stale") && !data.weather.optBoolean("expired");
-        root.setTextViewText(R.id.widget_year, month.getYear() + (cityName.isEmpty() ? "" : " · " + cityName)
+        root.setTextViewText(R.id.widget_year, month.getYear() + (data.allocatedDays.isEmpty() ? "" : " · 费用按日") + (cityName.isEmpty() ? "" : " · " + cityName)
                 + (cachedWeather ? " · 缓存" : ""));
         root.setTextColor(R.id.widget_month, text); root.setTextColor(R.id.widget_year, muted);
         root.setTextViewTextSize(R.id.widget_month, TypedValue.COMPLEX_UNIT_DIP, compactRoot ? 16 : 18);
@@ -290,6 +290,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
                         + "至" + Math.round(forecast.optDouble("max")) + "摄氏度" : "")
                         + (cachedWeather ? "，较早的缓存，打开应用更新" : "");
                 if (amounts != null) description += amounts.description();
+                if (data.allocatedDays.contains(date)) description += "，日费用包含按天分摊，实际付款在账本中保留";
                 if (events != null) for (JSONObject event : events) description += "，" + event.optString("time") + " " + event.optString("title");
                 cell.setContentDescription(R.id.widget_day, description);
                 cell.setOnClickPendingIntent(R.id.widget_day, open(context, id, "date", date));

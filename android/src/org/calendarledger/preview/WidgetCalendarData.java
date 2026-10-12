@@ -22,6 +22,7 @@ final class WidgetCalendarData {
     final JSONObject lunarDays;
     final JSONObject weather;
     final Map<String, JSONObject> weatherDays = new HashMap<>();
+    final Set<String> allocatedDays = new HashSet<>();
     final boolean dark;
     final boolean largeFont;
     final int weekStart;
@@ -41,18 +42,30 @@ final class WidgetCalendarData {
             JSONObject entry = forecast.optJSONObject(i);
             if (entry != null) weatherDays.put(entry.optString("date"), entry);
         }
+        Map<String, JSONObject> allocations = new HashMap<>();
+        JSONArray plans = state.optJSONArray("expenseAllocations");
+        if (plans != null) for (int i = 0; i < plans.length(); i++) {
+            JSONObject plan = plans.optJSONObject(i);
+            if (plan != null && CalendarAllocation.validPeriod(plan.optString("start"), plan.optString("end"))) allocations.put(plan.optString("transactionId"), plan);
+        }
         JSONArray transactions = state.optJSONArray("transactions");
         if (transactions != null) for (int i = 0; i < transactions.length(); i++) {
             JSONObject transaction = transactions.optJSONObject(i);
             if (transaction == null) continue;
             String date = transaction.optString("date");
-            if (date.compareTo(days.get(0).toString()) < 0 || date.compareTo(days.get(days.size() - 1).toString()) > 0) continue;
             try {
                 Object raw = transaction.opt("amount");
-                // Snapshots contain integer cents, never the yuan entered into a form.
                 if (!(raw instanceof Number)) continue;
-                java.math.BigDecimal amount = new java.math.BigDecimal(raw.toString());
-                CalendarMoney.add(money, date, transaction.optString("kind"), amount.longValueExact());
+                long cents = new java.math.BigDecimal(raw.toString()).longValueExact();
+                JSONObject plan = "expense".equals(transaction.optString("kind")) ? allocations.get(transaction.optString("id")) : null;
+                if (plan != null) {
+                    for (LocalDate day : days) {
+                        long share = CalendarAllocation.amountForDay(cents, plan.optString("start"), plan.optString("end"), day.toString());
+                        if (share > 0 && CalendarMoney.add(money,day.toString(),"expense",share)) allocatedDays.add(day.toString());
+                    }
+                } else if (date.compareTo(days.get(0).toString()) >= 0 && date.compareTo(days.get(days.size()-1).toString()) <= 0) {
+                    CalendarMoney.add(money,date,transaction.optString("kind"),cents);
+                }
             } catch (RuntimeException damaged) { /* Preserve the other valid records. */ }
         }
         festivals = festivals(context);

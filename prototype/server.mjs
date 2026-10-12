@@ -23,7 +23,7 @@ export function createPreviewServer({upstreamFetch=globalThis.fetch}={}){
     response.setHeader('X-Content-Type-Options','nosniff');response.setHeader('Referrer-Policy','no-referrer');response.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
     try{const requestURL=new URL(request.url,'http://127.0.0.1');const route=requestURL.pathname;
       if(route.startsWith('/api/')){const origin=request.headers.origin;if(origin){const parsed=new URL(origin);if(!['127.0.0.1','localhost'].includes(parsed.hostname)||parsed.port!==String(server.address().port)){sendJSON(response,403,{error:'不允许其他网页访问本机 API 配置。'});return;}}
-        if(route==='/api/health'&&request.method==='GET'){sendJSON(response,200,{ok:true,app:'calendar-ledger-ai-preview',version:'0.2.3'});return;}
+        if(route==='/api/health'&&request.method==='GET'){sendJSON(response,200,{ok:true,app:'calendar-ledger-ai-preview',version:'0.3.4'});return;}
         if(route==='/api/config'&&request.method==='GET'){sendJSON(response,200,publicConfig());return;}
         if(route==='/api/holidays'&&request.method==='GET'){
           const year=Number(requestURL.searchParams.get('year'));if(!Number.isInteger(year)||year<2020||year>2100)throw new Error('节假日年份无效。');
