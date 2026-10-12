@@ -12,8 +12,8 @@ RUNTIME=Path(json.loads((PROJECT/'build-tools/runtime-location.json').read_text(
 ADB=RUNTIME/'sdk/platform-tools/adb.exe'
 SERIAL='emulator-5580'
 OUT=PROJECT/'prototype/qa'
-VERSION='0.3.1'
-BASELINE_VERSION='0.3.0'
+VERSION='0.3.2'
+BASELINE_VERSION='0.3.1'
 
 def adb(*args,binary=False,timeout=60):
     result=subprocess.run([str(ADB),'-s',SERIAL,*args],capture_output=True,timeout=timeout)
@@ -55,10 +55,10 @@ try:
     adb('shell','cmd','connectivity','airplane-mode','enable')
     adb('shell','svc','wifi','disable');adb('shell','svc','data','disable')
     previous_font=adb('shell','settings','get','system','font_scale')
-    install(PROJECT/'android/build/runtime-test.apk','v031-runtime-test.apk')
+    install(PROJECT/'android/build/runtime-test.apk','v032-runtime-test.apk')
     if resume_appearance:
         previous=json.loads((OUT/f'android-widget-v{VERSION}-results.json').read_text(encoding='utf-8'))
-        for name in ('baseline','widget','reopened','cold-ai','cold-date','system-font','data-projection'):
+        for name in ('baseline','widget','reopened','cold-ai','cold-date','system-font','data-projection','sparse-grid'):
             assert previous['phases'][name]['passed'], f'{name} must have already passed.'
         path=adb('shell','pm','path','org.calendarledger.preview').splitlines()[0].removeprefix('package:')
         installed_hash=hashlib.sha256(adb('exec-out','cat',path,binary=True)).hexdigest()
@@ -72,11 +72,11 @@ try:
         assert report['phases']['baseline']['passed'] and report['phases']['baseline']['version']==BASELINE_VERSION
         # Reinstall only the tested upgrade during repair; never downgrade or clear.
         adb('shell','am','force-stop','org.calendarledger.preview')
-        install(PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk','v031-delivery.apk')
+        install(PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk','v032-delivery.apk')
     else:
         report['phases']['baseline']=phase('baseline')
         adb('shell','am','force-stop','org.calendarledger.preview')
-        install(PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk','v031-delivery.apk')
+        install(PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk','v032-delivery.apk')
     if not resume_appearance:
         report['sameSignatureUpgrade']=True
         report['phases']['widget']=phase('widget')
@@ -92,6 +92,9 @@ try:
         adb('shell','settings','put','system','font_scale',previous_font if previous_font!='null' else '1.0')
         adb('shell','am','force-stop','org.calendarledger.preview')
         report['phases']['data-projection']=phase('data-projection')
+        adb('shell','am','force-stop','org.calendarledger.preview')
+        report['phases']['sparse-grid']=phase('sparse-grid')
+        for name in ('widget-empty','widget-one-event','widget-three-events'):screenshot(name)
     adb('shell','am','force-stop','org.calendarledger.preview')
     report['phases']['appearance']=phase('appearance')
     for name in ('app-calendar','app-ledger','app-reports','app-more','app-chat','app-settings'):screenshot(name)

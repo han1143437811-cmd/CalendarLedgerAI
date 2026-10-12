@@ -31,6 +31,15 @@
       "feature": "Daily accounting and Morandi UI; S24 Ultra large month widget layout with separately reserved schedule and accounting areas",
       "samePackageAndSigningIdentity": true,
       "upstreamSourceImported": false
+    },
+    {
+      "version": "0.3.2",
+      "date": "2026-10-12",
+      "apkSha256": "4cdb4d4fd029b16f7c81c6b784499b1ef0ad74ef448c7da49f2ac4125de94805",
+      "runtimeCodeChanged": true,
+      "feature": "Subtle framed date cells in Morandi colors, grouped daily schedule/accounting and offline lunar sublabels; verified sparse 0/1/3-event months",
+      "samePackageAndSigningIdentity": true,
+      "upstreamSourceImported": false
     }
   ],
   "scope": "Initial v0.2.3 public release; newer runtime changes are recorded in subsequentReleases."

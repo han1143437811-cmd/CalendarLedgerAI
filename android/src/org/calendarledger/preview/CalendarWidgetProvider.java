@@ -160,31 +160,41 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
             label.setTextViewText(R.id.widget_weekday, weekdays[day]);
             label.setTextColor(R.id.widget_weekday, day == 0 || day == 6 ? weekend : muted);
             label.setTextViewTextSize(R.id.widget_weekday, TypedValue.COMPLEX_UNIT_DIP, compactRoot ? 8.5f : 9);
+            label.setInt(R.id.widget_weekday, "setGravity", android.view.Gravity.START | android.view.Gravity.CENTER_VERTICAL);
+            int inset = Math.round((compactRoot ? 5 : 10) * context.getResources().getDisplayMetrics().density);
+            label.setViewPadding(R.id.widget_weekday, inset, 0, 0, 0);
             root.addView(R.id.widget_weekdays, label);
         }
-        float rowHeight = (height - (compactRoot ? 69 : 87)) / (data.days.size() / 7) - 1;
+        float rowHeight = (height - (compactRoot ? 69 : 87)) / (data.days.size() / 7);
         boolean compactDay = compactRoot || rowHeight < 72;
         LocalDate today = LocalDate.now();
         for (int start = 0; start < data.days.size(); start += 7) {
             RemoteViews week = new RemoteViews(context.getPackageName(), R.layout.widget_week);
             week.setInt(R.id.widget_week_rule, "setBackgroundColor", Color.parseColor(data.dark ? "#414B43" : "#EBEDE6"));
-            week.setViewVisibility(R.id.widget_week_rule, start + 7 == data.days.size() ? View.GONE : View.VISIBLE);
+            // The inset date surfaces create both horizontal and vertical boundaries.
+            week.setViewVisibility(R.id.widget_week_rule, View.GONE);
             for (int column = 0; column < 7; column++) {
                 LocalDate day = data.days.get(start + column); String date = day.toString();
                 boolean outside = !YearMonth.from(day).equals(month);
                 RemoteViews cell = new RemoteViews(context.getPackageName(), compactDay ? R.layout.widget_day_compact : R.layout.widget_day);
                 cell.setTextViewText(R.id.widget_date, String.valueOf(day.getDayOfMonth()));
-                cell.setTextViewTextSize(R.id.widget_date, TypedValue.COMPLEX_UNIT_DIP, compactDay ? (data.largeFont ? 11.5f : 11) : (data.largeFont ? 13 : 12));
+                cell.setTextViewTextSize(R.id.widget_date, TypedValue.COMPLEX_UNIT_DIP, compactDay ? (data.largeFont ? 11.5f : 11) : (data.largeFont ? 15 : 14));
                 cell.setTextColor(R.id.widget_date, outside ? Color.parseColor(data.dark ? "#667169" : "#BBBFB5")
                         : day.equals(today) ? Color.WHITE : day.getDayOfWeek().getValue() >= 6 ? weekend : text);
-                cell.setInt(R.id.widget_day, "setBackgroundResource", day.equals(today)
-                        ? (data.dark ? R.drawable.widget_day_today_dark : R.drawable.widget_day_today) : 0);
+                int background = day.equals(today) ? (data.dark ? R.drawable.widget_day_today_dark : R.drawable.widget_day_today)
+                        : outside ? (data.dark ? R.drawable.widget_day_outside_dark : R.drawable.widget_day_outside)
+                        : day.getDayOfWeek().getValue() >= 6 ? (data.dark ? R.drawable.widget_day_weekend_dark : R.drawable.widget_day_weekend)
+                        : (data.dark ? R.drawable.widget_day_background_dark : R.drawable.widget_day_background);
+                cell.setInt(R.id.widget_day_surface, "setBackgroundResource", background);
                 if (day.equals(today)) cell.setInt(R.id.widget_date, "setBackgroundResource", R.drawable.widget_today);
                 String observance = data.observance(date);
-                cell.setViewVisibility(R.id.widget_observance, observance.isEmpty() ? View.GONE : View.VISIBLE);
-                cell.setTextViewText(R.id.widget_observance, observance);
+                String lunar = data.lunarDays.optString(date);
+                String sublabel = observance.isEmpty() ? lunar : observance;
+                cell.setViewVisibility(R.id.widget_observance, sublabel.isEmpty() ? View.GONE : View.VISIBLE);
+                cell.setTextViewText(R.id.widget_observance, sublabel);
                 cell.setTextViewTextSize(R.id.widget_observance, TypedValue.COMPLEX_UNIT_DIP, compactDay ? 6.5f : 7);
-                cell.setTextColor(R.id.widget_observance, outside ? muted : weekend);
+                cell.setTextColor(R.id.widget_observance, outside ? Color.parseColor(data.dark ? "#667169" : "#BBBFB5")
+                        : observance.isEmpty() ? muted : weekend);
                 JSONObject holiday = data.holidays.get(date);
                 if (holiday != null) {
                     cell.setViewVisibility(R.id.widget_holiday_badge, View.VISIBLE);
@@ -209,8 +219,8 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
                         cell.setTextColor(R.id.widget_income, amounts.transferOnly() ? muted : Color.parseColor(data.dark ? "#BDCDC0" : "#526F5D"));
                     }
                 }
-                float used = (compactDay ? 4 : 6) + (compactDay ? 14 : 16)
-                        + (observance.isEmpty() ? 0 : compactDay ? 8 : 9) + moneyLines * (compactDay ? 9 : 10);
+                float used = (compactDay ? 4 : 6) + (compactDay ? 14 : 18)
+                        + (sublabel.isEmpty() ? 0 : compactDay ? 8 : 9) + moneyLines * (compactDay ? 9 : 10);
                 int lines = Math.min(2, Math.max(0, (int)((rowHeight - used) / (compactDay ? 19 : 21))));
                 List<JSONObject> events = data.events.get(date);
                 int shown = events == null || outside ? 0 : Math.min(lines, events.size());
@@ -230,7 +240,8 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
                     int eventColor = data.calendarColors.containsKey(event.optString("calendar")) ? data.calendarColors.get(event.optString("calendar")) : Color.parseColor("#6882D8");
                     cell.setTextColor(viewId, data.dark ? Color.parseColor("#D2DBD2") : readable(eventColor));
                 }
-                String description = day.getMonthValue() + "月" + day.getDayOfMonth() + "日" + (observance.isEmpty() ? "" : "，" + observance);
+                String description = day.getMonthValue() + "月" + day.getDayOfMonth() + "日"
+                        + (lunar.isEmpty() ? "" : "，农历" + lunar) + (observance.isEmpty() ? "" : "，" + observance);
                 if (holiday != null) description += holiday.optBoolean("isOffDay") ? "，放假" : "，调休上班";
                 if (amounts != null) description += amounts.description();
                 if (events != null) for (JSONObject event : events) description += "，" + event.optString("time") + " " + event.optString("title");
@@ -246,7 +257,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         float density = context.getResources().getDisplayMetrics().density;
         int column = (int)Math.floor((Math.round(width * density)
                 - 2 * Math.round((compactRoot ? 8 : 12) * density)) / 7f)
-                - 2 * Math.round((compactDay ? 2 : 3) * density);
+                - 2 * Math.round((compactDay ? 2 : 4) * density);
         int availableWidth = Math.max(1, column - Math.round(2 * density) - Math.round(density) - 1);
         int availableHeight = Math.max(1, Math.round((compactDay ? 18 : 20) * density) - 1);
         TextPaint paint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
@@ -254,10 +265,9 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         paint.setTextLocales(context.getResources().getConfiguration().getLocales());
         paint.setElegantTextHeight(Build.VERSION.SDK_INT >= 35);
         float size = (compactDay ? 8 : 8.5f) * density;
-        String measuredText = title + "\n日程";
-        // A Chinese fallback font can make two lines taller than the primary font's
-        // metrics. Measure the actual two-line layout, including fallback metrics,
-        // so the final line is inside the schedule slot on every widget update.
+        String measuredText = title;
+        // Measure the actual title. Short titles keep their readable size; long
+        // Chinese titles still fit both fallback-font lines inside the slot.
         for (int attempt = 0; attempt < 5; attempt++) {
             paint.setTextSize(size);
             StaticLayout.Builder builder = StaticLayout.Builder.obtain(measuredText, 0, measuredText.length(), paint, availableWidth)
@@ -277,7 +287,7 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         // Reserve one pixel after those roundings instead of using an average dp width.
         float available = Math.max(1, (float)Math.floor((Math.round(width * density)
                 - 2 * Math.round((compactRoot ? 8 : 12) * density)) / 7f)
-                - 2 * Math.round((compactDay ? 2 : 3) * density) - 1);
+                - 2 * Math.round((compactDay ? 2 : 4) * density) - 1);
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
         float size = (compactDay ? 8 : 9) * density;

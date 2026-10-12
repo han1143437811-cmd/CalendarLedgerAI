@@ -49,7 +49,7 @@ public class WidgetRuntimeTest extends Instrumentation {
             if("baseline".equals(phase)) {
                 preferences().edit().putString("businessBefore",business())
                         .putString("keyCipherBefore",getTargetContext().getSharedPreferences("api-config",0).getString("keyCipher",""))
-                        .putString("marker","v030-to-v031").commit();
+                        .putString("marker","v031-to-v032").commit();
                 check("old release has saved business data",truth("calendarLedgerPreview.getState().transactions.length>0&&calendarLedgerPreview.getState().events.length>0"));
             } else if("cold-ai".equals(phase)) {
                 check("cold start consumes AI entry after JavaScript is ready",truth("document.body.classList.contains('ai-visible')"));
@@ -77,6 +77,8 @@ public class WidgetRuntimeTest extends Instrumentation {
                 evaluate("document.querySelector('.mobile-nav [data-page=more]').click();document.querySelector('.main [data-action=settings]').click()");SystemClock.sleep(400);
                 check("native phone settings modal fits the screen",truth("!document.body.classList.contains('ai-visible')&&document.querySelector('.modal').getBoundingClientRect().width>200&&document.querySelector('.modal').getBoundingClientRect().height>200&&document.querySelector('.modal').getBoundingClientRect().right<=innerWidth+1&&document.querySelector('.modal').getBoundingClientRect().bottom<=innerHeight+1"));
                 screenshot("app-settings",null);
+            } else if("sparse-grid".equals(phase)) {
+                sparseGridAcceptance(report);
             } else if("data-projection".equals(phase)) {
                 projectionAcceptance(report);
             } else if("reopened".equals(phase)||"system-font".equals(phase)) {
@@ -120,7 +122,7 @@ public class WidgetRuntimeTest extends Instrumentation {
     private void acceptance(JSONObject report)throws Exception {
         check("same-signature upgrade retains every saved record",business().equals(preferences().getString("businessBefore","")));
         check("same-signature upgrade retains encrypted API configuration",getTargetContext().getSharedPreferences("api-config",0).getString("keyCipher","").equals(preferences().getString("keyCipherBefore","!")));
-        check("upgrade retains private preference marker","v030-to-v031".equals(preferences().getString("marker","")));
+        check("upgrade retains private preference marker","v031-to-v032".equals(preferences().getString("marker","")));
         fixture();restartApp();
         startHost();widget=create();second=create();attach(widget,370,540);
         setMonth(widget.getAppWidgetId(),"2026-10");setMonth(second.getAppWidgetId(),"2026-10");
@@ -250,6 +252,60 @@ public class WidgetRuntimeTest extends Instrumentation {
         long end=SystemClock.elapsedRealtime()+8000;while(widget.updates<=before&&SystemClock.elapsedRealtime()<end)SystemClock.sleep(100);
         check("responsive RemoteViews fallback inflates when launcher omits sizes",widget.updates>before&&weekCount(widget)==6&&fits(widget));
         report.put("responsiveFallback",true);keepBindings=true;
+    }
+    private void sparseGridAcceptance(JSONObject report)throws Exception {
+        settings("light","normal",1);
+        JSONObject original=new JSONObject(evaluate("CalendarAndroid.loadSnapshot()"));
+        startHost();widget=restore(preferences().getInt("keptId",-1));
+        keepBindings=true;
+        try {
+            JSONObject sample=new JSONObject(original.toString());
+            JSONArray events=new JSONArray();sample.getJSONObject("state").put("events",events);
+            evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(sample.toString())+")");
+            setMonth(widget.getAppWidgetId(),"2027-05");attach(widget,370,540);waitText(widget,"widget_month","5月");
+            SystemClock.sleep(600);
+            check("empty six-week month has a framed surface for every clickable date",weekCount(widget)==6&&cells(widget).size()==42&&framesFit(widget));
+            check("empty month uses quiet distinct weekday, weekend and outside surfaces",surfaceColor(dayCell(widget,"2027-05-03"))!=surfaceColor(dayCell(widget,"2027-05-02"))&&surfaceColor(dayCell(widget,"2027-05-03"))!=surfaceColor(dayCell(widget,"2027-04-26")));
+            check("ordinary empty dates display a lunar sublabel",!text(dayCell(widget,"2027-05-03"),"widget_observance").isEmpty()&&description(widget,"2027-05-03").contains("农历"));
+            check("empty schedule state preserves accounting and holiday labels",moneyMatches(widget,"2027-05-01")&&text(dayCell(widget,"2027-05-01"),"widget_observance").equals("劳动节")&&!visible(dayCell(widget,"2027-05-01"),"widget_event")&&fits(widget));
+            screenshot("widget-empty",widget);
+            events.put(event("sparse-one","出门买菜","2027-05-01","09:00","personal","none","",new JSONArray()));
+            evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(sample.toString())+")");waitDescription(widget,"2027-05-01","出门买菜");SystemClock.sleep(250);
+            check("one scheduled holiday keeps the title and both accounting rows visible",visible(dayCell(widget,"2027-05-01"),"widget_event")&&moneyMatches(widget,"2027-05-01")&&fits(widget));
+            check("schedule and accounting remain grouped inside the same date frame",groupedContent(dayCell(widget,"2027-05-01")));
+            screenshot("widget-one-event",widget);
+            events.put(event("sparse-two","下午去公园散步","2027-05-10","15:00","personal","none","",new JSONArray()));
+            events.put(event("sparse-three","年度牙齿检查","2027-05-22","10:30","personal","none","",new JSONArray()));
+            evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(sample.toString())+")");waitDescription(widget,"2027-05-10","下午去公园散步");waitDescription(widget,"2027-05-22","年度牙齿检查");SystemClock.sleep(250);
+            check("three sparse schedules retain their full accessible titles and fit the frames",visible(dayCell(widget,"2027-05-10"),"widget_event")&&visible(dayCell(widget,"2027-05-22"),"widget_event")&&framesFit(widget)&&fits(widget));
+            screenshot("widget-three-events",widget);
+            attach(widget,230,460);SystemClock.sleep(500);
+            check("minimum six-week grid retains frames, a holiday schedule and both money lines",framesFit(widget)&&fits(widget)&&visible(dayCell(widget,"2027-05-01"),"widget_event")&&moneyMatches(widget,"2027-05-01"));
+            report.put("scheduleCounts",new JSONArray().put(0).put(1).put(3));
+        } finally {
+            evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(original.toString())+")");
+            setMonth(widget.getAppWidgetId(),"2026-11");detach();restartApp();
+        }
+    }
+    private int surfaceColor(View cell){
+        AtomicReference<Integer> color=new AtomicReference<>(0);
+        onUi(()->color.set(((GradientDrawable)view(cell,"widget_day_surface").getBackground()).getColor().getDefaultColor()));return color.get();
+    }
+    private boolean framesFit(View parent){
+        AtomicReference<Boolean> result=new AtomicReference<>(true);
+        onUi(()->{
+            Rect previous=null;
+            for(View cell:cells(parent)){
+                View surface=view(cell,"widget_day_surface");Rect bounds=new Rect(),frame=new Rect();cell.getGlobalVisibleRect(bounds);
+                if(surface==null||!(surface.getBackground() instanceof GradientDrawable)||!surface.getGlobalVisibleRect(frame)||frame.height()<surface.getHeight()-1||frame.left<bounds.left||frame.right>bounds.right||frame.bottom>bounds.bottom){result.set(false);continue;}
+                if(previous!=null&&previous.top==frame.top&&frame.left-previous.right<density())result.set(false);
+                previous=frame;
+            }
+        });return result.get();
+    }
+    private boolean groupedContent(View cell){
+        AtomicReference<Boolean> result=new AtomicReference<>(false);
+        onUi(()->{View event=view(cell,"widget_event"),expense=view(cell,"widget_expense");int[] a=new int[2],b=new int[2];event.getLocationOnScreen(a);expense.getLocationOnScreen(b);result.set(b[1]>=a[1]+event.getHeight()&&b[1]-a[1]-event.getHeight()<=dp(2));});return result.get();
     }
     private Intent entryIntent(){return new Intent().setClassName(PACKAGE,PACKAGE+".MainActivity").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);}
     private SharedPreferences preferences(){return getTargetContext().getSharedPreferences("qa-widget",0);}
@@ -431,7 +487,7 @@ public class WidgetRuntimeTest extends Instrumentation {
         Bitmap screen=getUiAutomation().takeScreenshot();if(screen==null)throw new AssertionError("No Android screenshot");
         Bitmap image=screen;
         if(crop!=null){Rect rect=new Rect();onUi(()->crop.getGlobalVisibleRect(rect));image=Bitmap.createBitmap(screen,rect.left,rect.top,rect.width(),rect.height());}
-        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.1.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
+        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.2.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
         finally{if(image!=screen)image.recycle();screen.recycle();}
     }
     private void check(String name,boolean passed)throws Exception{findings.put(new JSONObject().put("check",name).put("passed",passed));if(!passed)throw new AssertionError(name);}

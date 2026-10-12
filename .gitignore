@@ -40,6 +40,7 @@ prototype/qa/*.json
 !prototype/qa/festival-results-v0.2.3.json
 !prototype/qa/android-widget-v0.3.0-results.json
 !prototype/qa/android-widget-v0.3.1-results.json
+!prototype/qa/android-widget-v0.3.2-results.json
 prototype/qa/android-widget-*.txt
 
 # Editor / OS files

@@ -12,12 +12,14 @@ import java.util.*;
 /** A read-only projection of accounting, schedules and holidays. No API key or chat access. */
 final class WidgetCalendarData {
     private static JSONObject festivalIndex;
+    private static JSONObject lunarIndex;
     final List<LocalDate> days;
     final Map<String, List<JSONObject>> events = new HashMap<>();
     final Map<String, CalendarMoney.Day> money = new HashMap<>();
     final Map<String, Integer> calendarColors = new HashMap<>();
     final Map<String, JSONObject> holidays = new HashMap<>();
     final JSONObject festivals;
+    final JSONObject lunarDays;
     final boolean dark;
     final boolean largeFont;
     final int weekStart;
@@ -46,6 +48,7 @@ final class WidgetCalendarData {
             } catch (RuntimeException damaged) { /* Preserve the other valid records. */ }
         }
         festivals = festivals(context);
+        lunarDays = lunarDays(context);
         JSONObject cached = state.optJSONObject("holidayDays");
         JSONObject cachedYears = state.optJSONObject("holidayMeta");
         // Packaged official days-off data still works before the first app launch.
@@ -111,8 +114,17 @@ final class WidgetCalendarData {
         return name + (holiday.optBoolean("isOffDay") ? "假期" : "补班");
     }
     static synchronized JSONObject festivals(Context context) {
-        if (festivalIndex == null) festivalIndex = asset(context, "web/widget-festivals.json").optJSONObject("dates");
+        if (festivalIndex == null) loadDateIndex(context);
         return festivalIndex == null ? new JSONObject() : festivalIndex;
+    }
+    static synchronized JSONObject lunarDays(Context context) {
+        if (lunarIndex == null) loadDateIndex(context);
+        return lunarIndex == null ? new JSONObject() : lunarIndex;
+    }
+    private static void loadDateIndex(Context context) {
+        JSONObject index = asset(context, "web/widget-festivals.json");
+        festivalIndex = index.optJSONObject("dates");
+        lunarIndex = index.optJSONObject("lunarDays");
     }
     private static JSONObject asset(Context context, String name) {
         try (InputStream stream = context.getAssets().open(name)) {
