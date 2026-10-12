@@ -30,6 +30,7 @@ CalendarLedgerAI 0.2.3 是独立的 Android WebView 应用，包名 `org.calenda
 | [Alpha Cephei / Vosk](https://github.com/alphacep/vosk-api) 0.3.75 | Android 设备上的普通话离线识别 | Apache-2.0；原二进制由构建脚本获取 |
 | [Vosk small Chinese model](https://alphacephei.com/vosk/models) small-cn-0.22 | APK 内置普通话识别模型 | 发布方列明为 Apache-2.0；下载地址与 SHA256 已固定 |
 | [Java Native Access](https://github.com/java-native-access/jna) 5.18.1 | Java 调用 Vosk 原生库 | 采用上游提供的 Apache-2.0 许可选项 |
+| [Open-Meteo](https://open-meteo.com/) / [GeoNames](https://www.geonames.org/) | 可选城市搜索与最多 16 天日预报；仅打开应用时更新 | 数据为 CC BY 4.0；应用和小组件显示来源，使用本项目原创天气图标 |
 | [esbuild](https://github.com/evanw/esbuild) | 构建时打包手机页面 | MIT；版本由 package-lock.json 固定 |
 
 向这些项目的作者、维护者和贡献者一并致以衷心感谢。其原创工作和许可证保留原有归属。

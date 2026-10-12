@@ -23,7 +23,8 @@ jobs:
       - name: Native calendar dates, recurrence and accounting
         run: |
           mkdir -p "$RUNNER_TEMP/calendar-date-tests"
-          javac --release 8 -encoding UTF-8 -d "$RUNNER_TEMP/calendar-date-tests" android/src/org/calendarledger/preview/CalendarMonth.java android/src/org/calendarledger/preview/ReminderDates.java android/src/org/calendarledger/preview/CalendarMoney.java android/tests/CalendarMonthTest.java android/tests/ReminderDatesTest.java android/tests/CalendarMoneyTest.java
+          javac --release 8 -encoding UTF-8 -d "$RUNNER_TEMP/calendar-date-tests" android/src/org/calendarledger/preview/CalendarMonth.java android/src/org/calendarledger/preview/ReminderDates.java android/src/org/calendarledger/preview/CalendarMoney.java android/tests/CalendarMonthTest.java android/tests/ReminderDatesTest.java android/tests/CalendarMoneyTest.java android/src/org/calendarledger/preview/WeatherCodes.java android/tests/WeatherCodesTest.java
           java -cp "$RUNNER_TEMP/calendar-date-tests" CalendarMonthTest
           java -cp "$RUNNER_TEMP/calendar-date-tests" ReminderDatesTest
           java -cp "$RUNNER_TEMP/calendar-date-tests" CalendarMoneyTest
+          java -cp "$RUNNER_TEMP/calendar-date-tests" WeatherCodesTest

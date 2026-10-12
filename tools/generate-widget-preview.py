@@ -37,7 +37,8 @@ def set_text(root, name, text, color=None):
 labels = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
 root = ET.parse(LAYOUT / 'calendar_widget.xml').getroot()
 set_text(root, 'widget_month', '10月')
-set_text(root, 'widget_year', '2026')
+set_text(root, 'widget_year', '2026 · 天气示例')
+set_text(root, 'widget_weather_source', 'Open-Meteo')
 for index, name in enumerate('一二三四五六日'):
     weekday = ET.parse(LAYOUT / 'widget_weekday.xml').getroot()
     prop(weekday, 'text', name)
@@ -65,6 +66,10 @@ for dates in calendar.Calendar(firstweekday=0).monthdatescalendar(2026, 10):
         label = labels.get(key, {})
         set_text(cell, 'widget_observance', label.get('label', ''), '#BBBFB5' if outside else '#A36F69' if label.get('festival') else '#636B65')
         set_text(cell, 'widget_holiday_badge', label.get('badge', ''), '#526B61')
+        if not outside and 12 <= day.day <= 27:
+            weather = view(cell, 'widget_weather')
+            prop(weather, 'visibility', 'visible')
+            prop(weather, 'src', '@drawable/weather_' + ['sun', 'partly', 'cloud', 'rain', 'storm', 'snow', 'fog'][(day.day - 12) % 7])
         if key in schedules:
             set_text(cell, 'widget_event', schedules[key], '#526B61')
         if key in money:

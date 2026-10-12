@@ -12,8 +12,8 @@ RUNTIME=Path(json.loads((PROJECT/'build-tools/runtime-location.json').read_text(
 ADB=RUNTIME/'sdk/platform-tools/adb.exe'
 SERIAL='emulator-5580'
 OUT=PROJECT/'prototype/qa'
-VERSION='0.3.2'
-BASELINE_VERSION='0.3.1'
+VERSION='0.3.3'
+BASELINE_VERSION='0.3.2'
 
 def adb(*args,binary=False,timeout=60):
     result=subprocess.run([str(ADB),'-s',SERIAL,*args],capture_output=True,timeout=timeout)
@@ -49,22 +49,26 @@ try:
     assert adb('shell','getprop','ro.kernel.qemu')=='1', 'Only the isolated emulator may be modified.'
     resume='--resume' in sys.argv
     resume_appearance='--resume-appearance' in sys.argv
-    resume=resume or resume_appearance
+    resume_weather='--resume-weather' in sys.argv
+    reuse_core=resume_appearance or resume_weather
+    resume=resume or reuse_core
     installed=adb('shell','dumpsys','package','org.calendarledger.preview')
     assert f'versionName={VERSION if resume else BASELINE_VERSION}' in installed, 'Start with the published baseline or explicitly resume its already installed upgrade.'
     adb('shell','cmd','connectivity','airplane-mode','enable')
     adb('shell','svc','wifi','disable');adb('shell','svc','data','disable')
     previous_font=adb('shell','settings','get','system','font_scale')
-    install(PROJECT/'android/build/runtime-test.apk','v032-runtime-test.apk')
-    if resume_appearance:
+    install(PROJECT/'android/build/runtime-test.apk','v033-runtime-test.apk')
+    if reuse_core:
         previous=json.loads((OUT/f'android-widget-v{VERSION}-results.json').read_text(encoding='utf-8'))
         for name in ('baseline','widget','reopened','cold-ai','cold-date','system-font','data-projection','sparse-grid'):
             assert previous['phases'][name]['passed'], f'{name} must have already passed.'
+        if resume_appearance:assert previous['phases']['weather']['passed']
         path=adb('shell','pm','path','org.calendarledger.preview').splitlines()[0].removeprefix('package:')
         installed_hash=hashlib.sha256(adb('exec-out','cat',path,binary=True)).hexdigest()
         delivery_hash=hashlib.sha256((PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk').read_bytes()).hexdigest()
         assert installed_hash==delivery_hash, 'Completed phases must belong to the unchanged delivery APK.'
-        report['phases']=previous['phases'];report['sameSignatureUpgrade']=previous['sameSignatureUpgrade']
+        report['phases']={name:data for name,data in previous['phases'].items() if data.get('passed')}
+        report['sameSignatureUpgrade']=previous['sameSignatureUpgrade']
         report['completedPhasesApkSha256']=installed_hash
     elif resume:
         output=(OUT/f'android-widget-v{VERSION}-baseline.txt').read_text(encoding='utf-8')
@@ -72,12 +76,12 @@ try:
         assert report['phases']['baseline']['passed'] and report['phases']['baseline']['version']==BASELINE_VERSION
         # Reinstall only the tested upgrade during repair; never downgrade or clear.
         adb('shell','am','force-stop','org.calendarledger.preview')
-        install(PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk','v032-delivery.apk')
+        install(PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk','v033-delivery.apk')
     else:
         report['phases']['baseline']=phase('baseline')
         adb('shell','am','force-stop','org.calendarledger.preview')
-        install(PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk','v032-delivery.apk')
-    if not resume_appearance:
+        install(PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk','v033-delivery.apk')
+    if not reuse_core:
         report['sameSignatureUpgrade']=True
         report['phases']['widget']=phase('widget')
         for name in ('widget-large','widget-six-weeks','widget-compact','widget-dark','widget-ai-open','widget-date-open'):screenshot(name)
@@ -95,11 +99,22 @@ try:
         adb('shell','am','force-stop','org.calendarledger.preview')
         report['phases']['sparse-grid']=phase('sparse-grid')
         for name in ('widget-empty','widget-one-event','widget-three-events'):screenshot(name)
+    if not resume_appearance:
+        adb('shell','am','force-stop','org.calendarledger.preview')
+        report['phases']['weather']=phase('weather')
+        for name in ('widget-weather','widget-weather-dark','widget-weather-minimum','app-weather'):screenshot(name)
+        adb('shell','am','force-stop','org.calendarledger.preview')
+        adb('shell','settings','put','system','font_scale','1.3')
+        report['phases']['weather-system-font']=phase('weather-system-font')
+        screenshot('widget-weather-minimum')
+        adb('shell','settings','put','system','font_scale',previous_font if previous_font!='null' else '1.0')
     adb('shell','am','force-stop','org.calendarledger.preview')
     report['phases']['appearance']=phase('appearance')
     for name in ('app-calendar','app-ledger','app-reports','app-more','app-chat','app-settings'):screenshot(name)
     report['nativeWidgetChecks']=sum(len(result.get('findings',[])) for result in report['phases'].values())
     report['apkSha256']=hashlib.sha256((PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk').read_bytes()).hexdigest()
+    path=adb('shell','pm','path','org.calendarledger.preview').splitlines()[0].removeprefix('package:')
+    assert hashlib.sha256(adb('exec-out','cat',path,binary=True)).hexdigest()==report['apkSha256'], 'The installed and delivered APK must be byte-identical.'
     report['passed']=True
 except Exception as error:
     report['error']=str(error)

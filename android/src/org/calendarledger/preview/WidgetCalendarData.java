@@ -20,6 +20,8 @@ final class WidgetCalendarData {
     final Map<String, JSONObject> holidays = new HashMap<>();
     final JSONObject festivals;
     final JSONObject lunarDays;
+    final JSONObject weather;
+    final Map<String, JSONObject> weatherDays = new HashMap<>();
     final boolean dark;
     final boolean largeFont;
     final int weekStart;
@@ -33,6 +35,12 @@ final class WidgetCalendarData {
         largeFont = settings != null && "large".equals(settings.optString("fontSize"));
         weekStart = settings != null && settings.optInt("weekStart", 1) == 0 ? 0 : 1;
         days = CalendarMonth.grid(month, weekStart);
+        weather = WeatherStore.status(context, false);
+        JSONArray forecast = weather.optJSONArray("days");
+        if (forecast != null) for (int i = 0; i < forecast.length(); i++) {
+            JSONObject entry = forecast.optJSONObject(i);
+            if (entry != null) weatherDays.put(entry.optString("date"), entry);
+        }
         JSONArray transactions = state.optJSONArray("transactions");
         if (transactions != null) for (int i = 0; i < transactions.length(); i++) {
             JSONObject transaction = transactions.optJSONObject(i);

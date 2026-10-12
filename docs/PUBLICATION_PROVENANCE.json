@@ -40,6 +40,18 @@
       "feature": "Subtle framed date cells in Morandi colors, grouped daily schedule/accounting and offline lunar sublabels; verified sparse 0/1/3-event months",
       "samePackageAndSigningIdentity": true,
       "upstreamSourceImported": false
+    },
+    {
+      "version": "0.3.3",
+      "date": "2026-10-12",
+      "apkSha256": "db250f3ba41fbba92a4baeb8519ec219ea3b44b0ae3bd5fcf47303d3fc158f89",
+      "runtimeCodeChanged": true,
+      "feature": "Native date-header weather icons with explicit city selection, a small atomic cache, foreground-only HTTPS refresh and no widget or background weather networking",
+      "samePackageAndSigningIdentity": true,
+      "upstreamSourceImported": false,
+      "weatherProvider": "Open-Meteo / GeoNames",
+      "weatherDataLicence": "CC BY 4.0",
+      "originalWeatherVectorIcons": true
     }
   ],
   "scope": "Initial v0.2.3 public release; newer runtime changes are recorded in subsequentReleases."

@@ -89,6 +89,13 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
             } catch (Exception error) { Log.e("CalendarWidget", "Cannot refresh saved calendar data", error); }
         });
     }
+    static void weatherChanged(Context context) {
+        Context app = context.getApplicationContext();
+        WORK.execute(() -> {
+            try { refresh(app, ids(app)); }
+            catch (Exception error) { Log.e("CalendarWidget", "Cannot refresh cached weather", error); }
+        });
+    }
     private static SharedPreferences preferences(Context context) { return context.getSharedPreferences("calendar-widget", Context.MODE_PRIVATE); }
     private static int[] ids(Context context) {
         return AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, CalendarWidgetProvider.class));
@@ -141,17 +148,31 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
         int weekend = Color.parseColor(data.dark ? "#D7AAA1" : "#A36F69");
         root.setInt(R.id.widget_root, "setBackgroundResource", data.dark ? R.drawable.widget_background_dark : R.drawable.widget_background);
         root.setTextViewText(R.id.widget_month, month.getMonthValue() + "月");
-        root.setTextViewText(R.id.widget_year, String.valueOf(month.getYear()));
+        JSONObject city = data.weather.optJSONObject("city");
+        String cityName = city == null ? "" : city.optString("name");
+        boolean cachedWeather = data.weather.optBoolean("stale") && !data.weather.optBoolean("expired");
+        root.setTextViewText(R.id.widget_year, month.getYear() + (cityName.isEmpty() ? "" : " · " + cityName)
+                + (cachedWeather ? " · 缓存" : ""));
         root.setTextColor(R.id.widget_month, text); root.setTextColor(R.id.widget_year, muted);
         root.setTextViewTextSize(R.id.widget_month, TypedValue.COMPLEX_UNIT_DIP, compactRoot ? 16 : 18);
         root.setTextViewTextSize(R.id.widget_year, TypedValue.COMPLEX_UNIT_DIP, compactRoot ? 8.5f : 10);
         root.setTextViewTextSize(R.id.widget_ai_text, TypedValue.COMPLEX_UNIT_DIP, compactRoot ? 9 : 10);
+        root.setViewVisibility(R.id.widget_weather_source, city == null ? View.GONE : View.VISIBLE);
+        root.setTextColor(R.id.widget_weather_source, muted);
+        root.setTextViewTextSize(R.id.widget_weather_source, TypedValue.COMPLEX_UNIT_DIP, compactRoot ? 6 : 7);
+        Intent source = new Intent(Intent.ACTION_VIEW, Uri.parse("https://open-meteo.com/")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        root.setOnClickPendingIntent(R.id.widget_weather_source, PendingIntent.getActivity(context, id * 100 + 9, source,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         root.setInt(R.id.widget_weekday_rule, "setBackgroundColor", Color.parseColor(data.dark ? "#485149" : "#E5E8E0"));
         root.setOnClickPendingIntent(R.id.widget_ai, open(context, id, "ai", ""));
         root.setOnClickPendingIntent(R.id.widget_previous, move(context, id, PREVIOUS));
         root.setOnClickPendingIntent(R.id.widget_next, move(context, id, NEXT));
         root.setOnClickPendingIntent(R.id.widget_month_home, open(context, id, "date", month.atDay(1).toString()));
-        root.setContentDescription(R.id.widget_month_home, month.getYear() + "年" + month.getMonthValue() + "月，打开月历");
+        root.setContentDescription(R.id.widget_month_home, month.getYear() + "年" + month.getMonthValue() + "月，打开月历"
+                + (cityName.isEmpty() ? "" : "，天气城市" + cityName)
+                + (data.weather.optLong("updatedAt") <= 0 ? "" : "，天气更新于" + java.time.format.DateTimeFormatter.ofPattern("M月d日 HH:mm")
+                .format(Instant.ofEpochMilli(data.weather.optLong("updatedAt")).atZone(ZoneId.systemDefault())))
+                + (data.weather.optBoolean("expired") && city != null ? "，打开应用更新天气" : cachedWeather ? "，较早的天气缓存" : ""));
         root.removeAllViews(R.id.widget_weekdays); root.removeAllViews(R.id.widget_weeks);
         String[] weekdays = {"日", "一", "二", "三", "四", "五", "六"};
         for (int i = 0; i < 7; i++) {
@@ -230,6 +251,27 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
                     cell.setTextViewTextSize(R.id.widget_event_more, TypedValue.COMPLEX_UNIT_DIP, compactDay ? 6 : 7);
                     cell.setTextColor(R.id.widget_event_more, muted);
                 }
+                JSONObject forecast = outside ? null : data.weatherDays.get(date);
+                int moreCount = events == null || outside ? 0 : events.size() - shown;
+                boolean showWeather = forecast != null && weatherFits(context, compactDay, compactRoot, width,
+                        holiday != null, moreCount);
+                if (showWeather) {
+                    cell.setViewVisibility(R.id.widget_weather, View.VISIBLE);
+                    cell.setImageViewResource(R.id.widget_weather, WeatherIcons.resource(forecast.optString("icon"), data.dark));
+                    cell.setInt(R.id.widget_weather, "setImageAlpha", cachedWeather ? 145 : 255);
+                    cell.setContentDescription(R.id.widget_weather, cityName + "，" + forecast.optString("description")
+                            + (cachedWeather ? "，较早的天气缓存" : "，天气预报"));
+                }
+                if (moreCount > 0) {
+                    float density = context.getResources().getDisplayMetrics().density;
+                    int available = headerColumnWidth(context, compactDay, compactRoot, width)
+                            - Math.round((compactDay ? 13 : 20) * density)
+                            - (holiday == null ? 0 : Math.round(6 * density))
+                            - (compactDay ? 0 : Math.round(density))
+                            - (showWeather ? Math.round((compactDay ? 8 : 10) * density) + Math.round(density) : 0);
+                    cell.setInt(R.id.widget_event_more, "setMaxWidth", Math.max(1, available));
+                    cell.setContentDescription(R.id.widget_event_more, "还有" + moreCount + "个日程，点击日期查看");
+                }
                 if (events != null && !outside) for (int i = 0; i < Math.min(lines, events.size()); i++) {
                     JSONObject event = events.get(i); int viewId = i == 0 ? R.id.widget_event : R.id.widget_event_second;
                     String title = event.optString("title");
@@ -243,6 +285,10 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
                 String description = day.getMonthValue() + "月" + day.getDayOfMonth() + "日"
                         + (lunar.isEmpty() ? "" : "，农历" + lunar) + (observance.isEmpty() ? "" : "，" + observance);
                 if (holiday != null) description += holiday.optBoolean("isOffDay") ? "，放假" : "，调休上班";
+                if (forecast != null) description += "，" + cityName + "天气预报：" + forecast.optString("description")
+                        + (forecast.has("min") && forecast.has("max") ? "，" + Math.round(forecast.optDouble("min"))
+                        + "至" + Math.round(forecast.optDouble("max")) + "摄氏度" : "")
+                        + (cachedWeather ? "，较早的缓存，打开应用更新" : "");
                 if (amounts != null) description += amounts.description();
                 if (events != null) for (JSONObject event : events) description += "，" + event.optString("time") + " " + event.optString("title");
                 cell.setContentDescription(R.id.widget_day, description);
@@ -252,6 +298,27 @@ public class CalendarWidgetProvider extends AppWidgetProvider {
             root.addView(R.id.widget_weeks, week);
         }
         return root;
+    }
+    private static boolean weatherFits(Context context, boolean compactDay, boolean compactRoot, float width,
+            boolean holiday, int more) {
+        float density = context.getResources().getDisplayMetrics().density;
+        int column = headerColumnWidth(context, compactDay, compactRoot, width);
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
+        paint.setTextSize((compactDay ? 6 : 7) * density);
+        int overflow = more <= 0 ? 0 : (int)Math.ceil(paint.measureText("+" + more)) + (compactDay ? 0 : Math.round(density));
+        int required = Math.round((compactDay ? 13 : 20) * density)
+                + Math.round((compactDay ? 8 : 10) * density) + Math.round(density)
+                + (holiday ? Math.round(6 * density) : 0) + overflow;
+        // Preserve the date, holiday badge and exact +N count in a crowded header.
+        // Only the optional icon is omitted; the complete forecast stays accessible.
+        return required + 1 <= column;
+    }
+    private static int headerColumnWidth(Context context, boolean compactDay, boolean compactRoot, float width) {
+        float density = context.getResources().getDisplayMetrics().density;
+        return (int)Math.floor((Math.round(width * density)
+                - 2 * Math.round((compactRoot ? 8 : 12) * density)) / 7f)
+                - 2 * Math.round((compactDay ? 2 : 4) * density);
     }
     private static float scheduleTextSize(Context context, String title, boolean compactDay, boolean compactRoot, float width) {
         float density = context.getResources().getDisplayMetrics().density;

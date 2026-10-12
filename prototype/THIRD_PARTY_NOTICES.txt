@@ -448,3 +448,23 @@ twall[at]users[dot]sf[dot]net.
       of your accepting any such warranty or additional liability.
 
    END OF TERMS AND CONDITIONS
+
+
+Weather forecast data (online, optional): Open-Meteo
+https://open-meteo.com/
+https://open-meteo.com/en/licence
+https://open-meteo.com/en/terms
+API data licence: Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+City search data are provided by Open-Meteo using GeoNames:
+https://www.geonames.org/
+GeoNames data are distributed under CC BY 4.0.
+The app converts daily WMO weather codes into original local vector icons,
+rounds displayed temperatures to whole Celsius degrees, and caches at most
+16 daily forecasts. Attribution and licence links appear in weather settings;
+the calendar widget includes a clickable Open-Meteo source label. Weather
+icons are original to this project, not imported from Open-Meteo.
+The free Open-Meteo API is used for this non-commercial, ad-free application.
+No Open-Meteo server implementation is bundled; its server code licence is
+separate from the API data licence. Weather requests contain only the selected
+city name or geographic coordinates and do not include ledger or AI data.

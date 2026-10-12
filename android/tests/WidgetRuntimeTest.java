@@ -45,11 +45,12 @@ public class WidgetRuntimeTest extends Instrumentation {
             Intent intent=entryIntent();
             if("cold-ai".equals(phase))intent.setAction(PACKAGE+".WIDGET_OPEN").putExtra("widgetTarget","ai");
             if("cold-date".equals(phase))intent.setAction(PACKAGE+".WIDGET_OPEN").putExtra("widgetTarget","date").putExtra("widgetDate","2026-10-10");
+            if(phase.startsWith("weather"))FakeWeatherConnection.install();
             startApp(intent);
             if("baseline".equals(phase)) {
                 preferences().edit().putString("businessBefore",business())
                         .putString("keyCipherBefore",getTargetContext().getSharedPreferences("api-config",0).getString("keyCipher",""))
-                        .putString("marker","v031-to-v032").commit();
+                        .putString("marker","v032-to-v033").commit();
                 check("old release has saved business data",truth("calendarLedgerPreview.getState().transactions.length>0&&calendarLedgerPreview.getState().events.length>0"));
             } else if("cold-ai".equals(phase)) {
                 check("cold start consumes AI entry after JavaScript is ready",truth("document.body.classList.contains('ai-visible')"));
@@ -77,6 +78,10 @@ public class WidgetRuntimeTest extends Instrumentation {
                 evaluate("document.querySelector('.mobile-nav [data-page=more]').click();document.querySelector('.main [data-action=settings]').click()");SystemClock.sleep(400);
                 check("native phone settings modal fits the screen",truth("!document.body.classList.contains('ai-visible')&&document.querySelector('.modal').getBoundingClientRect().width>200&&document.querySelector('.modal').getBoundingClientRect().height>200&&document.querySelector('.modal').getBoundingClientRect().right<=innerWidth+1&&document.querySelector('.modal').getBoundingClientRect().bottom<=innerHeight+1"));
                 screenshot("app-settings",null);
+            } else if(phase.startsWith("weather")) {
+                weatherAcceptance(report);
+            } else if("live-weather".equals(phase)) {
+                liveWeatherAcceptance(report);
             } else if("sparse-grid".equals(phase)) {
                 sparseGridAcceptance(report);
             } else if("data-projection".equals(phase)) {
@@ -122,7 +127,7 @@ public class WidgetRuntimeTest extends Instrumentation {
     private void acceptance(JSONObject report)throws Exception {
         check("same-signature upgrade retains every saved record",business().equals(preferences().getString("businessBefore","")));
         check("same-signature upgrade retains encrypted API configuration",getTargetContext().getSharedPreferences("api-config",0).getString("keyCipher","").equals(preferences().getString("keyCipherBefore","!")));
-        check("upgrade retains private preference marker","v031-to-v032".equals(preferences().getString("marker","")));
+        check("upgrade retains private preference marker","v032-to-v033".equals(preferences().getString("marker","")));
         fixture();restartApp();
         startHost();widget=create();second=create();attach(widget,370,540);
         setMonth(widget.getAppWidgetId(),"2026-10");setMonth(second.getAppWidgetId(),"2026-10");
@@ -285,6 +290,199 @@ public class WidgetRuntimeTest extends Instrumentation {
         } finally {
             evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(original.toString())+")");
             setMonth(widget.getAppWidgetId(),"2026-11");detach();restartApp();
+        }
+    }
+    private Object weatherController()throws Exception{
+        java.lang.reflect.Field field=activity.getClass().getDeclaredField("weather");field.setAccessible(true);return field.get(activity);
+    }
+    private JSONObject weatherStatus()throws Exception{
+        Object controller=weatherController();java.lang.reflect.Method method=controller.getClass().getDeclaredMethod("status");method.setAccessible(true);
+        return (JSONObject)method.invoke(controller);
+    }
+    private void weatherConfigure(JSONObject city)throws Exception{
+        Object controller=weatherController();java.lang.reflect.Method method=controller.getClass().getDeclaredMethod("configure",JSONObject.class);method.setAccessible(true);method.invoke(controller,city);
+    }
+    private void weatherIdle()throws Exception{
+        long end=SystemClock.elapsedRealtime()+12000;
+        while(SystemClock.elapsedRealtime()<end){if(!weatherStatus().optBoolean("refreshing"))return;SystemClock.sleep(80);}
+        throw new AssertionError("Weather did not become idle");
+    }
+    private void weatherBackground()throws Exception{
+        long end=SystemClock.elapsedRealtime()+6000;
+        while(SystemClock.elapsedRealtime()<end){
+            Object controller=weatherController();java.lang.reflect.Field field=controller.getClass().getDeclaredField("foreground");field.setAccessible(true);
+            synchronized(controller){if(!field.getBoolean(controller))return;}
+            SystemClock.sleep(50);
+        }
+        throw new AssertionError("Activity did not reach its weather onStop hook");
+    }
+    private File weatherFile(){return new File(getTargetContext().getFilesDir(),"weather-cache-v1.json");}
+    private byte[] weatherBytes()throws Exception{
+        if(!weatherFile().exists())return null;return new android.util.AtomicFile(weatherFile()).readFully();
+    }
+    private void writeWeather(byte[] bytes)throws Exception{
+        Class<?> store=Class.forName(PACKAGE+".WeatherStore");
+        java.lang.reflect.Field lock=store.getDeclaredField("LOCK");lock.setAccessible(true);
+        synchronized(lock.get(null)){
+            android.util.AtomicFile file=new android.util.AtomicFile(weatherFile());
+            if(bytes==null){file.delete();return;}
+            FileOutputStream output=file.startWrite();try{output.write(bytes);file.finishWrite(output);}catch(Exception error){file.failWrite(output);throw error;}
+        }
+        Class<?> provider=Class.forName(PACKAGE+".CalendarWidgetProvider");java.lang.reflect.Method changed=provider.getDeclaredMethod("weatherChanged",Context.class);changed.setAccessible(true);changed.invoke(null,getTargetContext());
+    }
+    private boolean rejectsForecast(JSONObject forecast,JSONObject city)throws Exception{
+        Class<?> store=Class.forName(PACKAGE+".WeatherStore");
+        java.lang.reflect.Method normalize=store.getDeclaredMethod("normalizeForecast",JSONObject.class,JSONObject.class,long.class);normalize.setAccessible(true);
+        try{normalize.invoke(null,forecast,city,System.currentTimeMillis());return false;}catch(java.lang.reflect.InvocationTargetException error){return true;}
+    }
+    private boolean weatherHeadersFit(View parent){
+        AtomicReference<Boolean> result=new AtomicReference<>(true);
+        onUi(()->{
+            for(View cell:cells(parent)){
+                Rect previous=null,frame=new Rect();view(cell,"widget_day_surface").getGlobalVisibleRect(frame);
+                for(String id:new String[]{"widget_date","widget_weather","widget_event_more","widget_holiday_badge"}){
+                    View child=view(cell,id);if(child==null||child.getVisibility()!=View.VISIBLE)continue;
+                    Rect rect=new Rect();child.getGlobalVisibleRect(rect);
+                    if(rect.width()<child.getWidth()-1||rect.left<frame.left||rect.right>frame.right
+                            ||(previous!=null&&Rect.intersects(previous,rect)))result.set(false);
+                    previous=rect;
+                }
+            }
+        });return result.get();
+    }
+    private void weatherAcceptance(JSONObject report)throws Exception {
+        byte[] originalWeather=weatherBytes();String originalSnapshot=evaluate("CalendarAndroid.loadSnapshot()");
+        String before=business();JSONObject beijing=FakeWeatherConnection.city("北京",39.9075,116.39723);
+        String today=java.time.LocalDate.now(java.time.ZoneId.of("Asia/Shanghai")).toString();
+        String tomorrow=java.time.LocalDate.parse(today).plusDays(1).toString();
+        try {
+            check("unconfigured app does not make a weather request",FakeWeatherConnection.requests.get()==0);
+            evaluate("document.querySelector('.mobile-nav [data-page=more]').click();document.querySelector('.main [data-action=weather]').click()");
+            waitFor("document.querySelector('#weather-city-input')!==null",5000);
+            evaluate("document.querySelector('#weather-city-input').value='北京';document.querySelector('#weather-search-form').requestSubmit()");
+            waitFor("document.querySelector('[data-weather-index]')!==null",6000);
+            check("city search requires an explicit choice instead of choosing the first result",weatherStatus().optJSONObject("city")==null&&FakeWeatherConnection.forecasts.get()==0);
+            evaluate("document.querySelector('[data-weather-index=\"0\"]').click()");
+            waitFor("document.querySelector('.weather-update')?.textContent.includes('最近更新')",6000);weatherIdle();
+            JSONObject status=weatherStatus();
+            check("selected city receives one forecast through the real native bridge","北京".equals(status.getJSONObject("city").getString("name"))&&FakeWeatherConnection.forecasts.get()==1&&status.optLong("updatedAt")>0);
+            check("null or unknown WMO codes are omitted rather than made into sunny days",status.getJSONArray("days").length()==14&&!status.getJSONArray("days").toString().contains("\"code\":999"));
+            JSONObject noTemperature=status.getJSONArray("days").getJSONObject(7);
+            check("missing temperatures remain absent",!noTemperature.has("min")&&!noTemperature.has("max"));
+            check("new forecast covers only the supplied up-to-16-day dates",status.getString("forecastEnd").equals(java.time.LocalDate.parse(today).plusDays(15).toString()));
+            byte[] cache=weatherBytes();
+            check("durable weather cache is small and excludes accounting, messages and API credentials",cache.length<10_240&&!new String(cache,"UTF-8").matches("(?s).*(transactions|events|apiKey|keyCipher|messages).*"));
+            check("reading and configuring weather leaves accounting, events, budgets and ledgers unchanged",before.equals(business()));
+            JSONObject malformed=FakeWeatherConnection.forecast();malformed.getJSONObject("daily").getJSONArray("weather_code").put(16,0);
+            check("incomplete provider arrays are rejected",rejectsForecast(malformed,beijing));
+            malformed=FakeWeatherConnection.forecast();malformed.getJSONObject("daily").getJSONArray("time").put(0,java.time.LocalDate.parse(today).minusDays(1).toString());
+            check("a stale provider date range is rejected",rejectsForecast(malformed,beijing));
+            malformed=FakeWeatherConnection.forecast();malformed.getJSONObject("daily_units").put("temperature_2m_max","°F");
+            check("unexpected Fahrenheit data cannot be shown as Celsius",rejectsForecast(malformed,beijing));
+            boolean rejected=false;try{weatherConfigure(new JSONObject(beijing.toString()).put("latitude",91));}catch(Exception expected){rejected=true;}
+            check("invalid city coordinates cannot replace the saved city",rejected&&weatherStatus().getJSONObject("city").getString("name").equals("北京"));
+            check("weather modal fits the real phone viewport and displays cached update time",truth("document.documentElement.scrollWidth<=innerWidth+1&&document.querySelector('.modal').getBoundingClientRect().right<=innerWidth+1&&document.querySelector('.weather-forecast').children.length===7"));
+            screenshot("app-weather",null);evaluate("document.querySelector('.weather-settings [data-action=close-modal]').click()");
+            settings("light","normal",1);
+            startHost();widget=restore(preferences().getInt("keptId",-1));keepBindings=true;
+            JSONObject sample=new JSONObject(originalSnapshot);JSONObject state=sample.getJSONObject("state");
+            state.getJSONArray("transactions").put(transaction("weather-expense",today,"expense",1980)).put(transaction("weather-income",today,"income",8000));
+            state.getJSONArray("events").put(event("weather-shopping","下班买菜",today,"18:00","personal","none","",new JSONArray()));
+            evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(sample.toString())+")");
+            setMonth(widget.getAppWidgetId(),today.substring(0,7));attach(widget,370,540);SystemClock.sleep(500);
+            check("weather icon shares the existing date header while both money lines and schedule remain visible",visible(dayCell(widget,today),"widget_weather")&&visible(dayCell(widget,today),"widget_expense")&&visible(dayCell(widget,today),"widget_income")&&visible(dayCell(widget,today),"widget_event")&&fits(widget)&&weatherHeadersFit(widget));
+            check("date accessibility describes the full forecast and temperature",description(widget,today).contains("北京天气预报：晴")&&description(widget,today).contains("13至24摄氏度"));
+            check("widget carries a visible weather-source link",visible(widget,"widget_weather_source")&&text(widget,"widget_weather_source").equals("Open-Meteo"));
+            screenshot("widget-weather",widget);
+            state.getJSONArray("events").put(event("weather-two","项目讨论",today,"19:00","work","none","",new JSONArray()))
+                    .put(event("weather-three","阅读半小时",today,"20:00","personal","none","",new JSONArray()));
+            state.getJSONObject("holidayDays").put(today,new JSONObject().put("date",today).put("name","QA调休").put("isOffDay",false));
+            evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(sample.toString())+")");
+            refresh(widget.getAppWidgetId());SystemClock.sleep(500);
+            check("crowded header preserves exact +N and holiday badge without overlap",visible(dayCell(widget,today),"widget_event_more")&&visible(dayCell(widget,today),"widget_holiday_badge")&&weatherHeadersFit(widget)&&fits(widget));
+            attach(widget,230,460);SystemClock.sleep(400);
+            report.put("minimumWeatherHeaderFits",weatherHeadersFit(widget)).put("minimumWeatherBodyFits",fits(widget));
+            check("minimum width omits only the optional icon on a crowded day",!visible(dayCell(widget,today),"widget_weather")&&visible(dayCell(widget,today),"widget_event_more")&&visible(dayCell(widget,today),"widget_event")&&visible(dayCell(widget,today),"widget_expense")&&visible(dayCell(widget,today),"widget_income")&&report.getBoolean("minimumWeatherHeaderFits")&&report.getBoolean("minimumWeatherBodyFits"));
+            check("minimum width still shows weather on an uncrowded date",visible(dayCell(widget,tomorrow),"widget_weather"));
+            screenshot("widget-weather-minimum",widget);
+            state.getJSONObject("holidayDays").remove(today);
+            evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(sample.toString())+")");
+            detach();settings("dark","large",1);attach(widget,370,540);SystemClock.sleep(500);
+            check("dark and large-font widget retains native weather icons and uncut content",visible(dayCell(widget,tomorrow),"widget_weather")&&weatherHeadersFit(widget)&&fits(widget));
+            screenshot("widget-weather-dark",widget);
+            int requests=FakeWeatherConnection.requests.get();
+            onUi(()->callActivityOnResume(activity));SystemClock.sleep(250);
+            weatherStatus();refresh(widget.getAppWidgetId());attach(widget,250,460);
+            check("status reads, resume, widget refresh and resize do not poll weather",FakeWeatherConnection.requests.get()==requests);
+            // Exercise the actual Activity onStop hook, not a synthetic background flag.
+            onUi(()->activity.moveTaskToBack(true));weatherBackground();
+            int background=FakeWeatherConnection.requests.get();
+            refresh(widget.getAppWidgetId());
+            getTargetContext().sendBroadcast(new Intent(PACKAGE+".WIDGET_NEXT").setComponent(PROVIDER).putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,widget.getAppWidgetId()));
+            getTargetContext().sendBroadcast(new Intent(PACKAGE+".WIDGET_MIDNIGHT").setComponent(PROVIDER));
+            weatherStatus();SystemClock.sleep(600);
+            check("background widget flip, midnight and local reads make zero weather network requests",FakeWeatherConnection.requests.get()==background);
+            rejected=false;try{weatherConfigure(beijing);}catch(Exception expected){rejected=true;}
+            check("background cannot initiate city configuration or forecast networking",rejected&&FakeWeatherConnection.requests.get()==background);
+            onUi(()->activity.startActivity(entryIntent()));SystemClock.sleep(500);weatherIdle();
+            check("returning to the app foreground refreshes once",FakeWeatherConnection.forecasts.get()==2);
+            String previousDays=weatherStatus().getJSONArray("days").toString();long updated=weatherStatus().getLong("updatedAt");
+            FakeWeatherConnection.fail=true;restartApp();weatherIdle();
+            check("network failure preserves last successful forecast and timestamp",weatherStatus().getLong("updatedAt")==updated&&weatherStatus().getJSONArray("days").toString().equals(previousDays)&&!weatherStatus().getString("lastError").isEmpty());
+            FakeWeatherConnection.fail=false;
+            JSONObject raw=new JSONObject(new String(weatherBytes(),"UTF-8"));
+            raw.put("updatedAt",System.currentTimeMillis()-25L*3600*1000);writeWeather(raw.toString().getBytes("UTF-8"));
+            report.put("staleCacheStatus",weatherStatus());
+            check("older-than-24-hour cache is explicitly marked stale",weatherStatus().getBoolean("stale")&&!weatherStatus().getBoolean("expired")&&weatherStatus().getJSONArray("days").length()>0);
+            raw.put("updatedAt",System.currentTimeMillis()-73L*3600*1000);writeWeather(raw.toString().getBytes("UTF-8"));
+            check("expired forecast is hidden without a background update",weatherStatus().getBoolean("expired")&&weatherStatus().getJSONArray("days").length()==0);
+            FakeWeatherConnection.block=true;int target=FakeWeatherConnection.forecasts.get()+1;weatherConfigure(beijing);
+            long deadline=SystemClock.elapsedRealtime()+4000;
+            while(FakeWeatherConnection.forecasts.get()<target&&SystemClock.elapsedRealtime()<deadline)SystemClock.sleep(30);
+            check("cancellation test actually starts an in-flight request",FakeWeatherConnection.forecasts.get()>=target);
+            onUi(()->activity.moveTaskToBack(true));weatherBackground();FakeWeatherConnection.block=false;SystemClock.sleep(400);
+            check("leaving the app cancels an in-flight response and prevents a new cache timestamp",weatherStatus().getLong("updatedAt")==raw.getLong("updatedAt"));
+            onUi(()->activity.startActivity(entryIntent()));SystemClock.sleep(400);weatherIdle();
+            weatherConfigure(null);
+            check("turning weather off removes forecast and city",weatherStatus().optJSONObject("city")==null&&weatherStatus().getJSONArray("days").length()==0);
+            int disabled=FakeWeatherConnection.requests.get();restartApp();SystemClock.sleep(250);
+            check("disabled weather does not fetch when the app opens again",FakeWeatherConnection.requests.get()==disabled);
+            FakeWeatherConnection.block=true;weatherConfigure(beijing);SystemClock.sleep(150);
+            weatherConfigure(FakeWeatherConnection.city("上海",31.22222,121.45806));
+            check("switching city immediately clears the previous city's cache",weatherStatus().getJSONObject("city").getString("name").equals("上海")&&weatherStatus().getJSONArray("days").length()==0&&weatherStatus().getLong("updatedAt")==0);
+            FakeWeatherConnection.block=false;weatherIdle();
+            check("late old-city responses cannot overwrite the chosen city","上海".equals(weatherStatus().getJSONObject("city").getString("name"))&&weatherStatus().getJSONArray("days").length()>0);
+            report.put("weatherRequests",FakeWeatherConnection.requests.get()).put("forecastRequests",FakeWeatherConnection.forecasts.get())
+                    .put("weatherCacheBytes",weatherBytes().length).put("providerResponses","synthetic; real native networking path and lifecycle")
+                    .put("fontScale",getTargetContext().getResources().getConfiguration().fontScale);
+        } finally {
+            FakeWeatherConnection.fail=false;FakeWeatherConnection.block=false;
+            try{weatherConfigure(null);}catch(Exception ignored){}
+            writeWeather(originalWeather);
+            evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(originalSnapshot)+")");
+            setMonth(preferences().getInt("keptId",-1),"2026-11");detach();restartApp();
+        }
+    }
+    private void liveWeatherAcceptance(JSONObject report)throws Exception {
+        byte[] originalWeather=weatherBytes();
+        try {
+            weatherConfigure(FakeWeatherConnection.city("北京",39.9075,116.39723));
+            long end=SystemClock.elapsedRealtime()+22000;
+            while(weatherStatus().optBoolean("refreshing")&&SystemClock.elapsedRealtime()<end)SystemClock.sleep(120);
+            JSONObject status=weatherStatus();
+            check("real Android HTTPS forecast completes through the production provider",status.getLong("updatedAt")>0&&status.getJSONArray("days").length()>0&&status.optString("lastError").isEmpty());
+            report.put("provider","https://api.open-meteo.com/v1/forecast").put("city","北京")
+                    .put("weatherDays",status.getJSONArray("days").length()).put("weatherCacheBytes",weatherBytes().length);
+            settings("light","normal",1);
+            startHost();widget=restore(preferences().getInt("keptId",-1));keepBindings=true;
+            setMonth(widget.getAppWidgetId(),status.getString("today").substring(0,7));attach(widget,370,540);SystemClock.sleep(400);
+            check("real forecast renders beside today's date",visible(dayCell(widget,status.getString("today")),"widget_weather")&&weatherHeadersFit(widget)&&fits(widget));
+            screenshot("widget-weather-live",widget);
+            detach();evaluate("document.querySelector('.mobile-nav [data-page=more]').click();document.querySelector('.main [data-action=weather]').click()");
+            waitFor("document.querySelector('.weather-forecast')!==null",5000);screenshot("app-weather-live",null);
+        } finally {
+            try{weatherConfigure(null);}catch(Exception ignored){}
+            writeWeather(originalWeather);detach();
         }
     }
     private int surfaceColor(View cell){
@@ -487,7 +685,7 @@ public class WidgetRuntimeTest extends Instrumentation {
         Bitmap screen=getUiAutomation().takeScreenshot();if(screen==null)throw new AssertionError("No Android screenshot");
         Bitmap image=screen;
         if(crop!=null){Rect rect=new Rect();onUi(()->crop.getGlobalVisibleRect(rect));image=Bitmap.createBitmap(screen,rect.left,rect.top,rect.width(),rect.height());}
-        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.2.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
+        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.3.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
         finally{if(image!=screen)image.recycle();screen.recycle();}
     }
     private void check(String name,boolean passed)throws Exception{findings.put(new JSONObject().put("check",name).put("passed",passed));if(!passed)throw new AssertionError(name);}

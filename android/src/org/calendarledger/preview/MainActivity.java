@@ -31,11 +31,16 @@ public class MainActivity extends Activity {
     private ValueCallback<Uri[]> fileCallback;
     private SharedPreferences preferences;
     private VoiceInput voice;
+    private WeatherController weather;
     private JSONObject pendingWidgetNavigation;
     private boolean widgetPageReady;
     private static final String ORIGIN="https://calendar-ledger.local/",KEY_ALIAS="calendar-ledger-api-v1";
     @Override public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);preferences=getSharedPreferences("api-config",MODE_PRIVATE);acceptWidgetIntent(getIntent());
+        weather=new WeatherController(this,pool,()->{
+            CalendarWidgetProvider.weatherChanged(MainActivity.this);
+            ui.post(()->{if(web!=null&&!isFinishing())web.evaluateJavascript("globalThis.dispatchEvent(new Event('calendar-weather-changed'))",null);});
+        });
         FrameLayout frame=new FrameLayout(this);frame.setBackgroundColor(Color.rgb(252,251,248));web=new WebView(this);frame.addView(web,new FrameLayout.LayoutParams(-1,-1));setContentView(frame);voice=new VoiceInput(this,web);
         if(Build.VERSION.SDK_INT>=30){getWindow().setDecorFitsSystemWindows(false);getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);frame.setOnApplyWindowInsetsListener((v,insets)->{android.graphics.Insets bars=insets.getInsets(WindowInsets.Type.systemBars()|WindowInsets.Type.displayCutout());android.graphics.Insets ime=insets.getInsets(WindowInsets.Type.ime());v.setPadding(bars.left,bars.top,bars.right,Math.max(bars.bottom,ime.bottom));return insets;});}
         else{frame.setFitsSystemWindows(true);getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);}
@@ -82,7 +87,8 @@ public class MainActivity extends Activity {
     @Override protected void onActivityResult(int request,int result,Intent data){super.onActivityResult(request,result,data);if(request==41&&fileCallback!=null){ArrayList<Uri> uris=new ArrayList<>();if(result==RESULT_OK&&data!=null){if(data.getClipData()!=null){for(int index=0;index<data.getClipData().getItemCount();index++)uris.add(data.getClipData().getItemAt(index).getUri());}else if(data.getData()!=null)uris.add(data.getData());}fileCallback.onReceiveValue(uris.isEmpty()?null:uris.toArray(new Uri[0]));fileCallback=null;}}
     @Override public void onBackPressed(){handleBack();}
     private void handleBack(){web.evaluateJavascript("(() => {if(document.querySelector('.modal')){document.querySelector('[data-action=close-modal]').click();return true;}if(document.querySelector('.ai-panel.open')){document.querySelector('[data-action=close-ai]').click();return true;}return false;})()",value->{if(!"true".equals(value))finish();});}
-    @Override protected void onStop(){if(voice!=null)voice.paused();super.onStop();}
+    @Override protected void onStart(){super.onStart();if(weather!=null)weather.opened();}
+    @Override protected void onStop(){if(weather!=null)weather.stopped();if(voice!=null)voice.paused();super.onStop();}
     @Override protected void onDestroy(){if(voice!=null)voice.close();if(isFinishing()){web.removeJavascriptInterface("CalendarAndroid");web.destroy();pool.shutdown();}super.onDestroy();}
     @Override protected void onResume(){super.onResume();if(voice!=null)voice.resumed();if(web!=null)web.evaluateJavascript("window.__calendarResync && window.__calendarResync()",null);}
     @Override public void onWindowFocusChanged(boolean focused){super.onWindowFocusChanged(focused);if(voice!=null)voice.windowFocusChanged(focused);}
@@ -113,6 +119,9 @@ public class MainActivity extends Activity {
         @JavascriptInterface public String loadSnapshot(){return SnapshotStore.read(MainActivity.this);}
         @JavascriptInterface public boolean saveSnapshot(String json){JSONObject state=SnapshotStore.save(MainActivity.this,json);if(state==null)return false;try{CalendarWidgetProvider.snapshotChanged(MainActivity.this,state);}catch(Exception error){android.util.Log.e("CalendarWidget","Cannot queue widget refresh",error);}return true;}
         @JavascriptInterface public void request(String id,String route,String json){pool.execute(()->{int status=200;JSONObject result;try{JSONObject body=new JSONObject(json);if(route.equals("/api/config")){if(body.length()>0){String base=body.optString("baseURL","https://api.deepseek.com").replaceAll("/+$","");URL url=new URL(base);if(!"https".equals(url.getProtocol())||url.getUserInfo()!=null||url.getQuery()!=null||url.getRef()!=null)throw new IOException("请填写不含凭据或查询参数的 HTTPS API 地址。");String model=body.optString("model","deepseek-flash").trim();if(model.isEmpty()||model.length()>128)throw new IOException("模型名称无效。");String key=body.optString("apiKey","").trim();if(key.length()>2000||key.indexOf('\n')>=0||key.indexOf('\r')>=0)throw new IOException("API Key 长度或格式异常。");if(!key.isEmpty())saveKey(key);if(readKey().isEmpty())throw new IOException("请填写 API Key。");preferences.edit().putString("baseURL",base).putString("model",model).apply();}result=publicConfig();}
+                    else if(route.equals("/api/weather"))result=weather.status();
+                    else if(route.equals("/api/weather-search"))result=weather.search(body.optString("name"));
+                    else if(route.equals("/api/weather-city"))result=weather.configure(body.optJSONObject("city"));
                     else if(route.equals("/api/chat"))result=completion(body);
                     else if(route.equals("/api/test")){JSONObject completed=completion(new JSONObject().put("messages",new JSONArray().put(new JSONObject().put("role","user").put("content","请只回复 OK，用于测试 API 连接。"))));result=new JSONObject().put("ok",true).put("model",completed.getString("model"));}
                     else if(route.startsWith("/api/holidays?year="))result=holidays(Integer.parseInt(route.substring(route.indexOf('=')+1)));
