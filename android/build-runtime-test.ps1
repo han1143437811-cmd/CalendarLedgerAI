@@ -28,11 +28,12 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'tests\OfflineStartupTest.java')
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'tests\VoiceRuntimeTest.java') -Destination $testDirectory
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'tests\WidgetRuntimeTest.java'),(Join-Path $PSScriptRoot 'tests\FakeWeatherConnection.java') -Destination $testDirectory
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'tests\FakeWebConnection.java') -Destination $testDirectory
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'tests\FakeGatewayConnection.java') -Destination $testDirectory
 $androidJar = Join-Path $testDirectory 'android.jar'
 function Invoke-TestTool { param([string]$Executable,[string[]]$ToolArguments) & $Executable @ToolArguments; if ($LASTEXITCODE -ne 0) { throw "Tool failed ($LASTEXITCODE): $Executable" } }
 $unsigned = Join-Path $testDirectory 'unsigned.apk'
 Invoke-TestTool $aapt2 @('link','-o',$unsigned,'-I',$androidJar,'--manifest',(Join-Path $testDirectory 'AndroidManifest.xml'))
-Invoke-TestTool (Join-Path $testJavaHome 'bin\javac.exe') @('-encoding','UTF-8','--release','8','-classpath',$androidJar,'-d',(Join-Path $testDirectory 'classes'),(Join-Path $testDirectory 'OfflineStartupTest.java'),(Join-Path $testDirectory 'FixtureRecognitionService.java'),(Join-Path $testDirectory 'VoiceRuntimeTest.java'),(Join-Path $testDirectory 'WidgetRuntimeTest.java'),(Join-Path $testDirectory 'FakeWeatherConnection.java'),(Join-Path $testDirectory 'FakeWebConnection.java'))
+Invoke-TestTool (Join-Path $testJavaHome 'bin\javac.exe') @('-encoding','UTF-8','--release','8','-classpath',$androidJar,'-d',(Join-Path $testDirectory 'classes'),(Join-Path $testDirectory 'OfflineStartupTest.java'),(Join-Path $testDirectory 'FixtureRecognitionService.java'),(Join-Path $testDirectory 'VoiceRuntimeTest.java'),(Join-Path $testDirectory 'WidgetRuntimeTest.java'),(Join-Path $testDirectory 'FakeWeatherConnection.java'),(Join-Path $testDirectory 'FakeWebConnection.java'),(Join-Path $testDirectory 'FakeGatewayConnection.java'))
 Invoke-TestTool (Join-Path $testJavaHome 'bin\jar.exe') @('--create','--file',(Join-Path $testDirectory 'classes.jar'),'-C',(Join-Path $testDirectory 'classes'),'.')
 Invoke-TestTool (Join-Path $testJavaHome 'bin\java.exe') @('-cp',$d8Jar,'com.android.tools.r8.D8','--lib',$androidJar,'--min-api','26','--output',(Join-Path $testDirectory 'dex'),(Join-Path $testDirectory 'classes.jar'))
 Add-Type -AssemblyName System.IO.Compression,System.IO.Compression.FileSystem

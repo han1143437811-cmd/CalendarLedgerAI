@@ -3,7 +3,7 @@ export function createChatView(panel,{messageHTML}){
   const scroller=panel.querySelector('#chat-scroll'),list=panel.querySelector('#chat-messages');
   const input=panel.querySelector('#chat-input'),send=panel.querySelector('#chat-form button[type=submit]');
   const pending=panel.querySelector('#chat-pending'),latest=panel.querySelector('[data-action=latest-messages]');
-  const nodes=new Map();let initialized=false,wasVisible=false,following=true,lastTop=0,frame=0;
+  const nodes=new Map();let initialized=false,wasVisible=false,following=true,lastTop=0,frame=0,lastSession='';
   const visible=()=>getComputedStyle(panel).display!=='none';
   const nearEnd=()=>scroller.scrollHeight-scroller.clientHeight-scroller.scrollTop<=72;
   const updateLatest=()=>{const hidden=following||nearEnd();if(latest.hidden!==hidden)latest.hidden=hidden;};
@@ -33,7 +33,8 @@ export function createChatView(panel,{messageHTML}){
   resize.observe(scroller);
   return {
     moveToEnd,
-    render({messages,busy,open,draft,mode,forceEnd=false}){
+    render({messages,busy,open,draft,mode,modeLabel,sessionKey='',forceEnd=false}){
+      const branchChanged=sessionKey!==lastSession;lastSession=sessionKey;if(branchChanged){cancel();following=true;}
       const previouslyVisible=visible(),stick=following||(previouslyVisible&&nearEnd()),oldTop=previouslyVisible?scroller.scrollTop:lastTop;
       panel.classList.toggle('open',open);
       const isVisible=visible(),live=new Set(messages);let changed=false;
@@ -42,7 +43,7 @@ export function createChatView(panel,{messageHTML}){
         const html=messageHTML(message);let entry=nodes.get(message);
         if(!entry){
           const node=document.createElement('div');node.className=`chat-message ${message.role}`;
-          if(initialized&&isVisible)node.classList.add('is-new');
+          if(initialized&&isVisible&&!branchChanged)node.classList.add('is-new');
           node.addEventListener('animationend',()=>node.classList.remove('is-new'),{once:true});
           entry={node,html:null};nodes.set(message,entry);changed=true;
         }
@@ -53,12 +54,12 @@ export function createChatView(panel,{messageHTML}){
       if(list.getAttribute('aria-busy')!==String(busy))list.setAttribute('aria-busy',String(busy));
       if(input.value!==draft)input.value=draft;
       if(send.disabled!==busy)send.disabled=busy;
-      const modeLabel=panel.querySelector('#chat-mode'),label=mode==='deepseek'?'DeepSeek':'本地演示';
-      if(modeLabel.textContent!==label)modeLabel.textContent=label;
+      const badge=panel.querySelector('#chat-mode'),label=mode==='deepseek'?(modeLabel??'DeepSeek'):'本地演示';
+      if(badge.textContent!==label)badge.textContent=label;
       const note=panel.querySelector('.composer-note'),caption=mode==='demo'?'本地演示 · 截图识别需要在设置中连接 API':'文字可直接操作 · 截图先核对后保存';
       if(note.textContent!==caption)note.textContent=caption;
       if(isVisible){
-        if(!initialized||!wasVisible&&following)moveToEnd(false);
+        if(branchChanged||!initialized||!wasVisible&&following)moveToEnd(false);
         else if(forceEnd||changed&&stick)moveToEnd(true);
         else if(!frame)scroller.scrollTop=oldTop;
         updateLatest();

@@ -47,6 +47,7 @@ public class WidgetRuntimeTest extends Instrumentation {
             if("cold-date".equals(phase))intent.setAction(PACKAGE+".WIDGET_OPEN").putExtra("widgetTarget","date").putExtra("widgetDate","2026-10-10");
             if(phase.startsWith("weather"))FakeWeatherConnection.install();
             if("web-tools".equals(phase))FakeWebConnection.install();
+            if("chat-api".equals(phase))FakeGatewayConnection.install();
             startApp(intent);
             if("baseline".equals(phase)) {
                 if(getTargetContext().getSharedPreferences("api-config",0).getString("keyCipher","").isEmpty()) {
@@ -88,6 +89,8 @@ public class WidgetRuntimeTest extends Instrumentation {
                 aiOperationsAcceptance(report);
             } else if("web-tools".equals(phase)||"live-web".equals(phase)) {
                 webAcceptance(report,"live-web".equals(phase));
+            } else if("chat-api".equals(phase)) {
+                chatAPIAcceptance(report);
             } else if(phase.startsWith("weather")) {
                 weatherAcceptance(report);
             } else if("live-weather".equals(phase)) {
@@ -232,6 +235,47 @@ public class WidgetRuntimeTest extends Instrumentation {
             report.put("provider",evaluate("__qaParsed.provider")).put("sources",new JSONArray(evaluate("JSON.stringify(__qaParsed.items.map(r=>({title:r.title,url:r.url})))")));
         }
         report.put("actualPublicNetwork",live).put("apiKeyUsed",false);
+    }
+    private void chatAPIAcceptance(JSONObject report)throws Exception {
+        String before=evaluate("CalendarAndroid.loadSnapshot()");android.content.SharedPreferences apiPrefs=getTargetContext().getSharedPreferences("api-config",0);Map<String,?> oldPrefs=new HashMap<>(apiPrefs.getAll());
+        try {
+            JSONObject sample=new JSONObject(before),s=sample.getJSONObject("state");for(String key:new String[]{"transactions","events","tasks","undo","chat","lastCreated","expenseAllocations","aiMemory","aiMemorySuggestions","aiChatArchive","correctionHistory","chatBranches"})s.put(key,new JSONArray());s.remove("activeChatBranchId");s.put("aiSummary",JSONObject.NULL).put("chatDraft","");sample.getJSONObject("aiConfig").put("mode","demo").put("autoSummary",false).put("effort","none");
+            evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(sample.toString())+")");restartApp();sendChat("2026-10-01 月订阅30元");
+            String original=evaluate("calendarLedgerPreview.getState().activeChatBranchId");
+            evaluate("document.querySelector('#chat-input').value='原聊天草稿';document.querySelector('#chat-input').dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('[data-action=fork-chat]').click()");
+            check("native fork copies selected history without creating another payment",truth("calendarLedgerPreview.getState().chatBranches.length===2&&calendarLedgerPreview.getState().transactions.length===1&&calendarLedgerPreview.getState().chat.every(r=>r.branchReference)"));
+            check("native fork keeps copied undo cards read-only",truth("document.querySelectorAll('#chat-messages [data-action=undo]').length===0"));
+            sendChat("刚才那笔改成62");check("native branch edits the shared real payment",truth("calendarLedgerPreview.getState().transactions.length===1&&calendarLedgerPreview.getState().transactions[0].amount===6200"));
+            String fork=evaluate("calendarLedgerPreview.getState().activeChatBranchId");
+            evaluate("document.querySelector('#chat-input').value='分支草稿';document.querySelector('#chat-input').dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('[data-action=chat-branches]').click()");screenshot("app-chat-branches",null);
+            check("native branch picker fits phone and offers touch-sized controls",truth("document.querySelector('.branch-open').getBoundingClientRect().height>=44&&document.documentElement.scrollWidth<=innerWidth+1"));
+            evaluate("document.querySelector('[data-branch-open=\""+original+"\"]').click()");
+            check("native source restores its draft and original discussion",truth("document.querySelector('#chat-input').value==='原聊天草稿'&&calendarLedgerPreview.getState().chat.length===2&&calendarLedgerPreview.getState().transactions[0].amount===6200"));
+            evaluate("document.querySelector('[data-action=chat-branches]').click();document.querySelector('[data-branch-open=\""+fork+"\"]').click()");restartApp();
+            check("native cold restart retains fork and its text draft",truth("calendarLedgerPreview.getState().activeChatBranchId==="+JSONObject.quote(fork)+"&&document.querySelector('#chat-input').value==='分支草稿'&&calendarLedgerPreview.getState().chat.length===4"));
+            evaluate("document.querySelector('[data-action=new-chat]').click()");
+            check("native new chat clears context while retaining shared money",truth("calendarLedgerPreview.getState().chat.length===0&&calendarLedgerPreview.getState().transactions[0].amount===6200"));
+            evaluate("document.querySelector('.mobile-nav [data-page=more]').click();document.querySelector('.main [data-action=settings]').click();var f=document.querySelector('form[data-form=settings]');f.elements.provider.value='newapi';f.elements.provider.dispatchEvent(new Event('change',{bubbles:true}));f.elements.baseURL.value='https://8.8.8.8/tenant/v1/chat/completions';f.elements.baseURL.dispatchEvent(new Event('input',{bubbles:true}));f.elements.apiKey.value='native-fixture-key-a';document.querySelector('[data-action=settings-models]').click()");
+            waitFor("!!document.querySelector('[data-action=settings-model]')",10000);
+            check("native model-list probe uses selected gateway path and fixture credential",FakeGatewayConnection.lastUrl.equals("https://8.8.8.8/tenant/v1/models")&&FakeGatewayConnection.lastAuthorization.equals("Bearer native-fixture-key-a"));
+            evaluate("document.querySelector('[data-action=settings-model]').click();var f=document.querySelector('form[data-form=settings]');f.elements.aiMode.value='deepseek';f.elements.thinkingFormat.value='deepseek'");screenshot("app-newapi-settings",null);
+            evaluate("document.querySelector('form[data-form=settings]').requestSubmit()");waitFor("!document.querySelector('.modal')",10000);
+            check("native gateway persists normalized endpoint and model",truth("calendarLedgerPreview.getConfig().provider==='newapi'&&calendarLedgerPreview.getConfig().baseURL==='https://8.8.8.8/tenant/v1'&&calendarLedgerPreview.getConfig().model==='tenant-model'"));
+            evaluate("document.querySelector('[data-action=open-ai]').click();document.querySelector('#chat-model-button').click();var f=document.querySelector('[data-ai-controls]');f.elements.effort.value='2';f.requestSubmit();document.querySelector('[data-action=close-modal]').click()");
+            waitFor("calendarLedgerPreview.getConfig().effort==='high'",10000);
+            sendChat("查询本月实际支出");
+            check("native gateway receives tool schema and explicit thinking format",FakeGatewayConnection.lastUrl.equals("https://8.8.8.8/tenant/v1/chat/completions")&&FakeGatewayConnection.lastPayload.getString("model").equals("tenant-model")&&FakeGatewayConnection.lastPayload.getString("reasoning_effort").equals("high")&&FakeGatewayConnection.lastPayload.has("tools"));
+            check("native gateway loop executes actual local query without duplicate records",truth("calendarLedgerPreview.getState().chat.at(-1).results.some(r=>r.name==='query_cashflow'&&r.result.expense===6200)&&calendarLedgerPreview.getState().transactions.length===1"));
+            screenshot("app-branch-chat",null);restartApp();
+            check("native gateway key survives restart only as encrypted private configuration",truth("calendarLedgerPreview.getConfig().configured&&calendarLedgerPreview.getConfig().provider==='newapi'&&!CalendarAndroid.loadSnapshot().includes('native-fixture-key-a')")&&!apiPrefs.getAll().toString().contains("native-fixture-key-a"));
+            evaluate("document.querySelector('.mobile-nav [data-page=more]').click();document.querySelector('.main [data-action=settings]').click();var f=document.querySelector('form[data-form=settings]');f.elements.baseURL.value='https://8.8.4.4/v1';f.elements.apiKey.value='';f.requestSubmit()");waitFor("document.querySelector('.form-error').textContent.length>0",10000);
+            check("native new address cannot borrow saved gateway key",truth("calendarLedgerPreview.getConfig().baseURL==='https://8.8.8.8/tenant/v1'&&document.querySelector('.form-error').textContent.includes('新的接口地址')"));
+            evaluate("var f=document.querySelector('form[data-form=settings]');f.elements.apiKey.value='native-fixture-key-b';f.requestSubmit()");waitFor("!document.querySelector('.modal')",10000);
+            check("native second service keeps its own encrypted credential",truth("calendarLedgerPreview.getConfig().baseURL==='https://8.8.4.4/v1'"));
+            evaluate("document.querySelector('.main [data-action=settings]').click();var select=document.querySelector('[data-saved-api]');select.value=String(calendarLedgerPreview.getConfig().profiles.findIndex(r=>r.baseURL==='https://8.8.8.8/tenant/v1'));select.dispatchEvent(new Event('change',{bubbles:true}));document.querySelector('form[data-form=settings]').requestSubmit()");waitFor("!document.querySelector('.modal')",10000);sendChat("再查当前实际支出");
+            check("native switching back restores only original gateway credential",FakeGatewayConnection.lastAuthorization.equals("Bearer native-fixture-key-a")&&truth("calendarLedgerPreview.getConfig().baseURL==='https://8.8.8.8/tenant/v1'&&calendarLedgerPreview.getState().transactions.length===1"));
+            report.put("actualGateway",false).put("apiKeyUsed",false).put("transport","test-only HTTP gateway through real Android API bridge");
+        }finally{android.content.SharedPreferences.Editor edit=apiPrefs.edit().clear();for(Map.Entry<String,?> entry:oldPrefs.entrySet())if(entry.getValue() instanceof String)edit.putString(entry.getKey(),(String)entry.getValue());edit.commit();evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(before)+")");restartApp();}
     }
     private void acceptance(JSONObject report)throws Exception {
         check("same-signature upgrade retains every saved record",business().equals(preferences().getString("businessBefore","")));
@@ -794,7 +838,7 @@ public class WidgetRuntimeTest extends Instrumentation {
         Bitmap screen=getUiAutomation().takeScreenshot();if(screen==null)throw new AssertionError("No Android screenshot");
         Bitmap image=screen;
         if(crop!=null){Rect rect=new Rect();onUi(()->crop.getGlobalVisibleRect(rect));image=Bitmap.createBitmap(screen,rect.left,rect.top,rect.width(),rect.height());}
-        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.6.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
+        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.7.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
         finally{if(image!=screen)image.recycle();screen.recycle();}
     }
     private void check(String name,boolean passed)throws Exception{findings.put(new JSONObject().put("check",name).put("passed",passed));if(!passed)throw new AssertionError(name);}

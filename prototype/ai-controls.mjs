@@ -1,3 +1,4 @@
+import {thinkingEnabled} from './api-providers.mjs';
 import {THINKING_LEVELS,isDeepSeek,modelLabel} from './ai-options.mjs';
 export function openAIControls({config,state,openModal,escape,save,fetchModels,compress}){
   openModal('模型与思考','为记账、日程和分析选择合适的模型与强度。',`
@@ -5,7 +6,7 @@ export function openAIControls({config,state,openModal,escape,save,fetchModels,c
     <form data-ai-controls><div class="form-grid"><div class="form-field full"><label for="ai-model-id">当前模型</label><input id="ai-model-id" name="model" value="${escape(config.model)}" maxlength="128" required></div></div>
     <div class="ai-model-choices">${(isDeepSeek(config.baseURL)?['deepseek-flash','deepseek-v4-pro']:[]).map(id=>`<button class="btn ${config.model===id?'soft':''}" type="button" data-model-choice="${id}">${modelLabel(id)}</button>`).join('')}</div>
     <button class="text-button" type="button" data-fetch-models>从当前 API 获取模型列表</button><div data-model-list></div>
-    <div class="ai-thinking-control"><div class="between"><b>思考强度</b><span data-thinking-label></span></div><input aria-label="思考强度" name="effort" type="range" min="0" max="3" step="1" value="${Math.max(0,THINKING_LEVELS.findIndex(row=>row.value===config.effort))}" ${isDeepSeek(config.baseURL)?'':'disabled'}><div class="thinking-ticks"><span>关闭</span><span>轻度</span><span>深度</span><span>最大</span></div><p class="settings-note">${isDeepSeek(config.baseURL)?'轻度适合日常操作，深度适合复杂分析；最大可能更慢、消耗更多输出额度。档位对应 DeepSeek 官方参数。':'此自定义服务暂未配置思考参数映射，强度控制只对 DeepSeek 官方接口生效。'}</p></div>
+    <div class="ai-thinking-control"><div class="between"><b>思考强度</b><span data-thinking-label></span></div><input aria-label="思考强度" name="effort" type="range" min="0" max="3" step="1" value="${Math.max(0,THINKING_LEVELS.findIndex(row=>row.value===config.effort))}" ${thinkingEnabled(config)?'':'disabled'}><div class="thinking-ticks"><span>关闭</span><span>轻度</span><span>深度</span><span>最大</span></div><p class="settings-note">${thinkingEnabled(config)?'档位按所选 DeepSeek 参数格式发送；最大可能更慢、消耗更多输出额度。网关是否支持以服务说明为准。':'当前接口未启用思考参数；可在 API 设置中按网关说明选择 DeepSeek 格式。'}</p></div>
     <label class="record-row"><span class="grow">自动压缩上下文<span class="record-meta">较早内容达到阈值时额外请求一次摘要，保留最近三轮原始对话</span></span><input name="autoSummary" type="checkbox" ${config.autoSummary!==false?'checked':''}></label>
     <label class="record-row"><span class="grow">允许联网搜索<span class="record-meta">按需搜索公开网页或读取链接，结果显示来源；可在聊天顶部随时关闭</span></span><input name="webEnabled" type="checkbox" ${config.webEnabled!==false?'checked':''}></label>
     <p class="settings-note">摘要会调用当前所选模型，关闭思考；会产生 API 用量，不修改账目、日程和已确认偏好。</p>

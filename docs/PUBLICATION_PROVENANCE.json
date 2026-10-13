@@ -96,6 +96,22 @@
       "realUserApiKeyUsed": false,
       "actualSamsungPhone": false,
       "realPublicWebNetworkVerified": true
+    },
+    {
+      "date": "2026-10-13",
+      "version": "0.3.7",
+      "package": "org.calendarledger.preview",
+      "apkSha256": "981ad5912b8b7ab74fcc80034989adc1327774b83f2d3bbc311237599f306fbc",
+      "upstreamSourceImported": false,
+      "changes": [
+        "Prefix-based chat branching with independent context and shared actual records",
+        "New API and compatible provider configuration with normalized endpoints",
+        "Service-bound encrypted API keys and non-mutating model probes"
+      ],
+      "realUserApiKeyUsed": false,
+      "actualUserGatewayUsed": false,
+      "actualSamsungPhone": false,
+      "realPublicWebNetworkVerified": true
     }
   ],
   "scope": "Initial v0.2.3 public release; newer runtime changes are recorded in subsequentReleases."
