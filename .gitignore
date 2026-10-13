@@ -44,7 +44,10 @@ prototype/qa/*.json
 !prototype/qa/android-widget-v0.3.3-results.json
 !prototype/qa/android-widget-v0.3.4-results.json
 !prototype/qa/android-widget-v0.3.5-results.json
+!prototype/qa/android-widget-v0.3.6-results.json
+!prototype/qa/web-native-live-v0.3.6.json
 prototype/qa/android-widget-*.txt
+prototype/qa/web-native-live-*.txt
 prototype/qa/weather-native-live-*.txt
 
 # Editor / OS files

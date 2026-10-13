@@ -9,7 +9,7 @@ export const DRAFT_TOOLS=[
   tool('edit_prepared_record','修改还未保存的识别卡片，使用卡片的实际 ID。',{draftId:{type:'string'},recordId:{type:'string'},changes:{type:'object',properties:Object.fromEntries(Object.entries(fields).filter(([key])=>key!=='type')),additionalProperties:false}},['draftId','recordId','changes']),
   tool('save_prepared_records','用户明确要求保存时，将待核对卡片保存。默认只保存已勾选的项，已保存项不重复写入。',{draftId:{type:'string'},recordIds:{type:'array',items:{type:'string'}}},['draftId'])
 ];
-export const IMAGE_READ_TOOLS=new Set(['get_app_context','search_transactions','search_events','search_tasks','query_cashflow','compare_cashflow','get_settings','get_holidays','find_free_slots','prepare_records','edit_prepared_record']);
+export const IMAGE_READ_TOOLS=new Set(['web_search','read_webpage','query_corrections','get_app_context','search_transactions','search_events','search_tasks','query_cashflow','compare_cashflow','get_settings','get_holidays','find_free_slots','prepare_records','edit_prepared_record']);
 
 export function assertVisionConfig(config){
   if(config.mode==='demo')throw new Error('截图识别需要连接支持识图的 API。请到“更多 → AI 与设置”填写你的 API；本地演示可以使用文字和语音。');

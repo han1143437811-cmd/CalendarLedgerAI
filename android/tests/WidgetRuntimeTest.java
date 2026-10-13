@@ -46,6 +46,7 @@ public class WidgetRuntimeTest extends Instrumentation {
             if("cold-ai".equals(phase))intent.setAction(PACKAGE+".WIDGET_OPEN").putExtra("widgetTarget","ai");
             if("cold-date".equals(phase))intent.setAction(PACKAGE+".WIDGET_OPEN").putExtra("widgetTarget","date").putExtra("widgetDate","2026-10-10");
             if(phase.startsWith("weather"))FakeWeatherConnection.install();
+            if("web-tools".equals(phase))FakeWebConnection.install();
             startApp(intent);
             if("baseline".equals(phase)) {
                 if(getTargetContext().getSharedPreferences("api-config",0).getString("keyCipher","").isEmpty()) {
@@ -85,6 +86,8 @@ public class WidgetRuntimeTest extends Instrumentation {
                 screenshot("app-settings",null);
             } else if("ai-operations".equals(phase)) {
                 aiOperationsAcceptance(report);
+            } else if("web-tools".equals(phase)||"live-web".equals(phase)) {
+                webAcceptance(report,"live-web".equals(phase));
             } else if(phase.startsWith("weather")) {
                 weatherAcceptance(report);
             } else if("live-weather".equals(phase)) {
@@ -135,7 +138,7 @@ public class WidgetRuntimeTest extends Instrumentation {
         String before=evaluate("JSON.stringify({version:1,state:calendarLedgerPreview.getState(),aiConfig:calendarLedgerPreview.getConfig()})");
         try {
             JSONObject snapshot=new JSONObject(before), state=snapshot.getJSONObject("state");
-            for(String key:new String[]{"transactions","events","tasks","undo","chat","lastCreated","expenseAllocations","aiMemory"})state.put(key,new JSONArray());
+            for(String key:new String[]{"transactions","events","tasks","undo","chat","lastCreated","expenseAllocations","aiMemory","correctionHistory"})state.put(key,new JSONArray());
             state.put("viewMonth","2026-10").put("selectedDate","2026-10-13");snapshot.getJSONObject("aiConfig").put("mode","demo");
             evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(snapshot.toString())+")");restartApp();
             sendChat("2026-10-01 月订阅30元");
@@ -186,9 +189,49 @@ public class WidgetRuntimeTest extends Instrumentation {
             evaluate("document.querySelector('[data-memory-accept]').click()");
             check("native confirmed preference preserves provenance",truth("calendarLedgerPreview.getState().aiMemory.some(m=>m.key==='默认账户'&&m.value==='支付宝'&&m.evidence==='我习惯用支付宝支付')&&calendarLedgerPreview.getState().aiMemorySuggestions.length===0"));
             restartApp();check("native cold restart retains model effort and confirmed preference",truth("calendarLedgerPreview.getConfig().effort==='max'&&calendarLedgerPreview.getState().aiMemory.some(m=>m.key==='默认账户')"));
+            evaluate("document.querySelector('.mobile-nav [data-page=more]').click();document.querySelector('.main [data-action=ai-memory]').click();document.querySelector('[data-memory-edit=\"1\"]').click();var f=document.querySelector('[data-memory-form]');f.elements.value.value='银行卡';f.elements.value.dispatchEvent(new Event('input',{bubbles:true}))");
+            check("native preference correction previews the previous and new value",truth("document.querySelector('[data-memory-change-preview]').textContent.includes('支付宝 → 银行卡')&&document.querySelector('[name=key]').readOnly"));
+            evaluate("document.querySelector('[data-memory-form]').requestSubmit()");
+            check("native correction keeps the same preference key",truth("calendarLedgerPreview.getState().aiMemory.length===2&&calendarLedgerPreview.getState().aiMemory[1].value==='银行卡'"));
+            evaluate("document.querySelector('[data-memory-corrections]').click()");
+            check("native journal shows exact old and new preference values",truth("document.querySelector('.correction-card').textContent.includes('支付宝 → 银行卡')&&document.documentElement.scrollWidth<=innerWidth+1"));screenshot("app-corrections",null);
+            restartApp();
+            check("native cold storage preserves correction snapshots",truth("calendarLedgerPreview.getState().correctionHistory.at(-1).changes[0].before.value==='支付宝'&&calendarLedgerPreview.getState().aiMemory[1].value==='银行卡'"));
+            evaluate("document.querySelector('.mobile-nav [data-page=more]').click();document.querySelector('.main [data-action=corrections]').click();document.querySelector('[data-revert-correction]').click()");
+            check("native granular restore keeps the payment and allocation",truth("calendarLedgerPreview.getState().aiMemory[1].value==='支付宝'&&calendarLedgerPreview.getState().transactions[0].amount===3000&&calendarLedgerPreview.getState().expenseAllocations.length===1"));
+            evaluate("document.querySelector('[data-action=close-modal]').click()");restartApp();
+            check("native correction restoration persists across process restart",truth("calendarLedgerPreview.getState().correctionHistory.some(r=>r.revertedBy)&&calendarLedgerPreview.getState().aiMemory[1].value==='支付宝'"));
+            evaluate("document.querySelector('[data-action=open-ai]').click();document.querySelector('#chat-web-button').click()");restartApp();
+            check("native networking switch persists independently of actual records",truth("calendarLedgerPreview.getConfig().webEnabled===false&&calendarLedgerPreview.getState().transactions.length===1"));
             screenshot("app-ai-context",null);
             report.put("apiKeyUsed",false).put("actualProvider",false).put("mode","installed delivery APK, native bridge, local operation parser");
         } finally { JSONObject priorConfig=new JSONObject(before).getJSONObject("aiConfig");getTargetContext().getSharedPreferences("api-config",0).edit().putString("model",priorConfig.optString("model","deepseek-flash")).apply();evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(before)+")");restartApp(); }
+    }
+    private void webAcceptance(JSONObject report,boolean live)throws Exception {
+        try(InputStream input=getContext().getAssets().open("qa-web-tools.js")){ByteArrayOutputStream script=new ByteArrayOutputStream();byte[] buffer=new byte[8192];int size;while((size=input.read(buffer))!=-1)script.write(buffer,0,size);evaluate("(()=>{"+new String(script.toByteArray(),java.nio.charset.StandardCharsets.UTF_8)+";globalThis.__qaExecuteWeb=executeWebTool;})()");}
+        evaluate("globalThis.__qaWebPending={};var prior=globalThis.__calendarNativeReply;globalThis.__calendarNativeReply=(id,response)=>{if(__qaWebPending[id]){__qaWebPending[id](response);delete __qaWebPending[id];}else prior(id,response);};globalThis.__qaWeb=(route,body)=>new Promise(resolve=>{var id='qaweb'+Math.random();__qaWebPending[id]=resolve;CalendarAndroid.request(id,route,JSON.stringify(body));});globalThis.__qaResponse=null;");
+        Class<?> reader=Class.forName("org.calendarledger.preview.PublicWebReader",true,getTargetContext().getClassLoader());
+        java.lang.reflect.Method publicAddress=reader.getDeclaredMethod("publicAddress",java.net.InetAddress.class);publicAddress.setAccessible(true);
+        for(String address:new String[]{"127.0.0.1","10.1.2.3","192.168.1.1","100.64.0.1","::1","fd00::1"})check("native public page guard rejects "+address,Boolean.FALSE.equals(publicAddress.invoke(null,java.net.InetAddress.getByName(address))));
+        evaluate("__qaWeb('/api/web-read',{url:'https://127.0.0.1/private'}).then(r=>__qaResponse=r)");waitFor("__qaResponse!==null",10000);
+        check("real native web route rejects private addresses",truth("__qaResponse.status!==200&&!!__qaResponse.data.error"));
+        String url=live?"https://api-docs.deepseek.com/guides/thinking_mode/":"https://8.8.8.8/calendar";
+        evaluate("__qaResponse=null;__qaWeb('/api/web-read',{url:"+JSONObject.quote(url)+"}).then(r=>__qaResponse=r)");waitFor("__qaResponse!==null",65000);
+        check("native public page route returns actual HTTP content",truth("__qaResponse.status===200&&__qaResponse.data.content.length>30&&!!__qaResponse.data.retrievedAt"));
+        evaluate("globalThis.__qaParsed=null;__qaExecuteWeb('read_webpage',{url:"+JSONObject.quote(url)+"},{request:async()=>__qaResponse.data}).then(r=>__qaParsed=r).catch(e=>__qaParsed={error:e.message})");waitFor("__qaParsed!==null",10000);
+        check("native public page is parsed into bounded source text",truth("__qaParsed.ok===true&&__qaParsed.text.length<=10000&&__qaParsed.url==="+JSONObject.quote(url)));
+        if(!live){
+            check("native public reader never attaches the saved model key",!FakeWebConnection.credentialsAttached);
+            evaluate("__qaResponse=null;__qaWeb('/api/web-read',{url:'https://8.8.8.8/redirect-private'}).then(r=>__qaResponse=r)");waitFor("__qaResponse!==null",10000);
+            check("native redirects cannot reach a private URL",truth("__qaResponse.status!==200&&!!__qaResponse.data.error"));
+        } else {
+            evaluate("__qaResponse=null;__qaWeb('/api/web-search',{query:'DeepSeek reasoning_effort'}).then(r=>__qaResponse=r)");waitFor("__qaResponse!==null",65000);
+            check("native live search returns actual search-provider content",truth("__qaResponse.status===200&&!!__qaResponse.data.provider"));
+            evaluate("__qaParsed=null;__qaExecuteWeb('web_search',{query:'DeepSeek reasoning_effort'},{request:async()=>__qaResponse.data}).then(r=>__qaParsed=r).catch(e=>__qaParsed={error:e.message})");waitFor("__qaParsed!==null",10000);
+            check("native live search yields real clickable HTTPS results",truth("__qaParsed.ok===true&&__qaParsed.items.length>0&&__qaParsed.items.every(r=>r.url.startsWith('https://'))"));
+            report.put("provider",evaluate("__qaParsed.provider")).put("sources",new JSONArray(evaluate("JSON.stringify(__qaParsed.items.map(r=>({title:r.title,url:r.url})))")));
+        }
+        report.put("actualPublicNetwork",live).put("apiKeyUsed",false);
     }
     private void acceptance(JSONObject report)throws Exception {
         check("same-signature upgrade retains every saved record",business().equals(preferences().getString("businessBefore","")));
@@ -751,7 +794,7 @@ public class WidgetRuntimeTest extends Instrumentation {
         Bitmap screen=getUiAutomation().takeScreenshot();if(screen==null)throw new AssertionError("No Android screenshot");
         Bitmap image=screen;
         if(crop!=null){Rect rect=new Rect();onUi(()->crop.getGlobalVisibleRect(rect));image=Bitmap.createBitmap(screen,rect.left,rect.top,rect.width(),rect.height());}
-        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.5.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
+        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.6.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
         finally{if(image!=screen)image.recycle();screen.recycle();}
     }
     private void check(String name,boolean passed)throws Exception{findings.put(new JSONObject().put("check",name).put("passed",passed));if(!passed)throw new AssertionError(name);}

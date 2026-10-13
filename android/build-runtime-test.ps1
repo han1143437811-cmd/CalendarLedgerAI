@@ -19,22 +19,25 @@ $manifest = @'
   <instrumentation android:name=".WidgetRuntimeTest" android:targetPackage="org.calendarledger.preview"/>
 </manifest>
 '@
+$webFixture = [IO.File]::ReadAllText((Join-Path $projectRoot 'prototype/web-tools.mjs')).Replace('export ','')
+[IO.File]::WriteAllText((Join-Path $testDirectory 'qa-web-tools.js'),$webFixture,[Text.UTF8Encoding]::new($false))
 if ($NoRecognitionFixture) { $manifest = $manifest.Replace('android:name=".FixtureRecognitionService"','android:name=".FixtureRecognitionService" android:enabled="false"') }
 [IO.File]::WriteAllText((Join-Path $testDirectory 'AndroidManifest.xml'),$manifest,[Text.UTF8Encoding]::new($false))
 Copy-Item -LiteralPath $androidJar -Destination (Join-Path $testDirectory 'android.jar')
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'tests\OfflineStartupTest.java'),(Join-Path $PSScriptRoot 'tests\FixtureRecognitionService.java') -Destination $testDirectory
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'tests\VoiceRuntimeTest.java') -Destination $testDirectory
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'tests\WidgetRuntimeTest.java'),(Join-Path $PSScriptRoot 'tests\FakeWeatherConnection.java') -Destination $testDirectory
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'tests\FakeWebConnection.java') -Destination $testDirectory
 $androidJar = Join-Path $testDirectory 'android.jar'
 function Invoke-TestTool { param([string]$Executable,[string[]]$ToolArguments) & $Executable @ToolArguments; if ($LASTEXITCODE -ne 0) { throw "Tool failed ($LASTEXITCODE): $Executable" } }
 $unsigned = Join-Path $testDirectory 'unsigned.apk'
 Invoke-TestTool $aapt2 @('link','-o',$unsigned,'-I',$androidJar,'--manifest',(Join-Path $testDirectory 'AndroidManifest.xml'))
-Invoke-TestTool (Join-Path $testJavaHome 'bin\javac.exe') @('-encoding','UTF-8','--release','8','-classpath',$androidJar,'-d',(Join-Path $testDirectory 'classes'),(Join-Path $testDirectory 'OfflineStartupTest.java'),(Join-Path $testDirectory 'FixtureRecognitionService.java'),(Join-Path $testDirectory 'VoiceRuntimeTest.java'),(Join-Path $testDirectory 'WidgetRuntimeTest.java'),(Join-Path $testDirectory 'FakeWeatherConnection.java'))
+Invoke-TestTool (Join-Path $testJavaHome 'bin\javac.exe') @('-encoding','UTF-8','--release','8','-classpath',$androidJar,'-d',(Join-Path $testDirectory 'classes'),(Join-Path $testDirectory 'OfflineStartupTest.java'),(Join-Path $testDirectory 'FixtureRecognitionService.java'),(Join-Path $testDirectory 'VoiceRuntimeTest.java'),(Join-Path $testDirectory 'WidgetRuntimeTest.java'),(Join-Path $testDirectory 'FakeWeatherConnection.java'),(Join-Path $testDirectory 'FakeWebConnection.java'))
 Invoke-TestTool (Join-Path $testJavaHome 'bin\jar.exe') @('--create','--file',(Join-Path $testDirectory 'classes.jar'),'-C',(Join-Path $testDirectory 'classes'),'.')
 Invoke-TestTool (Join-Path $testJavaHome 'bin\java.exe') @('-cp',$d8Jar,'com.android.tools.r8.D8','--lib',$androidJar,'--min-api','26','--output',(Join-Path $testDirectory 'dex'),(Join-Path $testDirectory 'classes.jar'))
 Add-Type -AssemblyName System.IO.Compression,System.IO.Compression.FileSystem
 $zip = [IO.Compression.ZipFile]::Open($unsigned,[IO.Compression.ZipArchiveMode]::Update)
-try { [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,(Join-Path $testDirectory 'dex\classes.dex'),'classes.dex',[IO.Compression.CompressionLevel]::Optimal) | Out-Null } finally { $zip.Dispose() }
+try { [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,(Join-Path $testDirectory 'dex\classes.dex'),'classes.dex',[IO.Compression.CompressionLevel]::Optimal) | Out-Null; [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip,(Join-Path $testDirectory 'qa-web-tools.js'),'assets/qa-web-tools.js',[IO.Compression.CompressionLevel]::Optimal) | Out-Null } finally { $zip.Dispose() }
 $aligned = Join-Path $testDirectory 'aligned.apk'
 Invoke-TestTool $zipalign @('-p','-f','4',$unsigned,$aligned)
 $signed = Join-Path $testDirectory 'runtime-test.apk'

@@ -23,7 +23,7 @@ function resolveTarget(state,list,keyword,type) {
   return{ok:true,item:items[0]};
 }
 export function runDemo(state,message,now=todayISO()) {
-  const results=[],notes=[],createdRefs=[];let lastTransaction=null;const run=(name,args)=>{const result=dispatch(state,name,args,{today:now});results.push({name,result});if(result.ok&&result.type==='transaction')lastTransaction=result.items[0];if(result.ok&&['create_transactions','create_event','create_task','schedule_in_free_slots'].includes(name))createdRefs.push(...result.items.map(x=>({id:x.id,type:result.type,note:x.note,title:x.title})));return result;};
+  const results=[],notes=[],createdRefs=[];let lastTransaction=null;const run=(name,args)=>{const result=dispatch(state,name,args,{today:now,userPrompt:message});results.push({name,result});if(result.ok&&result.type==='transaction')lastTransaction=result.items[0];if(result.ok&&['create_transactions','create_event','create_task','schedule_in_free_slots'].includes(name))createdRefs.push(...result.items.map(x=>({id:x.id,type:result.type,note:x.note,title:x.title})));return result;};
   if (/^记住[，,:：\s]/.test(message)) {
     const value=message.replace(/^记住[，,:：\s]+/,'').trim(),key=/订阅|会员|分摊/.test(value)?'订阅分摊规则':/账户/.test(value)?'默认记账账户':value.slice(0,20);
     run('remember_preference',{key,value});return{results,notes};
@@ -75,6 +75,10 @@ export function describeResult(result) {
   if(result.type==='memory')return result.items.length?result.items.map(row=>`记忆：${row.key} · ${row.value}`).join('\n'):'尚无长期偏好。';
   if(result.type==='memory_removed')return`已忘记 ${result.removed} 条偏好。`;
   if(result.type==='memory_suggestion')return '发现一个可能的长期偏好，请核对并采纳后生效。';
+  if(result.type==='corrections')return result.items.length?`找到 ${result.items.length} 次纠正，包含真实修改前后内容。`:'还没有对应的纠正记录。';
+  if(result.type==='correction_restored')return '已恢复纠正前的内容，当前账目、日程和偏好已重新核对。';
+  if(result.type==='web_search')return `已取得 ${result.items.length} 个公开搜索结果，来源可在卡片中查看。`;
+  if(result.type==='webpage')return '已读取公开网页正文：'+result.title;
   if(result.type==='chat_history')return result.items.length?`找到 ${result.items.length} 条相关历史对话。`:'未找到对应历史对话。';
   if(result.type==='transaction')return result.items.length>1?`已处理 ${result.items.length} 笔账目。`:`已保存“${result.items[0].note}”，¥${money(result.items[0].amount)}。`;
   if(result.type==='event')return`已保存 ${result.items.length} 个日程。提醒设置已记录；手机端可在设置中启用通知，示例数据不触发通知。`;

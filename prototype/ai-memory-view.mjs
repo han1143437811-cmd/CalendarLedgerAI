@@ -1,4 +1,4 @@
-export function openAIMemory({state, openModal, dispatch, changed, escape}) {
+export function openAIMemory({state, openModal, dispatch, changed, escape,openCorrections}) {
   openModal('AI 记忆与上下文','记住你的偏好，也能随时修改或忘记。',`
     <div id="ai-memory-panel">
       <p class="settings-note">已确认偏好保存在本机。AI 会按当前问题选取记忆，找回较早原话和操作记录；聊天超过 200 条时，保留最多 80 条精简摘录。使用远程 AI 时，选取的上下文会发送至你配置的服务。</p>
@@ -8,24 +8,31 @@ export function openAIMemory({state, openModal, dispatch, changed, escape}) {
       <form data-memory-form><div class="form-grid">
         <div class="form-field full"><label for="ai-memory-key">记忆名称</label><input id="ai-memory-key" name="key" maxlength="60" placeholder="例如：订阅分摊规则" required></div>
         <div class="form-field full"><label for="ai-memory-value">偏好内容</label><input id="ai-memory-value" name="value" maxlength="300" placeholder="例如：月订阅默认按付款所在自然月均摊" required></div>
-      </div><div class="form-error" role="alert"></div><div class="form-actions"><button class="btn primary" type="submit">保存记忆</button></div></form>
+      </div><p class="settings-note" data-memory-change-preview></p><div class="form-error" role="alert"></div><div class="form-actions"><button class="btn primary" type="submit">保存记忆</button><button class="btn" type="button" data-memory-cancel-edit hidden>取消编辑</button></div></form>
+      <button class="btn" type="button" data-memory-corrections>查看偏好纠正记录</button>
       <p class="settings-note">也可以直接对 AI 说：“记住，我的月订阅都保留付款、按天分摊。”同名记忆会更新。</p>
       <button class="btn" type="button" data-memory-clear-chat>清空聊天上下文</button>
       <p class="settings-note">清空会一起删除旧聊天摘录，保留已确认偏好、账目和日程。当前保存最近 <span data-memory-chat-count>${Math.min(200,state.chat.length)}</span> 条消息。</p>
     </div>`);
   const panel=document.querySelector('#ai-memory-panel'), list=panel.querySelector('#ai-memory-list');
   const render=()=>{
-    list.innerHTML=state.aiMemory.length?state.aiMemory.map((row,index)=>`<div class="record-row"><div class="grow"><b>${escape(row.key)}</b><div class="record-meta">${escape(row.value)}</div>${row.evidence?`<div class="record-meta">来源原话：${escape(row.evidence)}</div>`:''}</div><button class="text-button" type="button" data-memory-delete="${index}">忘记</button></div>`).join(''):'<div class="empty">还没有长期偏好，告诉 AI 你希望它记住什么。</div>';
+    list.innerHTML=state.aiMemory.length?state.aiMemory.map((row,index)=>`<div class="record-row"><div class="grow"><b>${escape(row.key)}</b><div class="record-meta">${escape(row.value)}</div>${row.evidence?`<div class="record-meta">来源原话：${escape(row.evidence)}</div>`:''}</div><button class="text-button" type="button" data-memory-edit="${index}">纠正</button><button class="text-button" type="button" data-memory-delete="${index}">忘记</button></div>`).join(''):'<div class="empty">还没有长期偏好，告诉 AI 你希望它记住什么。</div>';
     panel.querySelector('#ai-memory-suggestions').innerHTML=(state.aiMemorySuggestions??[]).map(row=>`<div class="memory-suggestion"><b>${escape(row.key)}</b><p>${escape(row.value)}</p><div class="record-meta">来源原话：${escape(row.evidence)}</div>${state.aiMemory.some(item=>item.key===row.key)?'<p class="settings-note">采纳后替换同名旧偏好。</p>':''}<div class="form-actions"><button class="btn" type="button" data-memory-dismiss="${escape(row.id)}">忽略</button><button class="btn primary" type="button" data-memory-accept="${escape(row.id)}">采纳偏好</button></div></div>`).join('');
   };
   render();
+  const form=panel.querySelector('form'),preview=panel.querySelector('[data-memory-change-preview]');
+  const resetEdit=()=>{form.reset();form.elements.key.readOnly=false;panel.querySelector('[data-memory-cancel-edit]').hidden=true;preview.textContent='';};
+  form.addEventListener('input',()=>{const old=state.aiMemory.find(row=>row.key===form.elements.key.value);preview.textContent=old&&old.value!==form.elements.value.value?'将纠正为：'+old.value+' → '+form.elements.value.value:'';});
   panel.querySelector('form').addEventListener('submit',event=>{
     event.preventDefault();const form=event.target, data=Object.fromEntries(new FormData(form));
     const result=dispatch('remember_preference',data);
     panel.querySelector('.form-error').textContent=result.ok?'':result.error;
-    if(result.ok){form.reset();changed();render();}
+    if(result.ok){resetEdit();changed();render();}
   });
   panel.addEventListener('click',event=>{
+    const edit=event.target.closest('[data-memory-edit]');if(edit){const row=state.aiMemory[Number(edit.dataset.memoryEdit)];if(row){form.elements.key.value=row.key;form.elements.key.readOnly=true;form.elements.value.value=row.value;panel.querySelector('[data-memory-cancel-edit]').hidden=false;form.elements.value.focus();}}
+    if(event.target.closest('[data-memory-cancel-edit]'))resetEdit();
+    if(event.target.closest('[data-memory-corrections]'))openCorrections?.();
     const suggestion=event.target.closest('[data-memory-accept],[data-memory-dismiss]');
     if(suggestion){const result=dispatch(suggestion.dataset.memoryAccept?'accept_memory_suggestion':'dismiss_memory_suggestion',{id:suggestion.dataset.memoryAccept??suggestion.dataset.memoryDismiss});panel.querySelector('.form-error').textContent=result.ok?'':result.error;changed();render();}
     const button=event.target.closest('[data-memory-delete]');

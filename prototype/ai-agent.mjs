@@ -30,6 +30,10 @@ export async function runToolConversation({messages, tools, request, execute, is
       messages.push({role:'assistant',content:message.content ?? null,...(typeof message.reasoning_content==='string'?{reasoning_content:message.reasoning_content}:{}),...(calls.length?{tool_calls:calls}:{})});
       if (!calls.length) {
         const answer=message.content ?? '';
+        if(/联网|上网|搜索/.test(prompt)&&/已[^。\n]{0,15}(?:查到|搜索|联网)|根据[^。\n]{0,15}(?:搜索|网页)/.test(answer)&&tools.some(tool=>tool.function.name==='web_search')&&!results.some(row=>['web_search','read_webpage'].includes(row.name)&&row.result.ok)){
+          final='这次没有取得联网搜索或网页读取的成功结果，不能报告已查证。请检查网络，或提供具体公开网页链接后重试。';
+          results.push({name:'execution_check',result:{ok:false,error:'没有联网工具成功结果，已纠正模型的查证声明。'}});break;
+        }
         const claimsDone=/已(?:经)?[^。！\n]{0,12}(?:完成|保存|记账|均摊|分摊|记住|更新|处理|取消)/.test(answer);
         if(supportedRequest&&claimsDone&&!results.some(row=>requested.includes(row.name)&&row.result.ok)){
           if(!completionRepair){completionRepair=true;messages.push({role:'system',content:'应用执行核对：没有收到 '+requested.join(' / ')+' 的成功结果，不能报告已完成。请实际调用相应工具，或询问确实缺少的信息；已保存的付款不能重复创建。'});continue;}

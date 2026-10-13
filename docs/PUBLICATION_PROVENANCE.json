@@ -81,6 +81,21 @@
       ],
       "realUserApiKeyUsed": false,
       "actualSamsungPhone": false
+    },
+    {
+      "date": "2026-10-13",
+      "version": "0.3.6",
+      "package": "org.calendarledger.preview",
+      "apkSha256": "42a1559fe2e1b8be5c0d5831ae1f6bc5769c4c239424ef23013852665f7b08b3",
+      "upstreamSourceImported": false,
+      "changes": [
+        "Before/after correction history with conflict-checked targeted restore",
+        "Same-key preference corrections",
+        "Public web search and webpage reader through native tool bridge"
+      ],
+      "realUserApiKeyUsed": false,
+      "actualSamsungPhone": false,
+      "realPublicWebNetworkVerified": true
     }
   ],
   "scope": "Initial v0.2.3 public release; newer runtime changes are recorded in subsequentReleases."

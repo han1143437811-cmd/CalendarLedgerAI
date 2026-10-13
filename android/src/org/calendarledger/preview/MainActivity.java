@@ -123,6 +123,8 @@ public class MainActivity extends Activity {
                     else if(route.equals("/api/weather-search"))result=weather.search(body.optString("name"));
                     else if(route.equals("/api/weather-city"))result=weather.configure(body.optJSONObject("city"));
                     else if(route.equals("/api/models")){String key=readKey();if(key.isEmpty())throw new IOException("请先配置 API Key。");String base=preferences.getString("baseURL","https://api.deepseek.com").replaceAll("/chat/completions$","");JSONObject list=httpJSON(base+"/models",null,key,20000);JSONArray rows=list.optJSONArray("data"),ids=new JSONArray();if(rows!=null)for(int i=0;i<Math.min(rows.length(),80);i++){String model=rows.getJSONObject(i).optString("id");if(!model.isEmpty()&&model.length()<=128)ids.put(model);}result=new JSONObject().put("items",ids);}
+                    else if(route.equals("/api/web-search"))result=PublicWebReader.search(body.optString("query"));
+                    else if(route.equals("/api/web-read"))result=PublicWebReader.read(body.optString("url"));
                     else if(route.equals("/api/chat"))result=completion(body);
                     else if(route.equals("/api/test")){JSONObject completed=completion(new JSONObject().put("messages",new JSONArray().put(new JSONObject().put("role","user").put("content","请只回复 OK，用于测试 API 连接。"))));result=new JSONObject().put("ok",true).put("model",completed.getString("model"));}
                     else if(route.startsWith("/api/holidays?year="))result=holidays(Integer.parseInt(route.substring(route.indexOf('=')+1)));
