@@ -5,7 +5,7 @@ sys.stdout.reconfigure(encoding='utf-8',errors='replace')
 ROOT=Path(__file__).resolve().parents[2]
 RUNTIME=Path(json.loads((ROOT/'build-tools/runtime-location.json').read_text(encoding='utf-8-sig'))['directory'])
 ADB=RUNTIME/'sdk/platform-tools/adb.exe'
-VERSION='0.3.7'
+VERSION='0.3.8'
 OUT=ROOT/'prototype/qa'
 def adb(*args,binary=False,timeout=60):
     result=subprocess.run([str(ADB),'-s','emulator-5580',*args],capture_output=True,timeout=timeout)

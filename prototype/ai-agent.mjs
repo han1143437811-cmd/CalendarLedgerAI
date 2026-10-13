@@ -15,18 +15,20 @@ function validate(value, spec, path='参数') {
   } else if (spec.type === 'integer' ? !Number.isInteger(value) : spec.type && typeof value !== spec.type) throw new Error(`${path}类型应为 ${spec.type}。`);
   if (spec.enum && !spec.enum.includes(value)) throw new Error(`${path}不在支持范围内。`);
 }
-export async function runToolConversation({messages, tools, request, execute, isReadOnly, onResult=()=>{}, describe, maxTurns=12, prompt=''}) {
-  const results=[], successfulWrites=new Map(),wireStart=messages.length; let final='', completionRepair=false;
+export async function runToolConversation({messages, tools, request, execute, isReadOnly, onResult=()=>{}, describe, maxTurns=12, prompt='',signal,onStatus=()=>{}}) {
+  const results=[], successfulWrites=new Map(),wireStart=messages.length; let final='', completionRepair=false, exhausted=true, finishReason='';
   const requested = /^(?:请|帮我)?记住|以后默认/.test(prompt) ? ['remember_preference']
     : /均摊|分摊|平摊/.test(prompt) ? [/取消|不再/.test(prompt)?'remove_expense_allocation':'allocate_expense'] : [];
   const supportedRequest=requested.length&&requested.every(name=>tools.some(tool=>tool.function.name===name));
   try {
     for (let turn=0; turn<maxTurns; turn++) {
-      const reply=await request({messages,tools});
+      signal?.throwIfAborted();onStatus({phase:'request',turn});
+      const reply=await request({messages,tools});signal?.throwIfAborted();finishReason=reply.finishReason??'';
       const message=reply.message;
-      if (!message || message.role !== 'assistant') throw new Error('API 回复格式异常。');
+      if (!message || message.role !== 'assistant' || message.content!=null&&typeof message.content!=='string') throw new Error('API 回复格式异常。');
       const calls=message.tool_calls ?? [];
       if (!Array.isArray(calls) || calls.length>30) throw new Error('一次工具调用过多，请分批处理。');
+      if(finishReason==='length'){if(calls.length)throw new Error('工具参数达到输出上限，未执行这批操作。');final=message.content??'';exhausted=false;break;}
       messages.push({role:'assistant',content:message.content ?? null,...(typeof message.reasoning_content==='string'?{reasoning_content:message.reasoning_content}:{}),...(calls.length?{tool_calls:calls}:{})});
       if (!calls.length) {
         const answer=message.content ?? '';
@@ -40,9 +42,10 @@ export async function runToolConversation({messages, tools, request, execute, is
           final='这次尚未得到操作成功的结果，请明确要处理的账目或分摊日期后继续。';
           results.push({name:'execution_check',result:{ok:false,error:'未收到对应工具的成功结果，已纠正模型的完成声明。'}});break;
         }
-        final=answer;break;
+        final=answer;exhausted=false;break;
       }
       for (const call of calls) {
+        signal?.throwIfAborted();onStatus({phase:'tool',name:call.function?.name});
         let result;
         if (typeof call.id !== 'string' || !call.id) throw new Error('工具调用缺少 ID，请重试。');
         try {
@@ -66,7 +69,8 @@ export async function runToolConversation({messages, tools, request, execute, is
         messages.push({role:'tool',tool_call_id:call.id,content:content.length>45000?JSON.stringify({...compactToolResult(safe),truncated:true,warning:'返回过长，请缩小查询范围。'}):content});
       }
     }
-    if (!final) final=(results.length?results.map(row=>describe(row.result)).join('\n'):'未收到完整回复。')+'\n本轮已到工具执行上限；上面的结果为实际完成状态，可继续描述下一步。';
-    return {text:final,results,apiMessages:messages.slice(wireStart).filter(row=>row.role!=='system')};
+    if(!final&&exhausted){signal?.throwIfAborted();onStatus({phase:'answer'});const reply=await request({messages:[...messages,{role:'system',content:'本轮工具调用已达上限。请根据实际取得的结果，用自然语言回答用户问题，解释已完成内容、分析与仍缺少的信息，不要声称未执行的操作已经完成。'}],tools:[]});signal?.throwIfAborted();final=reply.message?.content??'';finishReason=reply.finishReason??'';if(reply.message&&!reply.message.tool_calls?.length)messages.push(reply.message);}
+    if(!final)final=results.length?results.map(row=>describe(row.result)).join('\n')+'\n接口未返回文字说明，可以继续追问。':'接口没有返回回答正文。请检查模型设置，或再次提问。';
+    return {text:final,results,finishReason,apiMessages:messages.slice(wireStart).filter(row=>row.role!=='system')};
   } catch (error) { error.completedResults=results; throw error; }
 }

@@ -1,0 +1,14 @@
+{
+  "name": "marked",
+  "version": "18.1.1",
+  "license": "MIT",
+  "source": "https://github.com/markedjs/marked",
+  "tarball": "https://registry.npmjs.org/marked/-/marked-18.1.1.tgz",
+  "npmIntegrity": "sha512-zEGgrtUG8crk+TrMacJSVABU4DYDDkS8uqgU3ohrn/2fW9C2AEfUrO3m6IhpIpQpl7YcVpiXXC9cSMWDANT3dg==",
+  "retrievedAt": "2026-10-13",
+  "files": {
+    "marked.mjs": "930457e5d55439f90465015cc507d3323366e80df5f7a701b61189d4e1046bda",
+    "LICENSE.md": "8e3a3f82f59a60958f56ca08f445647c32a4733dc7ca6c2c46f6eb898471ab9c"
+  },
+  "modifications": "None; marked.esm.js renamed marked.mjs"
+}

@@ -10,7 +10,7 @@ const history=n=>Array.from({length:n},(_,i)=>({id:'msg_'+i,role:i%2?'assistant'
 const state=()=>({...createInitialState('2026-10-13',false),chat:history(32)});
 test('four slider positions produce official DeepSeek options while other providers stay unchanged',()=>{
   for(const effort of ['none','low','high','max']){const options=completionOptions(base,effort);assert.equal(options.reasoning_effort,effort);assert.equal(options.thinking.type,effort==='none'?'disabled':'enabled');assert.ok(options.max_tokens>=2048);}
-  assert.deepEqual(completionOptions('https://example.org','max'),{max_tokens:2048});assert.throws(()=>completionOptions(base,'fake'));
+  assert.deepEqual(completionOptions('https://example.org','max'),{max_tokens:8192});assert.throws(()=>completionOptions(base,'fake'));
 });
 test('summary uses no thinking, a bounded JSON answer and leaves the most recent three turns untouched',async()=>{
   const s=state(),original=JSON.stringify(s.chat);let calls=0;

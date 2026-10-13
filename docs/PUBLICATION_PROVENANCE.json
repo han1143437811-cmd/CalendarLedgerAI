@@ -112,6 +112,26 @@
       "actualUserGatewayUsed": false,
       "actualSamsungPhone": false,
       "realPublicWebNetworkVerified": true
+    },
+    {
+      "date": "2026-10-13",
+      "version": "0.3.8",
+      "package": "org.calendarledger.preview",
+      "apkSha256": "f4d7e24be342d6fe7dba419053045ea3b016886582c95d0f821723d110fbaae1",
+      "upstreamSourceImported": false,
+      "changes": [
+        "General-purpose conversational assistant with long-form answers and richer dialogue context",
+        "Real SSE streaming and cancellation through browser and Android native bridge",
+        "Safe local Markdown rendering, provider reasoning disclosure and stable scrolling",
+        "Direct searchable model picker, response budgets and API connection controls"
+      ],
+      "bundledDependenciesAdded": [
+        "marked 18.1.1 (MIT)"
+      ],
+      "realUserApiKeyUsed": false,
+      "actualUserGatewayUsed": false,
+      "actualSamsungPhone": false,
+      "realPublicWebNetworkVerified": true
     }
   ],
   "scope": "Initial v0.2.3 public release; newer runtime changes are recorded in subsequentReleases."

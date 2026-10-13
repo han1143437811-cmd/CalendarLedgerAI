@@ -1,6 +1,6 @@
 {
   "name": "calendar-ledger-ai-preview",
-  "version": "0.3.4",
+  "version": "0.3.8",
   "private": true,
   "type": "module",
   "scripts": {

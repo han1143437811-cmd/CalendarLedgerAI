@@ -47,7 +47,7 @@ public class WidgetRuntimeTest extends Instrumentation {
             if("cold-date".equals(phase))intent.setAction(PACKAGE+".WIDGET_OPEN").putExtra("widgetTarget","date").putExtra("widgetDate","2026-10-10");
             if(phase.startsWith("weather"))FakeWeatherConnection.install();
             if("web-tools".equals(phase))FakeWebConnection.install();
-            if("chat-api".equals(phase))FakeGatewayConnection.install();
+            if("chat-api".equals(phase)||"conversation".equals(phase))FakeGatewayConnection.install();
             startApp(intent);
             if("baseline".equals(phase)) {
                 if(getTargetContext().getSharedPreferences("api-config",0).getString("keyCipher","").isEmpty()) {
@@ -80,7 +80,7 @@ public class WidgetRuntimeTest extends Instrumentation {
                     check("native phone "+page+" has no horizontal overflow",truth("document.documentElement.scrollWidth<=innerWidth+1"));screenshot("app-"+page,null);
                 }
                 evaluate("document.querySelector('[data-action=open-ai]').click()");SystemClock.sleep(300);
-                check("native Morandi chat retains image, microphone and send controls",truth("document.querySelector('.composer .mic-button')!==null&&document.querySelector('#chat-form button[type=submit]')!==null&&document.querySelector('.composer').getBoundingClientRect().bottom<document.querySelector('.mobile-nav').getBoundingClientRect().top"));
+                check("native Morandi chat retains image, microphone and send controls",truth("document.querySelector('.composer .mic-button')!==null&&document.querySelector('#chat-form button[type=submit]')!==null&&document.querySelector('.composer').getBoundingClientRect().bottom<=innerHeight&&!!document.querySelector('.composer [data-action=attach-image]')"));
                 screenshot("app-chat",null);
                 evaluate("document.querySelector('.mobile-nav [data-page=more]').click();document.querySelector('.main [data-action=settings]').click()");SystemClock.sleep(400);
                 check("native phone settings modal fits the screen",truth("!document.body.classList.contains('ai-visible')&&document.querySelector('.modal').getBoundingClientRect().width>200&&document.querySelector('.modal').getBoundingClientRect().height>200&&document.querySelector('.modal').getBoundingClientRect().right<=innerWidth+1&&document.querySelector('.modal').getBoundingClientRect().bottom<=innerHeight+1"));
@@ -89,6 +89,7 @@ public class WidgetRuntimeTest extends Instrumentation {
                 aiOperationsAcceptance(report);
             } else if("web-tools".equals(phase)||"live-web".equals(phase)) {
                 webAcceptance(report,"live-web".equals(phase));
+            } else if("conversation".equals(phase)){conversationAcceptance(report);
             } else if("chat-api".equals(phase)) {
                 chatAPIAcceptance(report);
             } else if(phase.startsWith("weather")) {
@@ -175,7 +176,7 @@ public class WidgetRuntimeTest extends Instrumentation {
             check("forget preference can be undone",truth("calendarLedgerPreview.getState().aiMemory.length===1"));
             evaluate("document.querySelector('#chat-model-button').click()");
             check("native model sheet and slider fit phone",truth("document.querySelector('[data-ai-controls] input[name=effort]').getBoundingClientRect().height>=44&&document.documentElement.scrollWidth<=innerWidth+1"));
-            evaluate("document.querySelector('[data-model-choice=\"deepseek-v4-pro\"]').click();var c=document.querySelector('[data-ai-controls]');c.elements.effort.value='3';c.elements.effort.dispatchEvent(new Event('input',{bubbles:true}));c.requestSubmit()");
+            evaluate("var c=document.querySelector('[data-ai-controls]');c.elements.model.value='deepseek-v4-pro';c.elements.effort.value='3';c.elements.effort.dispatchEvent(new Event('input',{bubbles:true}));c.requestSubmit()");
             waitFor("calendarLedgerPreview.getConfig().model==='deepseek-v4-pro'",10000);
             check("native model and max thinking setting reach saved configuration",truth("calendarLedgerPreview.getConfig().effort==='max'&&JSON.parse(CalendarAndroid.loadSnapshot()).aiConfig.effort==='max'"));
             screenshot("app-model-controls",null);evaluate("document.querySelector('[data-action=close-modal]').click()");
@@ -235,6 +236,41 @@ public class WidgetRuntimeTest extends Instrumentation {
             report.put("provider",evaluate("__qaParsed.provider")).put("sources",new JSONArray(evaluate("JSON.stringify(__qaParsed.items.map(r=>({title:r.title,url:r.url})))")));
         }
         report.put("actualPublicNetwork",live).put("apiKeyUsed",false);
+    }
+    private void conversationAcceptance(JSONObject report)throws Exception{
+        String before=evaluate("CalendarAndroid.loadSnapshot()");android.content.SharedPreferences apiPrefs=getTargetContext().getSharedPreferences("api-config",0);Map<String,?> oldPrefs=new HashMap<>(apiPrefs.getAll());
+        try{
+            JSONObject sample=new JSONObject(before),s=sample.getJSONObject("state");s.put("chat",new JSONArray()).put("chatBranches",new JSONArray()).put("aiSummary",JSONObject.NULL);s.remove("activeChatBranchId");sample.getJSONObject("aiConfig").put("autoSummary",false).put("effort","none");evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(sample.toString())+")");restartApp();
+            evaluate("document.querySelector('[data-action=open-ai]').click();document.querySelector('[data-action=ai-connection]').click()");
+            check("native chat opens API connections directly",truth("!!document.querySelector('form[data-form=ai-connection]')"));
+            evaluate("var f=document.querySelector('form[data-form=ai-connection]');f.elements.provider.value='newapi';f.elements.provider.dispatchEvent(new Event('change',{bubbles:true}));f.elements.baseURL.value='https://8.8.8.8/v1';f.elements.apiKey.value='conversation-fixture-key';f.elements.model.value='tenant-model';f.elements.thinkingFormat.value='deepseek';f.requestSubmit()");waitFor("!document.querySelector('.modal')&&calendarLedgerPreview.getConfig().configured",10000);
+            String businessBefore=business();FakeGatewayConnection.chatMode="conversation";
+            evaluate("globalThis.nativeLongTask=calendarLedgerPreview.sendChat('我想学习编程，帮我详细分析学习路线，先聊方案，不改日历。');globalThis.originalComposer=document.querySelector('#chat-input')");
+            waitFor("document.querySelector('#chat-messages').textContent.includes('从一个小项目开始')&&!document.querySelector('.stop-button').hidden",10000);
+            check("Android receives incremental text before request completes",truth("document.querySelector('#chat-form button[type=submit]').disabled&&calendarLedgerPreview.getState().chat.at(-1).role==='user'"));
+            check("native streaming request uses selected model and long answer budget",FakeGatewayConnection.lastPayload.optBoolean("stream")&&FakeGatewayConnection.lastPayload.getInt("max_tokens")==8192);
+            check("native user can inspect model-returned reasoning",truth("!document.querySelector('.reasoning-block').hidden&&document.querySelector('[data-reasoning-body]').textContent.includes('理解目标')"));
+            evaluate("document.querySelector('.reasoning-block').open=true");
+            waitFor("!document.querySelector('#chat-form button[type=submit]').disabled",15000);
+            check("long answer retains prose and Markdown table and code",truth("!!document.querySelector('.markdown-body h2')&&!!document.querySelector('.markdown-body table')&&!!document.querySelector('.markdown-body pre')&&calendarLedgerPreview.getState().chat.at(-1).text.length>400"));
+            check("streaming preserves composer identity and expanded reasoning",truth("originalComposer===document.querySelector('#chat-input')&&document.querySelector('.reasoning-block').open"));
+            check("discussion leaves actual business data unchanged",businessBefore.equals(business()));
+            evaluate("document.querySelector('.reasoning-block').open=false;var sc=document.querySelector('#chat-scroll');sc.dispatchEvent(new WheelEvent('wheel',{deltaY:-1000}));sc.scrollTop=0");screenshot("app-conversation",null);
+            evaluate("document.querySelector('#chat-model-button').click()");waitFor("document.querySelectorAll('[data-model-choice]').length>0",10000);screenshot("app-chat-model-picker",null);
+            check("native model menu offers search and response length",truth("!!document.querySelector('[data-model-search]')&&!!document.querySelector('[name=maxTokens]')"));
+            evaluate("document.querySelector('[data-model-choice]').click()");waitFor("!document.querySelector('.modal')",10000);
+            FakeGatewayConnection.chatMode="stop";FakeGatewayConnection.cancelled=false;
+            evaluate("globalThis.stopTask=calendarLedgerPreview.sendChat('继续详细讨论')");waitFor("!document.querySelector('.stop-button').hidden&&document.querySelector('#chat-messages').lastElementChild.textContent.includes('从一个小项目开始')",10000);
+            evaluate("document.querySelector('[data-action=stop-chat]').click()");waitFor("!document.querySelector('#chat-form button[type=submit]').disabled",5000);
+            check("stop preserves partial answer and explicit stopped status",truth("calendarLedgerPreview.getState().chat.at(-1).status.includes('已停止')&&calendarLedgerPreview.getState().chat.at(-1).text.includes('从一个小项目开始')"));
+            SystemClock.sleep(250);check("stop disconnects native upstream request",FakeGatewayConnection.cancelled);
+            check("stop causes no business changes",businessBefore.equals(business()));
+            restartApp();check("cold start retains long answers and stopped status",truth("calendarLedgerPreview.getState().chat.some(r=>r.text.includes('三个阶段'))&&calendarLedgerPreview.getState().chat.at(-1).status.includes('已停止')"));
+            check("API keys remain absent from conversation snapshots",!evaluate("CalendarAndroid.loadSnapshot()").contains("conversation-fixture-key"));
+            report.put("actualModel",false).put("apiKeyUsed",false).put("transport","SSE fixture through actual Android native HTTP and WebView bridge");
+        }finally{
+            FakeGatewayConnection.chatMode="";android.content.SharedPreferences.Editor edit=apiPrefs.edit().clear();for(Map.Entry<String,?> entry:oldPrefs.entrySet()){Object value=entry.getValue();if(value instanceof String)edit.putString(entry.getKey(),(String)value);else if(value instanceof Boolean)edit.putBoolean(entry.getKey(),(Boolean)value);}edit.commit();evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(before)+")");restartApp();
+        }
     }
     private void chatAPIAcceptance(JSONObject report)throws Exception {
         String before=evaluate("CalendarAndroid.loadSnapshot()");android.content.SharedPreferences apiPrefs=getTargetContext().getSharedPreferences("api-config",0);Map<String,?> oldPrefs=new HashMap<>(apiPrefs.getAll());
@@ -838,7 +874,7 @@ public class WidgetRuntimeTest extends Instrumentation {
         Bitmap screen=getUiAutomation().takeScreenshot();if(screen==null)throw new AssertionError("No Android screenshot");
         Bitmap image=screen;
         if(crop!=null){Rect rect=new Rect();onUi(()->crop.getGlobalVisibleRect(rect));image=Bitmap.createBitmap(screen,rect.left,rect.top,rect.width(),rect.height());}
-        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.7.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
+        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.8.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
         finally{if(image!=screen)image.recycle();screen.recycle();}
     }
     private void check(String name,boolean passed)throws Exception{findings.put(new JSONObject().put("check",name).put("passed",passed));if(!passed)throw new AssertionError(name);}

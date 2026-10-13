@@ -20,14 +20,29 @@ export function createPreviewServer({upstreamFetch=globalThis.fetch,webFetch=fet
     const upstream=await upstreamFetch(url,{method:'POST',headers:{Authorization:`Bearer ${config.apiKey}`,'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(payload.effort&&payload.effort!=='none'?300000:110000)});
     let data;try{data=await upstream.json();}catch{throw new Error(`API 返回了无法解析的内容（HTTP ${upstream.status}）。`);}
     if(!upstream.ok){const detail=String(data.error?.message??data.message??'请求失败').split(config.apiKey).join('[已隐藏]').slice(0,400);throw new Error(`API 错误 ${upstream.status}：${detail}`);}
-    if(data.choices?.[0]?.finish_reason==='length')throw new Error('模型输出达到长度上限，尚未收到完整回复；已完成的本地操作保留。');
-    const message=data.choices?.[0]?.message;if(!message)throw new Error('API 未返回有效回复；请确认该服务支持 Chat Completions。');return{message,model:data.model??config.model,usage:data.usage??null};
+    const message=data.choices?.[0]?.message;if(!message)throw new Error('API 未返回有效回复；请确认该服务支持 Chat Completions。');return{message,model:data.model??config.model,usage:data.usage??null,finishReason:data.choices?.[0]?.finish_reason??''};
+  }
+  async function streamCompletion(payload,response){
+    const current={...config};if(!current.apiKey)throw new Error('请先连接 API。');
+    const abort=new AbortController(),timeout=setTimeout(()=>abort.abort(),300000);
+    const closed=()=>{if(!response.writableEnded)abort.abort();};response.on('close',closed);
+    try{
+      const body={model:current.model,messages:payload.messages,stream:true,...completionOptions(current.baseURL,payload.effort??'none',{thinkingFormat:current.thinkingFormat,maxTokens:payload.maxTokens}),...(payload.tools?.length?{tools:payload.tools,tool_choice:'auto'}:{})};
+      const upstream=await upstreamFetch(apiEndpoint(current.baseURL),{method:'POST',headers:{Authorization:`Bearer ${current.apiKey}`,'Content-Type':'application/json',Accept:'text/event-stream'},body:JSON.stringify(body),signal:abort.signal});
+      if(!upstream.ok)throw new Error(`API 错误 ${upstream.status}，请检查所选模型和接口设置。`);
+      if(!upstream.headers.get('content-type')?.includes('text/event-stream')){
+        const data=await upstream.json();if(!data.choices?.[0]?.message)throw new Error('接口没有返回有效回复。');sendJSON(response,200,{message:data.choices[0].message,model:data.model??current.model,finishReason:data.choices[0].finish_reason??''});return;
+      }
+      response.writeHead(200,{'Content-Type':'text/event-stream; charset=utf-8','Cache-Control':'no-store','X-Accel-Buffering':'no'});response.flushHeaders();
+      const reader=upstream.body.getReader();let size=0;try{while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>8_000_000)throw new Error('回复超过接收上限。');response.write(value);}}finally{await reader.cancel().catch(()=>{});reader.releaseLock();}response.end();
+    }catch(error){if(response.headersSent){response.write('data: '+JSON.stringify({error:{message:'回复中断'}})+'\n\n');response.end();}else throw error;}
+    finally{clearTimeout(timeout);response.off('close',closed);}
   }
   const server=http.createServer(async(request,response)=>{
     response.setHeader('X-Content-Type-Options','nosniff');response.setHeader('Referrer-Policy','no-referrer');response.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
     try{const requestURL=new URL(request.url,'http://127.0.0.1');const route=requestURL.pathname;
       if(route.startsWith('/api/')){const origin=request.headers.origin;if(origin){const parsed=new URL(origin);if(!['127.0.0.1','localhost'].includes(parsed.hostname)||parsed.port!==String(server.address().port)){sendJSON(response,403,{error:'不允许其他网页访问本机 API 配置。'});return;}}
-        if(route==='/api/health'&&request.method==='GET'){sendJSON(response,200,{ok:true,app:'calendar-ledger-ai-preview',version:'0.3.7'});return;}
+        if(route==='/api/health'&&request.method==='GET'){sendJSON(response,200,{ok:true,app:'calendar-ledger-ai-preview',version:'0.3.8'});return;}
         if(route==='/api/config'&&request.method==='GET'){sendJSON(response,200,publicConfig());return;}
         if(route==='/api/models'&&request.method==='GET'){
           if(!config.apiKey)throw new Error('请先配置 API Key。');
@@ -62,7 +77,7 @@ export function createPreviewServer({upstreamFetch=globalThis.fetch,webFetch=fet
           if(!profiles.has(baseURL)&&profiles.size>=8)throw new Error('最多保存8个接口地址。');config={baseURL,provider,model,thinkingFormat,apiKey};profiles.set(baseURL,{...config});sendJSON(response,200,publicConfig());return;
         }
         if(route==='/api/test'){const result=await completion({messages:[{role:'user',content:'请只回复 OK，用于测试 API 连接。'}]});sendJSON(response,200,{ok:true,model:result.model});return;}
-        if(route==='/api/chat'){if(!Array.isArray(body.messages)||body.messages.length<1||body.messages.length>300)throw new Error('会话长度不符合要求，请开始新会话。');if(body.tools!==undefined&&(!Array.isArray(body.tools)||body.tools.length>96))throw new Error('操作接口数量异常。');const result=await completion({messages:body.messages,tools:body.tools,effort:body.effort,purpose:body.purpose});sendJSON(response,200,result);return;}
+        if(route==='/api/chat'){if(!Array.isArray(body.messages)||body.messages.length<1||body.messages.length>300)throw new Error('会话长度不符合要求，请开始新会话。');if(body.tools!==undefined&&(!Array.isArray(body.tools)||body.tools.length>96))throw new Error('操作接口数量异常。');if(body.stream===true&&body.purpose!=='summary'){await streamCompletion(body,response);return;}const result=await completion({messages:body.messages,tools:body.tools,effort:body.effort,purpose:body.purpose});sendJSON(response,200,result);return;}
         sendJSON(response,404,{error:'没有这个接口。'});return;
       }
       if(!['GET','HEAD'].includes(request.method)){sendJSON(response,405,{error:'请求方法不支持。'});return;}

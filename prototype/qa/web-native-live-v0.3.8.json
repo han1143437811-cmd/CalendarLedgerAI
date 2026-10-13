@@ -1,0 +1,87 @@
+{
+  "passed": true,
+  "version": "0.3.8",
+  "actualSamsungPhone": false,
+  "apiKeyUsed": false,
+  "actualPublicNetwork": true,
+  "native": {
+    "phase": "live-web",
+    "androidApi": 36,
+    "actualSamsungPhone": false,
+    "host": "Android AppWidgetHost in instrumentation overlay",
+    "version": "0.3.8",
+    "provider": "DuckDuckGo",
+    "sources": [
+      {
+        "title": "Thinking Mode | DeepSeek API Docs",
+        "url": "https://api-docs.deepseek.com/guides/thinking_mode/"
+      },
+      {
+        "title": "opencode-deepseek-v4-reasoning-effort - GitHub",
+        "url": "https://github.com/criterium/opencode-lab/tree/main/research/opencode-deepseek-v4-reasoning-effort"
+      },
+      {
+        "title": "GitHub - HanaAyane/dsh-reasoning-effort: DSH适用的Codex风格的思考强度滑块，以及大肥鱼跑步滑块 ...",
+        "url": "https://github.com/HanaAyane/dsh-reasoning-effort"
+      },
+      {
+        "title": "DeepSeek Thinking Mode: Toggle, reasoning_effort & Tools 400",
+        "url": "https://deepseek.day/en/blog/deepseek-thinking-mode-guide/"
+      },
+      {
+        "title": "DeepSeek Thinking Mode: How It Works and How to Use It",
+        "url": "https://deepseek-usa.ai/docs/deepseek-thinking-mode/"
+      }
+    ],
+    "actualPublicNetwork": true,
+    "apiKeyUsed": false,
+    "passed": true,
+    "findings": [
+      {
+        "check": "native public page guard rejects 127.0.0.1",
+        "passed": true
+      },
+      {
+        "check": "native public page guard rejects 10.1.2.3",
+        "passed": true
+      },
+      {
+        "check": "native public page guard rejects 192.168.1.1",
+        "passed": true
+      },
+      {
+        "check": "native public page guard rejects 100.64.0.1",
+        "passed": true
+      },
+      {
+        "check": "native public page guard rejects ::1",
+        "passed": true
+      },
+      {
+        "check": "native public page guard rejects fd00::1",
+        "passed": true
+      },
+      {
+        "check": "real native web route rejects private addresses",
+        "passed": true
+      },
+      {
+        "check": "native public page route returns actual HTTP content",
+        "passed": true
+      },
+      {
+        "check": "native public page is parsed into bounded source text",
+        "passed": true
+      },
+      {
+        "check": "native live search returns actual search-provider content",
+        "passed": true
+      },
+      {
+        "check": "native live search yields real clickable HTTPS results",
+        "passed": true
+      }
+    ]
+  },
+  "apkSha256": "f4d7e24be342d6fe7dba419053045ea3b016886582c95d0f821723d110fbaae1"
+}

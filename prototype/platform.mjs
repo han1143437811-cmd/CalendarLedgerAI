@@ -1,10 +1,34 @@
+import {createChatStream} from './chat-stream.mjs';
 export const isAndroid = !!globalThis.CalendarAndroid;
 export function getNativeSnapshot(){if(!isAndroid||typeof globalThis.CalendarAndroid.loadSnapshot!=='function')return null;try{return JSON.parse(globalThis.CalendarAndroid.loadSnapshot()||'null');}catch{return null;}}
 export function saveNativeSnapshot(snapshot){if(!isAndroid)return false;if(typeof globalThis.CalendarAndroid.saveSnapshot!=='function'||!globalThis.CalendarAndroid.saveSnapshot(JSON.stringify(snapshot)))throw new Error('手机保存失败，请先导出备份后再关闭应用。');return true;}
 const pending = new Map();let counter=0;
-if(isAndroid)globalThis.__calendarNativeReply=(id,value)=>{const request=pending.get(id);if(!request)return;pending.delete(id);clearTimeout(request.timeout);request.resolve(value);};
-export function nativeRequest(route,body={}){return new Promise((resolve,reject)=>{const id=String(++counter),timeout=setTimeout(()=>{pending.delete(id);reject(new Error('手机网络请求超时，请稍后重试。'));},route==='/api/chat'&&body.effort&&body.effort!=='none'?315000:125000);pending.set(id,{resolve,reject,timeout});try{globalThis.CalendarAndroid.request(id,route,JSON.stringify(body));}catch(e){pending.delete(id);clearTimeout(timeout);reject(e);}});}
-export async function apiFetch(route,options={}){if(!isAndroid)return fetch(route,options);const response=await nativeRequest(route,options.body?JSON.parse(options.body):{});return new Response(JSON.stringify(response.data),{status:response.status,headers:{'Content-Type':'application/json'}});}
+if(isAndroid){
+  globalThis.__calendarNativeReply=(id,value)=>pending.get(id)?.resolve(value);
+  globalThis.__calendarNativeProgress=(id,text)=>{try{pending.get(id)?.onProgress?.(text);}catch(error){pending.get(id)?.cancel(error);}};
+}
+export function nativeRequest(route,body={},options={}){return new Promise((resolve,reject)=>{
+  const id=String(++counter),cleanup=()=>{pending.delete(id);clearTimeout(timeout);options.signal?.removeEventListener('abort',abort);};
+  const cancel=error=>{if(!pending.has(id))return;cleanup();globalThis.CalendarAndroid.cancelRequest?.(id);reject(error);};
+  const abort=()=>cancel(options.signal.reason??new DOMException('已停止生成','AbortError'));
+  const timeout=setTimeout(()=>cancel(new Error('手机网络请求超时，请稍后重试。')),route==='/api/chat'?315000:125000);
+  pending.set(id,{resolve:value=>{cleanup();resolve(value);},cancel,onProgress:options.onProgress});
+  if(options.signal?.aborted){abort();return;}options.signal?.addEventListener('abort',abort,{once:true});
+  try{globalThis.CalendarAndroid.request(id,route,JSON.stringify(body));}catch(e){cancel(e);}
+});}
+export async function apiFetch(route,options={}){if(!isAndroid)return fetch(route,options);const response=await nativeRequest(route,options.body?JSON.parse(options.body):{},options);return new Response(JSON.stringify(response.data),{status:response.status,headers:{'Content-Type':'application/json'}});}
+export async function requestChat(body,{signal,onUpdate=()=>{}}={}){
+  const stream=createChatStream(onUpdate);let data;
+  if(isAndroid){const response=await nativeRequest('/api/chat',{...body,stream:true},{signal,onProgress:stream.feed});if(response.status!==200)throw new Error(response.data.error??'请求失败。');data=response.data;}
+  else{
+    const response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,stream:true}),signal});
+    if(response.ok&&response.headers.get('content-type')?.includes('text/event-stream')){
+      const reader=response.body.getReader(),decoder=new TextDecoder();try{while(true){const {done,value}=await reader.read();if(done)break;stream.feed(decoder.decode(value,{stream:true}));}stream.feed(decoder.decode());}catch(error){await reader.cancel().catch(()=>{});throw error;}finally{reader.releaseLock();}data={streamed:true};
+    }else{data=await response.json();if(!response.ok)throw new Error(data.error??'请求失败。');}
+  }
+  if(data.streamed)return stream.result();
+  onUpdate({text:data.message?.content??'',reasoning:data.message?.reasoning_content??'',toolPending:!!data.message?.tool_calls?.length});return data;
+}
 export async function saveDownload(result){if(!isAndroid)return false;const response=await nativeRequest('/api/download',{filename:result.filename,data:result.data,format:result.format});if(response.status!==200)throw new Error(response.data.error);return response.data;}
 let syncTimer;
 export function syncDevice(state){if(!isAndroid)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>nativeRequest('/api/device-sync',{events:state.events,theme:state.settings.theme,dataMode:state.dataMode}).then(response=>{globalThis.calendarDeviceStatus=response.data;}).catch(()=>{}),250);}

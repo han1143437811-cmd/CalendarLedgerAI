@@ -12,8 +12,8 @@ RUNTIME=Path(json.loads((PROJECT/'build-tools/runtime-location.json').read_text(
 ADB=RUNTIME/'sdk/platform-tools/adb.exe'
 SERIAL='emulator-5580'
 OUT=PROJECT/'prototype/qa'
-VERSION='0.3.7'
-BASELINE_VERSION='0.3.6'
+VERSION='0.3.8'
+BASELINE_VERSION='0.3.7'
 
 def adb(*args,binary=False,timeout=60):
     result=subprocess.run([str(ADB),'-s',SERIAL,*args],capture_output=True,timeout=timeout)
@@ -58,7 +58,7 @@ try:
     adb('shell','cmd','connectivity','airplane-mode','enable')
     adb('shell','svc','wifi','disable');adb('shell','svc','data','disable')
     previous_font=adb('shell','settings','get','system','font_scale')
-    install(PROJECT/'android/build/runtime-test.apk','v037-runtime-test.apk')
+    install(PROJECT/'android/build/runtime-test.apk','v038-runtime-test.apk')
     if reuse_core:
         previous=json.loads((OUT/f'android-widget-v{VERSION}-results.json').read_text(encoding='utf-8'))
         for name in ('baseline','widget','reopened','cold-ai','cold-date','system-font','data-projection','sparse-grid'):
@@ -77,11 +77,11 @@ try:
         assert report['phases']['baseline']['passed'] and report['phases']['baseline']['version']==BASELINE_VERSION
         # Reinstall only the tested upgrade during repair; never downgrade or clear.
         adb('shell','am','force-stop','org.calendarledger.preview')
-        install(PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk','v037-delivery.apk')
+        install(PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk','v038-delivery.apk')
     else:
         report['phases']['baseline']=phase('baseline')
         adb('shell','am','force-stop','org.calendarledger.preview')
-        install(PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk','v037-delivery.apk')
+        install(PROJECT/f'dist/CalendarLedgerAI-v{VERSION}.apk','v038-delivery.apk')
     if not reuse_core:
         report['sameSignatureUpgrade']=True
         report['phases']['widget']=phase('widget')
@@ -116,6 +116,9 @@ try:
     report['phases']['web-tools']=phase('web-tools')
     adb('shell','am','force-stop','org.calendarledger.preview')
     report['phases']['chat-api']=phase('chat-api')
+    adb('shell','am','force-stop','org.calendarledger.preview')
+    report['phases']['conversation']=phase('conversation')
+    screenshot('app-conversation');screenshot('app-chat-model-picker')
     for name in ('app-chat-branches','app-newapi-settings','app-branch-chat'):screenshot(name)
     report['phases']['appearance']=phase('appearance')
     for name in ('app-calendar','app-ledger','app-reports','app-more','app-chat','app-settings'):screenshot(name)

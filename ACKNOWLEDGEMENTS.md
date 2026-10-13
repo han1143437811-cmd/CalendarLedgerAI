@@ -41,3 +41,7 @@ CalendarLedgerAI 0.2.3 是独立的 Android WebView 应用，包名 `org.calenda
 在 v0.3.5 的调研与设计中，向 [Operit](https://github.com/AAswordman/Operit)、[Open WebUI](https://github.com/open-webui/open-webui)、[Mem0](https://github.com/mem0ai/mem0)、[Cline](https://github.com/cline/cline) 和 [Aider](https://github.com/Aider-AI/aider) 的作者及贡献者致以诚挚感谢。它们公开的记忆管理、上下文摘要、模型配置与思考档位映射为移动端实现提供了有价值的参考。
 
 本应用独立实现适合日历和账本的轻量方案，未复制这些项目源码或引入其运行时。逐项技术来源、采用范围及验证边界见 [AI 记忆调研](docs/AI_MEMORY_RESEARCH.md)。对 Fossify 和既有依赖的致谢与许可说明继续保留。
+
+## 完整聊天体验的参考与依赖
+
+v0.3.8 特别感谢 [RikkaHub](https://github.com/rikkahub/rikkahub) 和 [Open WebUI](https://github.com/open-webui/open-webui) 的作者及贡献者。参考其多模型聊天、丰富文本阅读和流式交互理念，独立实现本项目适配；未复制它们的源码。实际使用 [marked 18.1.1](https://github.com/markedjs/marked) 解析 Markdown，采用 MIT 许可，完整版权通知见 [许可证](prototype/vendor/marked/LICENSE.md)。来源、版本及文件摘要保留在 vendor/marked/provenance.json。

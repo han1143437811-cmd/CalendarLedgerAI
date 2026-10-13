@@ -468,3 +468,12 @@ The free Open-Meteo API is used for this non-commercial, ad-free application.
 No Open-Meteo server implementation is bundled; its server code licence is
 separate from the API data licence. Weather requests contain only the selected
 city name or geographic coordinates and do not include ledger or AI data.
+
+Markdown rendering: marked 18.1.1 (MIT)
+https://github.com/markedjs/marked
+Bundled license: vendor/marked/LICENSE.md
+
+Chat interaction design references (independent implementation, no source copied):
+RikkaHub https://github.com/rikkahub/rikkahub
+Open WebUI https://github.com/open-webui/open-webui
+Our sincere thanks to their authors and contributors for their open work.
