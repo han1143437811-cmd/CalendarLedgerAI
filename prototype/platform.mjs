@@ -1,5 +1,7 @@
 import {createChatStream} from './chat-stream.mjs';
+import {deviceTime,normalizeDeviceTime} from './ai-time.mjs';
 export const isAndroid = !!globalThis.CalendarAndroid;
+export function getDeviceTime(){if(isAndroid&&typeof globalThis.CalendarAndroid.currentTime==='function')try{const time=normalizeDeviceTime(JSON.parse(globalThis.CalendarAndroid.currentTime()));if(time)return time;}catch{}return deviceTime();}
 export function getNativeSnapshot(){if(!isAndroid||typeof globalThis.CalendarAndroid.loadSnapshot!=='function')return null;try{return JSON.parse(globalThis.CalendarAndroid.loadSnapshot()||'null');}catch{return null;}}
 export function saveNativeSnapshot(snapshot){if(!isAndroid)return false;if(typeof globalThis.CalendarAndroid.saveSnapshot!=='function'||!globalThis.CalendarAndroid.saveSnapshot(JSON.stringify(snapshot)))throw new Error('手机保存失败，请先导出备份后再关闭应用。');return true;}
 const pending = new Map();let counter=0;

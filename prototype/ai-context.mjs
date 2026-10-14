@@ -1,4 +1,5 @@
 // Rebuild context from durable data every turn; API wire messages are ephemeral.
+import {normalizeDeviceTime,describeTime} from './ai-time.mjs';
 const clip = (value, limit=1800) => String(value ?? '').slice(0, limit);
 export function savedToolResult(result) {
   // Recognition cards are intentionally live; ordinary operation history is not.
@@ -63,7 +64,7 @@ export function searchChatHistory(state, query, limit=8) {
   return [...(state.aiChatArchive??[]).map(row=>({...row,archived:true})),...(state.chat??[])]
     .map((row,index)=>({row,index,score:relevance(row.text,query)})).filter(x=>x.score>0)
     .sort((a,b)=>b.score-a.score||b.index-a.index).slice(0,limit)
-    .map(({row})=>({role:row.role,text:clip(row.text),archived:row.archived===true,results:(row.results??[]).slice(-3).map(entry=>({name:entry.name,result:compactToolResult(entry.result)}))}));
+    .map(({row})=>({role:row.role,text:clip(row.text),archived:row.archived===true,...(normalizeDeviceTime(row.sentAt)?{sentAt:normalizeDeviceTime(row.sentAt)}:{}),results:(row.results??[]).slice(-3).map(entry=>({name:entry.name,result:compactToolResult(entry.result)}))}));
 }
 export function normalizeSuggestions(input=[]) {
   if(!Array.isArray(input)||input.length>20)throw new Error('待核对的记忆建议最多 20 条。');
@@ -81,7 +82,7 @@ export function compactChat(state) {
   const evicted=state.chat.slice(0,-200), archive=[...(state.aiChatArchive??[])];
   for(const row of evicted){
     const results=(row.results??[]).filter(entry=>entry.result?.ok===true&&entry.result?.operationId).slice(-2).map(entry=>{const result=compactToolResult(entry.result);if(result.items)result.items=result.items.slice(0,3);if(result.operations)result.operations=result.operations.slice(0,1);return {name:clip(entry.name,60),result};});
-    if(row.role==='user'||results.length)archive.push({role:row.role,text:row.role==='user'?clip(row.text,500):'',results});
+    if(row.role==='user'||results.length)archive.push({role:row.role,text:row.role==='user'?clip(row.text,500):'',results,...(normalizeDeviceTime(row.sentAt)?{sentAt:normalizeDeviceTime(row.sentAt)}:{})});
   }
   state.aiChatArchive=archive.slice(-80);state.chat=state.chat.slice(-200);
 }
@@ -92,7 +93,7 @@ export function selectMemories(state,prompt,budget=4000) {
 }
 export function buildConversationContext(state, {prompt, userContent, today, timeZone, isAndroid=false, appContext={}, drafts=[],thinking=false,model='',baseURL='',webEnabled=false}) {
   const instruction = `你是一位聪明、灵活、可靠的个人 AI 助手，与用户自然交流，帮助理解问题、分析方案、学习、写作、规划和解决实际困难。可以讨论日历账本以外的话题。默认使用清楚自然的中文，按问题需要决定篇幅；用户要深入讨论、长文或详细方案时充分展开，不要一律简短回复。先回答真正的问题，解释依据、关键步骤、取舍和不确定性，避免只有操作回执、空话或工具结果复述。用段落、列表、表格和代码块组织内容，适合手机阅读；不要用固定模板强行套所有回答。
-工具是按需使用的能力。普通聊天、解释、写作和头脑风暴可以直接回答，无需为了回答而调用工具，也不要把话题强行转回记账。分析真实收支或日程时先查询相关数据，再给出有依据的文字分析与可执行建议。用户仅讨论方案、假设、示例或询问怎么做时，不代表授权修改数据；只有用户实际要求执行时才写入。已经完成工具调用后，继续回答用户关心的问题，而不是只说“已完成”。不能假装查过数据或已执行操作；操作结果必须以成功工具返回为准，失败要说明。工具参数中的金额输入是人民币元，工具返回金额是整数分；面向用户以元解释，不要把分直接当元。当前日期${today}，时区${timeZone}。${isAndroid?'Android 提醒依赖授权，示例账本不触发通知。':'浏览器只保存提醒参数。'}
+工具是按需使用的能力。普通聊天、解释、写作和头脑风暴可以直接回答，无需为了回答而调用工具，也不要把话题强行转回记账。分析真实收支或日程时先查询相关数据，再给出有依据的文字分析与可执行建议。用户仅讨论方案、假设、示例或询问怎么做时，不代表授权修改数据；只有用户实际要求执行时才写入。已经完成工具调用后，继续回答用户关心的问题，而不是只说“已完成”。不能假装查过数据或已执行操作；操作结果必须以成功工具返回为准，失败要说明。工具参数中的金额输入是人民币元，工具返回金额是整数分；面向用户以元解释，不要把分直接当元。本轮对话开始日期${today}，时区${timeZone}；即时日期时间以每次请求的“应用提供的实时设备时间”为准。${isAndroid?'Android 提醒依赖授权，示例账本不触发通知。':'浏览器只保存提醒参数。'}
 当前聊天为“${String(state.chatBranches?.find(row=>row.id===state.activeChatBranchId)?.title??'主聊天').slice(0,40)}”。不同聊天与分支共享当前账目、日程和已确认偏好；复制的历史操作不会重执行。分支内的历史工具结果可能过时，修改前重新查询当前对象。当前问题不能借用其他未引用聊天里的“刚才那笔”。
 用户明确要求的普通操作直接执行；对象不唯一、金额未知、分摊期间不清楚或重复系列范围不清时只询问必要信息。用查询结果、当前对象或上轮工具返回的真实 ID，不能凭聊天里的名称猜 ID。写入后可重新查询核实。
 纠正已有偏好先 get_ai_memory 查到原名称，再 correct_preference 更新；用户明确要求纠正可直接执行。同名更新会记录真实前后变化。修改账目、日程、待办也记录纠正历史；query_corrections 取得纠正ID，用户要求恢复旧值时 revert_correction，失败说明后来又有修改。历史不是当前值，不把纠正记录中的旧偏好当成当前默认。
@@ -121,6 +122,7 @@ ${webEnabled?'本轮允许 web_search 和 read_webpage。查询最新公开信�
       const size=JSON.stringify(wire).length;if(size<=historyBudget){past.push(wire);historyBudget-=size;continue;}
     }
     let content = clip(row.text,24000);
+    const sentAt=describeTime(row.sentAt);if(sentAt)content+='\n[历史消息发送时间：'+sentAt+'；该消息的相对日期按当时理解，不能当作现在。]';
     if (row.images?.length) content += '\n[此前附过图片；图片原文未重新发送，需要重新查看时请用户再附图。]';
     if (row.results?.length) content += '\n[当时执行结果，可能已被修改或撤销；真实状态需查询] ' + JSON.stringify(row.results.slice(-3).map(entry => ({name:entry.name, result:compactToolResult(entry.result)})));
     if (content.length>historyBudget) break;

@@ -129,6 +129,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void cancelVoice(String session){ui.post(()->{if(!isFinishing())voice.cancel(session);});}
         @JavascriptInterface public void openMicrophoneSettings(){ui.post(()->{try{startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:"+getPackageName())));}catch(Exception ignored){}});}
         @JavascriptInterface public void showKeyboard(){ui.post(()->{web.requestFocus();android.view.inputmethod.InputMethodManager keyboard=(android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);if(keyboard!=null)keyboard.showSoftInput(web,android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT);});}
+        @JavascriptInterface public String currentTime(){try{return DeviceTime.now().toString();}catch(Exception error){return "";}}
         @JavascriptInterface public String loadSnapshot(){return SnapshotStore.read(MainActivity.this);}
         @JavascriptInterface public boolean saveSnapshot(String json){JSONObject state=SnapshotStore.save(MainActivity.this,json);if(state==null)return false;try{CalendarWidgetProvider.snapshotChanged(MainActivity.this,state);}catch(Exception error){android.util.Log.e("CalendarWidget","Cannot queue widget refresh",error);}return true;}
         @JavascriptInterface public void cancelRequest(String id){chatTransport.cancel(id);}

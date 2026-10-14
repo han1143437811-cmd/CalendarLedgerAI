@@ -65,20 +65,20 @@ try{
   await click('.mobile-nav [data-page=more]');await click('.main [data-action=ai-memory]');
   check('mobile memory panel fits screen',await evaluate('document.querySelector(".modal").getBoundingClientRect().right<=innerWidth+1&&document.documentElement.scrollWidth<=innerWidth+1'));
   check('memory input uses the app styling and touch target',await evaluate('document.querySelector("[data-memory-form] input").getBoundingClientRect().height>=44&&parseFloat(getComputedStyle(document.querySelector("[data-memory-form] input")).borderRadius)>0'));
-  await screenshot('mobile-ai-memory-v0.3.8.png');
+  await screenshot('mobile-ai-memory-v0.3.9.png');
   await fill('[data-memory-form] input[name=key]','默认账户');await fill('[data-memory-form] input[name=value]','银行卡');await evaluate('document.querySelector("[data-memory-form]").requestSubmit()');
   check('memory settings adds preferences through the real dispatcher',await evaluate('calendarLedgerPreview.getState().aiMemory.some(row=>row.key==="默认账户"&&row.value==="银行卡")'));
   await click('[data-memory-delete="0"]');check('forget memory preserves payment and allocation',await evaluate('calendarLedgerPreview.getState().aiMemory.length===1&&calendarLedgerPreview.getState().transactions.length===1&&calendarLedgerPreview.getState().expenseAllocations.length===1'));
   await click('[data-action=close-modal]');await click('.mobile-nav [data-page=calendar]');
   check('calendar clearly labels allocation and shows two-yuan daily share',await evaluate('document.querySelector(".calendar-foot").textContent.includes("费用按天分摊")&&document.querySelector(".calendar-day[data-date=\\"2026-10-13\\"] .day-money").textContent.includes("2")'));
-  await screenshot('mobile-allocation-v0.3.8.png');
+  await screenshot('mobile-allocation-v0.3.9.png');
   check('all API rounds advertise local memory and allocation tools',requests.every(payload=>payload.tools.some(row=>row.function.name==='allocate_expense')&&payload.tools.some(row=>row.function.name==='remember_preference')));
   check('API wire histories contain paired call/result IDs',requests.every(payload=>payload.messages.every((row,index)=>!row.tool_calls||row.tool_calls.every(call=>payload.messages.slice(index+1).some(message=>message.role==='tool'&&message.tool_call_id===call.id)))));
   await send('我习惯用支付宝支付',[toolCall('propose_preference',{key:'默认账户',value:'支付宝',evidence:'我习惯用支付宝支付'}),final('提交了一个待核对偏好，请在记忆页面采纳。')]);
   check('API suggestion uses exact user quote and remains inactive',await evaluate('calendarLedgerPreview.getState().aiMemorySuggestions[0].evidence==="我习惯用支付宝支付"&&calendarLedgerPreview.getState().aiMemory.length===1'));
   await click('.mobile-nav [data-page=more]');await click('.main [data-action=ai-memory]');
   check('suggestion buttons meet phone touch size without overflow',await evaluate('document.querySelector("[data-memory-accept]").getBoundingClientRect().height>=44&&document.documentElement.scrollWidth<=innerWidth+1'));
-  await screenshot('mobile-memory-suggestion-v0.3.8.png');
+  await screenshot('mobile-memory-suggestion-v0.3.9.png');
   await click('[data-memory-accept]');
   check('accept replaces same-key memory and preserves source',await evaluate('calendarLedgerPreview.getState().aiMemory.length===1&&calendarLedgerPreview.getState().aiMemory[0].evidence==="我习惯用支付宝支付"&&calendarLedgerPreview.getState().aiMemorySuggestions.length===0'));
   await click('[data-action=close-modal]');await evaluate('location.reload()');await waitFor('!!globalThis.calendarLedgerPreview');
@@ -96,7 +96,7 @@ try{
   await fill('[data-ai-controls] input[name=model]','deepseek-v4-pro');await fill('[data-ai-controls] input[name=effort]','3');await evaluate('document.querySelector("[data-ai-controls]").requestSubmit()');await waitFor('calendarLedgerPreview.getConfig().model==="deepseek-v4-pro"');
   check('model and real max-effort slider persist',await evaluate('calendarLedgerPreview.getConfig().effort==="max"&&document.querySelector("#chat-model-button").textContent.includes("V4 Pro")'));
   check('control sheet fits narrow phone',await evaluate('document.documentElement.scrollWidth<=innerWidth+1&&document.querySelector(".ai-thinking-control input").getBoundingClientRect().height>=44'));
-  await screenshot('mobile-model-controls-v0.3.8.png');await click('[data-action=close-modal]');
+  await screenshot('mobile-model-controls-v0.3.9.png');await click('[data-action=close-modal]');
   await send('读取已确认偏好',[{...toolCall('get_ai_memory',{}),reasoning_content:'需要读取真实偏好。'},payload=>{check('max effort reaches upstream wire with complete thinking tool round',payload.model==='deepseek-v4-pro'&&payload.reasoning_effort==='max'&&payload.thinking.type==='enabled'&&payload.messages.some(row=>row.reasoning_content==='需要读取真实偏好。'));return {...final('当前默认账户是支付宝。'),reasoning_content:'本地查询确认。'};}]);
   steps=[payload=>{check('manual summary calls selected model without tools or thinking',payload.model==='deepseek-v4-pro'&&payload.thinking.type==='disabled'&&payload.reasoning_effort==='none'&&!payload.tools&&payload.response_format.type==='json_object'&&payload.max_tokens===1600);return final(JSON.stringify({summary:'用户月订阅付款已修改为62元，按天分摊；默认账户已确认支付宝。需要核实当前账目时重新查询。'}));}];step=0;
   await click('#chat-model-button');await click('[data-compress-now]');await waitFor('!!calendarLedgerPreview.getState().aiSummary&&!document.querySelector("#chat-form button[type=submit]").disabled');
@@ -108,14 +108,14 @@ try{
   check('same-key correction keeps one preference and records before/after',await evaluate('calendarLedgerPreview.getState().aiMemory.length===1&&calendarLedgerPreview.getState().aiMemory[0].value==="银行卡"&&calendarLedgerPreview.getState().correctionHistory.at(-1).changes[0].before.value==="支付宝"'));
   await click('.mobile-nav [data-page=more]');await click('.main [data-action=corrections]');
   check('correction UI shows exact quote and old/new values',await evaluate('document.querySelector(".correction-card").textContent.includes("支付宝 → 银行卡")&&document.querySelector(".correction-card").textContent.includes("纠正偏好，以后默认用银行卡")'));
-  await screenshot('mobile-corrections-v0.3.8.png');await click('[data-revert-correction]');
+  await screenshot('mobile-corrections-v0.3.9.png');await click('[data-revert-correction]');
   check('targeted UI restore changes preference without changing subscription',await evaluate('calendarLedgerPreview.getState().aiMemory[0].value==="支付宝"&&calendarLedgerPreview.getState().transactions[0].amount===6200'));
   await click('[data-action=close-modal]');await evaluate('location.reload()');await waitFor('!!globalThis.calendarLedgerPreview');
   check('correction history and restoration survive cold reload',await evaluate('calendarLedgerPreview.getState().correctionHistory.some(r=>r.revertedBy)&&calendarLedgerPreview.getState().aiMemory[0].value==="支付宝"'));
   await send('联网搜索公开日历说明，并读取原网页',[payload=>{check('enabled API exposes real web tools',payload.tools.some(t=>t.function.name==='web_search')&&payload.tools.some(t=>t.function.name==='read_webpage'));return toolCall('web_search',{query:'公开日历说明'});},payload=>{const found=JSON.parse(payload.messages.filter(row=>row.role==='tool').at(-1).content);check('model receives actual returned source URL and snippet',found.items[0].url==='https://example.com/calendar'&&found.items[0].snippet.includes('真实测试来源'));return toolCall('read_webpage',{url:found.items[0].url});},payload=>{const page=JSON.parse(payload.messages.filter(row=>row.role==='tool').at(-1).content);check('source reading returns actual bounded public text',page.text.includes('避免把模型知识当成联网结果')&&page.retrievedAt==='2026-10-13T00:00:00Z');return final('已搜索并读取公开日历说明，来源 https://example.com/calendar。');}]);
   check('chat displays clickable sources without horizontal overflow',await evaluate('document.querySelectorAll("a.web-source").length>=2&&document.documentElement.scrollWidth<=innerWidth+1'));
   check('web search and read use a separate public networking path',webRequests.length===2&&webRequests.every(url=>!url.includes('mock-no-real-key')));
-  await screenshot('mobile-web-sources-v0.3.8.png');await command('Emulation.setDeviceMetricsOverride',{width:320,height:740,deviceScaleFactor:1,mobile:true});await checkLayout('320px web toolbar and source cards fit narrow phone');
+  await screenshot('mobile-web-sources-v0.3.9.png');await command('Emulation.setDeviceMetricsOverride',{width:320,height:740,deviceScaleFactor:1,mobile:true});await checkLayout('320px web toolbar and source cards fit narrow phone');
   await command('Emulation.setDeviceMetricsOverride',{width:412,height:850,deviceScaleFactor:1,mobile:true});await click('#chat-web-button');
   await send('查询当前默认账户',[payload=>{check('disabled networking removes both tools from API request',!payload.tools.some(t=>['web_search','read_webpage'].includes(t.function.name)));return toolCall('get_ai_memory',{});},final('当前默认账户是支付宝。')]);
   await evaluate('location.reload()');await waitFor('!!globalThis.calendarLedgerPreview');check('web toggle remains off after cold reload',await evaluate('calendarLedgerPreview.getConfig().webEnabled===false'));
@@ -126,7 +126,7 @@ try{
   check('repeated references to one historical payment stay unambiguous in branch',await evaluate('calendarLedgerPreview.getState().lastCreated.length===1&&calendarLedgerPreview.getState().lastCreated[0].id==="'+sourceId+'"'));
   check('copied operation cards cannot invoke old undo buttons',await evaluate('document.querySelectorAll("#chat-messages [data-action=undo]").length===0'));
   await send('从分支继续分析本月实际收支',[payload=>{check('fork API context names its branch and carries original source reference',payload.messages[0].content.includes('分支')&&JSON.stringify(payload.messages).includes(sourceId));return toolCall('query_cashflow',{start:'2026-10-01',end:'2026-10-31'});},final('分支独立讨论，当前实际支出62元。')]);
-  await fill('#chat-input','分支未发送草稿');await click('[data-action=chat-branches]');await screenshot('mobile-chat-branches-v0.3.8.png');
+  await fill('#chat-input','分支未发送草稿');await click('[data-action=chat-branches]');await screenshot('mobile-chat-branches-v0.3.9.png');
   check('branch picker touch targets fit Morandi mobile sheet',await evaluate('document.querySelector(".branch-open").getBoundingClientRect().height>=44&&document.documentElement.scrollWidth<=innerWidth+1'));
   await click('[data-branch-open="'+originalBranch+'"]');
   check('returning to original restores text draft and excludes future branch messages',await evaluate('document.querySelector("#chat-input").value==="原聊天未发送草稿"&&calendarLedgerPreview.getState().chat.length==='+originalCount));
@@ -147,10 +147,10 @@ try{
   check('settings retrieves actual selected gateway model list before activating service',providerRequests.at(-1).url==='https://gateway.example/tenant/v1/models'&&providerRequests.at(-1).authorization==='Bearer gateway-fixture-key'&&(await evaluate('calendarLedgerPreview.getConfig().provider==="deepseek"')));
   await click('[data-action=settings-model]');await fill('select[name=thinkingFormat]','deepseek');await fill('select[name=aiMode]','deepseek');
   check('gateway endpoint previews fit narrow phone',await evaluate('document.querySelector("[data-api-paths]").textContent.includes("/tenant/v1/models")&&document.documentElement.scrollWidth<=innerWidth+1'));
-  await screenshot('mobile-newapi-settings-v0.3.8.png');await evaluate('document.querySelector("form[data-form=settings]").requestSubmit()');await waitFor('!document.querySelector(".modal")');
+  await screenshot('mobile-newapi-settings-v0.3.9.png');await evaluate('document.querySelector("form[data-form=settings]").requestSubmit()');await waitFor('!document.querySelector(".modal")');
   check('gateway save normalizes complete endpoint and persists provider and renamed model',await evaluate('calendarLedgerPreview.getConfig().provider==="newapi"&&calendarLedgerPreview.getConfig().baseURL==="https://gateway.example/tenant/v1"&&calendarLedgerPreview.getConfig().model==="tenant/deepseek-flash"'));
   await send('通过新接口查询本月实际支出',[payload=>{check('New API tool request preserves model and explicit DeepSeek thinking fields',payload.model==='tenant/deepseek-flash'&&payload.reasoning_effort==='max'&&payload.thinking.type==='enabled'&&payload.tools.some(t=>t.function.name==='query_cashflow'));return toolCall('query_cashflow',{start:'2026-10-01',end:'2026-10-31'});},payload=>{check('gateway tool loop receives current real accounting result',JSON.parse(payload.messages.filter(r=>r.role==='tool').at(-1).content).expense===6200);return final('当前实际支出62元。');}]);
-  await screenshot('mobile-branch-chat-v0.3.8.png');await evaluate('location.reload()');await waitFor('!!globalThis.calendarLedgerPreview&&calendarLedgerPreview.getConfig().configured');
+  await screenshot('mobile-branch-chat-v0.3.9.png');await evaluate('location.reload()');await waitFor('!!globalThis.calendarLedgerPreview&&calendarLedgerPreview.getConfig().configured');
   check('provider profiles and gateway choice survive app-like reload',await evaluate('calendarLedgerPreview.getConfig().provider==="newapi"&&calendarLedgerPreview.getConfig().profiles.length===2'));
   await click('.mobile-nav [data-page=more]');await click('.main [data-action=settings]');await fill('select[name=thinkingFormat]','auto');await evaluate('document.querySelector("form[data-form=settings]").requestSubmit()');await waitFor('!document.querySelector(".modal")');await click('[data-action=open-ai]');
   check('gateway without explicit thinking mapping displays a truthful disabled state',await evaluate('document.querySelector("#chat-thinking-button").textContent.includes("未启用")'));
@@ -163,7 +163,7 @@ try{
   check('clear context removes archive and messages but keeps confirmed preference and money',await evaluate('calendarLedgerPreview.getState().aiSummary===null&&calendarLedgerPreview.getState().aiChatArchive.length===0&&calendarLedgerPreview.getState().chat.length===0&&calendarLedgerPreview.getState().aiMemory.length===1&&calendarLedgerPreview.getState().transactions.length===1'));
   check('API keys are absent from local memory, branches and ledger snapshot',!(await evaluate('JSON.stringify(localStorage)')).includes('mock-no-real-key')&&!(await evaluate('JSON.stringify(localStorage)')).includes('gateway-fixture-key'));
   assert.equal(errors.length,0,errors.join('\n'));
-  const report={passed:true,version:'0.3.8',actualProvider:false,apiKeyUsed:false,requests:requests.length,findings,errors};
-  await writeFile(path.join(output,'ai-operations-results-v0.3.8.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
-}catch(error){await writeFile(path.join(output,'ai-operations-results-v0.3.8.json'),JSON.stringify({passed:false,error:error.message,findings,errors},null,2));console.error(error.stack);process.exitCode=1;}
+  const report={passed:true,version:'0.3.9',actualProvider:false,apiKeyUsed:false,requests:requests.length,findings,errors};
+  await writeFile(path.join(output,'ai-operations-results-v0.3.9.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));
+}catch(error){await writeFile(path.join(output,'ai-operations-results-v0.3.9.json'),JSON.stringify({passed:false,error:error.message,findings,errors},null,2));console.error(error.stack);process.exitCode=1;}
 finally{if(previewServer?.listening)await new Promise(resolve=>previewServer.close(resolve));if(ws)ws.close();browser.kill();}

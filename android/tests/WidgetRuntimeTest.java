@@ -47,7 +47,7 @@ public class WidgetRuntimeTest extends Instrumentation {
             if("cold-date".equals(phase))intent.setAction(PACKAGE+".WIDGET_OPEN").putExtra("widgetTarget","date").putExtra("widgetDate","2026-10-10");
             if(phase.startsWith("weather"))FakeWeatherConnection.install();
             if("web-tools".equals(phase))FakeWebConnection.install();
-            if("chat-api".equals(phase)||"conversation".equals(phase))FakeGatewayConnection.install();
+            if("chat-api".equals(phase)||"conversation".equals(phase)||"clock".equals(phase))FakeGatewayConnection.install();
             startApp(intent);
             if("baseline".equals(phase)) {
                 if(getTargetContext().getSharedPreferences("api-config",0).getString("keyCipher","").isEmpty()) {
@@ -89,6 +89,7 @@ public class WidgetRuntimeTest extends Instrumentation {
                 aiOperationsAcceptance(report);
             } else if("web-tools".equals(phase)||"live-web".equals(phase)) {
                 webAcceptance(report,"live-web".equals(phase));
+            } else if("clock".equals(phase)){clockAcceptance(report);
             } else if("conversation".equals(phase)){conversationAcceptance(report);
             } else if("chat-api".equals(phase)) {
                 chatAPIAcceptance(report);
@@ -236,6 +237,33 @@ public class WidgetRuntimeTest extends Instrumentation {
             report.put("provider",evaluate("__qaParsed.provider")).put("sources",new JSONArray(evaluate("JSON.stringify(__qaParsed.items.map(r=>({title:r.title,url:r.url})))")));
         }
         report.put("actualPublicNetwork",live).put("apiKeyUsed",false);
+    }
+    private void clockAcceptance(JSONObject report)throws Exception{
+        String before=evaluate("CalendarAndroid.loadSnapshot()");android.content.SharedPreferences prefs=getTargetContext().getSharedPreferences("api-config",0);Map<String,?> oldPrefs=new HashMap<>(prefs.getAll());
+        try{
+            JSONObject live=new JSONObject(evaluate("CalendarAndroid.currentTime()"));check("native clock exposes second-precision local time and weekday",live.getString("date").matches("\\d{4}-\\d{2}-\\d{2}")&&live.getString("time").matches("\\d{2}:\\d{2}:\\d{2}")&&live.getString("weekday").startsWith("星期"));
+            check("native clock reads the actual Android system instant",Math.abs(live.getLong("epochMillis")-System.currentTimeMillis())<5000&&live.getString("source").equals("android-system"));
+            Class<?> type=Class.forName("org.calendarledger.preview.DeviceTime",true,getTargetContext().getClassLoader());java.lang.reflect.Method at=type.getDeclaredMethod("at",java.time.Instant.class,java.time.ZoneId.class);at.setAccessible(true);
+            JSONObject midnight=(JSONObject)at.invoke(null,java.time.Instant.parse("2026-10-13T16:08:09Z"),java.time.ZoneId.of("Asia/Shanghai"));
+            check("native clock converts UTC into next local date with exact weekday",midnight.getString("date").equals("2026-10-14")&&midnight.getString("time").equals("00:08:09")&&midnight.getString("weekday").equals("星期三")&&midnight.getString("utcOffset").equals("+08:00"));
+            JSONObject dstBefore=(JSONObject)at.invoke(null,java.time.Instant.parse("2026-11-01T05:30:00Z"),java.time.ZoneId.of("America/New_York")),dstAfter=(JSONObject)at.invoke(null,java.time.Instant.parse("2026-11-01T06:30:00Z"),java.time.ZoneId.of("America/New_York"));
+            check("native clock distinguishes repeated DST hour offsets",dstBefore.getString("time").equals(dstAfter.getString("time"))&&dstBefore.getString("utcOffset").equals("-04:00")&&dstAfter.getString("utcOffset").equals("-05:00"));
+            JSONObject sample=new JSONObject(before),state=sample.getJSONObject("state");state.put("chat",new JSONArray()).put("chatBranches",new JSONArray()).put("aiSummary",JSONObject.NULL).put("viewMonth","2027-05").put("selectedDate","2027-05-01");state.remove("activeChatBranchId");sample.getJSONObject("aiConfig").put("autoSummary",false).put("effort","none");evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(sample.toString())+")");restartApp();
+            // Configure through the production bridge and direct chat connection form.
+            evaluate("document.querySelector('[data-action=open-ai]').click();document.querySelector('[data-action=ai-connection]').click();var f=document.querySelector('form[data-form=ai-connection]');f.elements.provider.value='newapi';f.elements.provider.dispatchEvent(new Event('change',{bubbles:true}));f.elements.baseURL.value='https://8.8.8.8/v1';f.elements.apiKey.value='clock-fixture-key';f.elements.model.value='tenant-model';f.elements.thinkingFormat.value='deepseek';f.requestSubmit()");waitFor("!document.querySelector('.modal')&&calendarLedgerPreview.getConfig().configured",10000);
+            String originalBusiness=business();FakeGatewayConnection.chatPayloads.clear();FakeGatewayConnection.clockCase=true;FakeGatewayConnection.clockDelayMillis=1300;
+            sendChat("现在是星期几、几点？顺便查询一下收支，不修改记录。");
+            check("clock is supplied to both initial model call and tool continuation",FakeGatewayConnection.chatPayloads.size()==2);
+            JSONObject first=FakeGatewayConnection.clockContext(FakeGatewayConnection.chatPayloads.get(0)),second=FakeGatewayConnection.clockContext(FakeGatewayConnection.chatPayloads.get(1));
+            long firstTime=first.getJSONObject("currentRequestTime").getLong("epochMillis"),secondTime=second.getJSONObject("currentRequestTime").getLong("epochMillis");
+            check("clock advances during tool loop instead of remaining frozen",secondTime-firstTime>=1000);
+            check("relative-time anchor remains the original user message instant",first.getJSONObject("userMessageTime").getLong("epochMillis")==second.getJSONObject("userMessageTime").getLong("epochMillis"));
+            check("request clock uses device date rather than selected calendar date",!second.getJSONObject("currentRequestTime").getString("date").equals("2027-05-01")&&Math.abs(secondTime-System.currentTimeMillis())<10000);
+            check("clock remains one message with native source and named timezone",truth("calendarLedgerPreview.getState().chat[0].sentAt.source==='android-system'")&&second.getJSONObject("currentRequestTime").has("timeZone"));
+            check("time-aware chat leaves actual business records unchanged",originalBusiness.equals(business()));
+            screenshot("app-clock",null);restartApp();check("message time persists through process restart",truth("!!calendarLedgerPreview.getState().chat[0].sentAt.epochMillis&&!!calendarLedgerPreview.getState().chat.at(-1).sentAt.epochMillis"));
+            report.put("actualModel",false).put("apiKeyUsed",false).put("clockSource","real Android system clock through native bridge; deterministic DST/date conversion checks");
+        }finally{FakeGatewayConnection.clockCase=false;FakeGatewayConnection.clockDelayMillis=0;android.content.SharedPreferences.Editor edit=prefs.edit().clear();for(Map.Entry<String,?> row:oldPrefs.entrySet()){Object value=row.getValue();if(value instanceof String)edit.putString(row.getKey(),(String)value);else if(value instanceof Boolean)edit.putBoolean(row.getKey(),(Boolean)value);}edit.commit();evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(before)+")");restartApp();}
     }
     private void conversationAcceptance(JSONObject report)throws Exception{
         String before=evaluate("CalendarAndroid.loadSnapshot()");android.content.SharedPreferences apiPrefs=getTargetContext().getSharedPreferences("api-config",0);Map<String,?> oldPrefs=new HashMap<>(apiPrefs.getAll());
@@ -874,7 +902,7 @@ public class WidgetRuntimeTest extends Instrumentation {
         Bitmap screen=getUiAutomation().takeScreenshot();if(screen==null)throw new AssertionError("No Android screenshot");
         Bitmap image=screen;
         if(crop!=null){Rect rect=new Rect();onUi(()->crop.getGlobalVisibleRect(rect));image=Bitmap.createBitmap(screen,rect.left,rect.top,rect.width(),rect.height());}
-        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.8.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
+        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.9.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
         finally{if(image!=screen)image.recycle();screen.recycle();}
     }
     private void check(String name,boolean passed)throws Exception{findings.put(new JSONObject().put("check",name).put("passed",passed));if(!passed)throw new AssertionError(name);}

@@ -1,0 +1,85 @@
+{
+  "passed": true,
+  "version": "0.3.9",
+  "findings": [
+    {
+      "check": "API setup opens directly from chat without visiting general settings",
+      "passed": true
+    },
+    {
+      "check": "direct API save activates remote chat mode",
+      "passed": true
+    },
+    {
+      "check": "actual SSE displays partial reply before response completes",
+      "passed": true
+    },
+    {
+      "check": "reasoning returned by provider has its own expandable section",
+      "passed": true
+    },
+    {
+      "check": "streaming patches text without replacing message or composer nodes",
+      "passed": true
+    },
+    {
+      "check": "reading earlier text during generation does not jump to bottom",
+      "passed": true
+    },
+    {
+      "check": "final long response renders headings lists tables and code",
+      "passed": true
+    },
+    {
+      "check": "discussion leaves bookkeeping untouched",
+      "passed": true
+    },
+    {
+      "check": "model picker exposes search thinking and length beside active chat",
+      "passed": true
+    },
+    {
+      "check": "model list search filters available API models",
+      "passed": true
+    },
+    {
+      "check": "one-click model switch preserves draft and current conversation",
+      "passed": true
+    },
+    {
+      "check": "stopping retains partial text and leaves an explicit status",
+      "passed": true
+    },
+    {
+      "check": "stop aborts upstream HTTP stream",
+      "passed": true
+    },
+    {
+      "check": "reload preserves model long answer and stopped reply",
+      "passed": true
+    },
+    {
+      "check": "320px phone keeps composer and controls in bounds",
+      "passed": true
+    },
+    {
+      "check": "360px phone keeps composer and controls in bounds",
+      "passed": true
+    },
+    {
+      "check": "412px phone keeps composer and controls in bounds",
+      "passed": true
+    },
+    {
+      "check": "keyboard viewport keeps composer usable",
+      "passed": true
+    },
+    {
+      "check": "API secret never appears in persisted conversation data",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "actualModel": false,
+  "transport": "SSE fixture through real preview HTTP proxy"
+}

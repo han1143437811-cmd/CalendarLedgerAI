@@ -3,6 +3,11 @@ import assert from 'node:assert/strict';
 const calls=[];
 globalThis.CalendarAndroid={request(id,route,json){const body=JSON.parse(json);calls.push({id,route,body});const delay=route.includes('slow')?20:0;setTimeout(()=>globalThis.__calendarNativeReply(id,{status:route.includes('failed')?400:200,data:route.includes('failed')?{error:'网络失败'}:{ok:true,route,location:'下载/日历账本'}}),delay);}};
 const platform=await import('../platform.mjs?native-test');
+test('phone clock uses native epoch and zone, refreshes on every read and falls back safely',()=>{
+  let time=Date.parse('2026-10-13T16:08:09Z');globalThis.CalendarAndroid.currentTime=()=>JSON.stringify({epochMillis:time,timeZone:'Asia/Shanghai',source:'android-system'});
+  const first=platform.getDeviceTime();assert.equal(first.time,'00:08:09');assert.equal(first.source,'android-system');time+=2000;assert.equal(platform.getDeviceTime().time,'00:08:11');
+  globalThis.CalendarAndroid.currentTime=()=>'{bad';assert.equal(Number.isFinite(platform.getDeviceTime().epochMillis),true);delete globalThis.CalendarAndroid.currentTime;
+});
 test('手机桥接按请求ID匹配响应，支持并发及错误状态',async()=>{
   assert.equal(platform.isAndroid,true);
   const [slow,fast]=await Promise.all([platform.apiFetch('/api/slow'),platform.apiFetch('/api/fast')]);
