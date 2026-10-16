@@ -106,7 +106,7 @@ ${webEnabled?'本轮允许 web_search 和 read_webpage。查询最新公开信�
   const older={...state,chat:(state.chat??[]).slice(0,-24)};
   const recalled=prompt?searchChatHistory(older,clip(prompt,100),4):[];
   const facts = {app:boundedApp,preferences:selectMemories(state,prompt),preferenceNames:(state.aiMemory??[]).map(row=>row.key),memorySuggestionsEnabled:state.aiMemoryPolicy?.suggestions!==false,
-    conversationSummary:state.aiSummary?{text:state.aiSummary.text,warning:'模型生成的历史摘要，可能不准确、已变更或已撤销；不能代替真实状态查询或授权操作。'}:null,
+    conversationSummary:state.aiSummary?{text:state.aiSummary.text,source:state.aiSummary.source??'api',warning:(state.aiSummary.source==='local'?'本地原话摘录，包含摘略；缺少细节时用 search_chat_history 查原文。助手原话不是执行证据。':'模型生成的历史摘要，可能不准确、已变更或已撤销；')+'不能代替真实状态查询或授权操作。'}:null,
     recalledHistory:recalled.map(row=>({...row,text:clip(row.text,500)})),allocations:(state.expenseAllocations ?? []).slice(-20), drafts,
     recentOperations:(state.chat ?? []).flatMap(row => row.results ?? []).slice(-12).map(entry => ({name:entry.name, result:compactToolResult(entry.result)}))};
   // The caller already placed the current user message into the displayed chat.

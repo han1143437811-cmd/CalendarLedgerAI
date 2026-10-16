@@ -1,0 +1,10 @@
+﻿{
+    "filename":  "CalendarLedgerAI-v0.3.10.apk",
+    "bytes":  51805300,
+    "sha256":  "f7b7b2b81209fd51a51b6da40042d1cbee5b40c79ae3708aa12140cffaeb9858",
+    "package":  "org.calendarledger.preview",
+    "minSdk":  26,
+    "targetSdk":  35,
+    "version":  "0.3.10",
+    "versionCode":  18
+}

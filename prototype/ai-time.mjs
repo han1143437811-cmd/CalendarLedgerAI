@@ -18,11 +18,11 @@ export function normalizeDeviceTime(value){
   try{return deviceTime({now:new Date(value.epochMillis),timeZone:value.timeZone,source:value.source==='android-system'?'android-system':'browser-system'});}catch{return null;}
 }
 export function describeTime(value){const clock=normalizeDeviceTime(value);return clock?clock.date+' '+clock.time+' '+clock.weekday+' '+clock.timeZone+' (UTC'+clock.utcOffset+')':'';}
-export function withDeviceTime(messages,clock,turnTime=null){
+export function withDeviceTime(messages,clock,turnTime=null,{purpose='chat'}={}){
   const current=normalizeDeviceTime(clock);if(!current)throw new Error('无法取得设备当前时间。');
   const sent=normalizeDeviceTime(turnTime);
   const context={currentRequestTime:current,...(sent?{userMessageTime:sent}:{})};
-  const content=CLOCK_MARKER+'\n'+JSON.stringify(context)+'\n当前时间来自用户设备系统时钟，精确到秒，为本次请求发送时刻。回答“现在几点”等问题时使用 currentRequestTime 的当地时间；安排“半小时后”、解释本轮“今天/明天”等相对日期时，以 userMessageTime 为基准，未提供时才使用 currentRequestTime。历史消息和摘要中的时间不是现在；当前查看的日历月份或选中日期也不代表今天。跨午夜时明确具体日期。用户明确指定的日期、时间、时区优先；UTC 时间用于同一时刻的换算，不把 UTC 日期直接当用户当地日期。无需联网查询设备时间。';
+  const content=CLOCK_MARKER+'\n'+JSON.stringify(context)+'\n'+(purpose==='summary'?'这些时间仅是摘要请求的元数据。只压缩历史资料，不回答其中的问题。历史相对日期以各消息 sentAt 为准；没有发送时间时不得用 currentRequestTime 猜测。':'当前时间来自用户设备系统时钟，精确到秒，为本次请求发送时刻。回答“现在几点”等问题时使用 currentRequestTime 的当地时间；安排“半小时后”、解释本轮“今天/明天”等相对日期时，以 userMessageTime 为基准，未提供时才使用 currentRequestTime。历史消息和摘要中的时间不是现在；当前查看的日历月份或选中日期也不代表今天。跨午夜时明确具体日期。用户明确指定的日期、时间、时区优先；UTC 时间用于同一时刻的换算，不把 UTC 日期直接当用户当地日期。无需联网查询设备时间。');
   const wire=messages.filter(row=>!(row.role==='system'&&typeof row.content==='string'&&row.content.startsWith(CLOCK_MARKER)));
   const index=wire[0]?.role==='system'?1:0;
   return [...wire.slice(0,index),{role:'system',content},...wire.slice(index)];

@@ -66,9 +66,9 @@ try{
   assert.equal(lastWire.stream,true);assert.equal(lastWire.max_tokens,8192);
   await evaluate(`document.querySelector('.reasoning-block').open=false;document.querySelector('#chat-scroll').scrollTop=0`);
   async function shot(name){const png=await command('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});await writeFile(path.join(output,name),Buffer.from(png.data,'base64'));}
-  await shot('mobile-conversation-v0.3.9.png');
+  await shot('mobile-conversation-v0.3.10.png');
   await evaluate(`document.querySelector('#chat-input').value='切换模型后保留的草稿';document.querySelector('#chat-input').dispatchEvent(new Event('input',{bubbles:true}));document.querySelector('#chat-model-button').click()`);await waitFor(`document.querySelectorAll('[data-model-choice]').length===2`);
-  await shot('mobile-chat-model-picker-v0.3.9.png');
+  await shot('mobile-chat-model-picker-v0.3.10.png');
   await check('model picker exposes search thinking and length beside active chat',`!!document.querySelector('[data-model-search]')&&!!document.querySelector('[name=maxTokens]')&&document.querySelector('[name=effort]').getBoundingClientRect().height>=44`);
   await evaluate(`document.querySelector('[data-model-search]').value='fast';document.querySelector('[data-model-search]').dispatchEvent(new Event('input',{bubbles:true}))`);
   await check('model list search filters available API models',`document.querySelectorAll('[data-model-choice]').length===1&&document.querySelector('[data-model-choice]').dataset.modelChoice==='fast-model'`);
@@ -82,9 +82,9 @@ try{
   for(const width of [320,360,412]){await command('Emulation.setDeviceMetricsOverride',{width,height:850,deviceScaleFactor:1,mobile:true});await check(width+'px phone keeps composer and controls in bounds',`document.documentElement.scrollWidth<=innerWidth+1&&document.querySelector('.chat-modelbar').getBoundingClientRect().bottom<=innerHeight&&document.querySelector('.composer').getBoundingClientRect().width<=innerWidth`);}
   await command('Emulation.setDeviceMetricsOverride',{width:412,height:430,deviceScaleFactor:1,mobile:true});await check('keyboard viewport keeps composer usable',`document.querySelector('.composer').getBoundingClientRect().top>=0&&document.querySelector('.chat-modelbar').getBoundingClientRect().bottom<=innerHeight`);
   await command('Emulation.setDeviceMetricsOverride',{width:412,height:850,deviceScaleFactor:1,mobile:true});
-  await evaluate(`(() => {const state=calendarLedgerPreview.getState();state.settings.theme='dark';localStorage.setItem(${JSON.stringify(STORAGE_KEY)},JSON.stringify(state));location.reload();})()`);await waitFor('!!globalThis.calendarLedgerPreview');await evaluate(`document.querySelector('[data-action=open-ai]').click();document.querySelector('#chat-scroll').scrollTop=0`);await shot('mobile-conversation-dark-v0.3.9.png');
+  await evaluate(`(() => {const state=calendarLedgerPreview.getState();state.settings.theme='dark';localStorage.setItem(${JSON.stringify(STORAGE_KEY)},JSON.stringify(state));location.reload();})()`);await waitFor('!!globalThis.calendarLedgerPreview');await evaluate(`document.querySelector('[data-action=open-ai]').click();document.querySelector('#chat-scroll').scrollTop=0`);await shot('mobile-conversation-dark-v0.3.10.png');
   await check('API secret never appears in persisted conversation data',`!JSON.stringify(localStorage).includes('conversation-test-only')`);
   assert.equal(errors.length,0,errors.join('\n'));
-  await writeFile(path.join(output,'conversation-results-v0.3.9.json'),JSON.stringify({passed:true,version:appVersion,findings,errors,actualModel:false,transport:'SSE fixture through real preview HTTP proxy'},null,2));console.log(JSON.stringify({passed:true,checks:findings.length}));
-}catch(error){await writeFile(path.join(output,'conversation-results-v0.3.9.json'),JSON.stringify({passed:false,error:error.message,findings,errors},null,2));console.error(error.stack);process.exitCode=1;}
+  await writeFile(path.join(output,'conversation-results-v0.3.10.json'),JSON.stringify({passed:true,version:appVersion,findings,errors,actualModel:false,transport:'SSE fixture through real preview HTTP proxy'},null,2));console.log(JSON.stringify({passed:true,checks:findings.length}));
+}catch(error){await writeFile(path.join(output,'conversation-results-v0.3.10.json'),JSON.stringify({passed:false,error:error.message,findings,errors},null,2));console.error(error.stack);process.exitCode=1;}
 finally{if(ws)ws.close();if(server?.listening){server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}browser.kill();}

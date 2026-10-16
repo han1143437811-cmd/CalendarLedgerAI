@@ -15,12 +15,12 @@ function sendJSON(response,status,value){response.writeHead(status,{'Content-Typ
 export function createPreviewServer({upstreamFetch=globalThis.fetch,webFetch=fetchPublicPage}={}){
   let config={baseURL:'https://api.deepseek.com',provider:'deepseek',model:'deepseek-flash',thinkingFormat:'auto',apiKey:''};const profiles=new Map();
   const publicConfig=()=>({baseURL:config.baseURL,provider:config.provider,model:config.model,thinkingFormat:config.thinkingFormat,configured:!!config.apiKey,profiles:[...profiles.values()].map(({apiKey,...row})=>({...row,configured:!!apiKey}))});
-  async function completion(payload){if(!config.apiKey)throw new Error('请先配置 API Key。');const url=apiEndpoint(config.baseURL);
-    const body={model:config.model,messages:payload.messages,stream:false,...completionOptions(config.baseURL,payload.effort??'none',{summary:payload.purpose==='summary',thinkingFormat:config.thinkingFormat}),...(payload.tools?.length&&payload.purpose!=='summary'?{tools:payload.tools,tool_choice:'auto'}:{})};
-    const upstream=await upstreamFetch(url,{method:'POST',headers:{Authorization:`Bearer ${config.apiKey}`,'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(payload.effort&&payload.effort!=='none'?300000:110000)});
-    let data;try{data=await upstream.json();}catch{throw new Error(`API 返回了无法解析的内容（HTTP ${upstream.status}）。`);}
-    if(!upstream.ok){const detail=String(data.error?.message??data.message??'请求失败').split(config.apiKey).join('[已隐藏]').slice(0,400);throw new Error(`API 错误 ${upstream.status}：${detail}`);}
-    const message=data.choices?.[0]?.message;if(!message)throw new Error('API 未返回有效回复；请确认该服务支持 Chat Completions。');return{message,model:data.model??config.model,usage:data.usage??null,finishReason:data.choices?.[0]?.finish_reason??''};
+  async function completion(payload){const current={...config};if(!current.apiKey)throw new Error('请先配置 API Key。');const url=apiEndpoint(current.baseURL);
+    const body={model:current.model,messages:payload.messages,stream:false,...completionOptions(current.baseURL,payload.effort??'none',{summary:payload.purpose==='summary',thinkingFormat:current.thinkingFormat,maxTokens:payload.maxTokens,summaryMode:payload.summaryMode,summaryMaxTokens:payload.summaryMaxTokens}),...(payload.tools?.length&&payload.purpose!=='summary'?{tools:payload.tools,tool_choice:'auto'}:{})};
+    const upstream=await upstreamFetch(url,{method:'POST',headers:{Authorization:`Bearer ${current.apiKey}`,'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(payload.effort&&payload.effort!=='none'?300000:110000)});
+    let data;try{data=await upstream.json();}catch{throw Object.assign(new Error(`API 返回了无法解析的内容（HTTP ${upstream.status}）。`),{upstreamStatus:upstream.status});}
+    if(!upstream.ok){const detail=String(data.error?.message??data.message??'请求失败').split(current.apiKey).join('[已隐藏]').replace(/\bsk-[A-Za-z0-9_-]{12,}\b/g,'[已隐藏]').replace(/Bearer\s+[^\s"<>]+/gi,'Bearer [已隐藏]').slice(0,400);throw Object.assign(new Error(`API 错误 ${upstream.status}：${detail}`),{upstreamStatus:upstream.status});}
+    const message=data.choices?.[0]?.message;if(!message)throw new Error('API 未返回有效回复；请确认该服务支持 Chat Completions。');return{message,model:data.model??current.model,usage:data.usage??null,finishReason:data.choices?.[0]?.finish_reason??''};
   }
   async function streamCompletion(payload,response){
     const current={...config};if(!current.apiKey)throw new Error('请先连接 API。');
@@ -77,14 +77,14 @@ export function createPreviewServer({upstreamFetch=globalThis.fetch,webFetch=fet
           if(!profiles.has(baseURL)&&profiles.size>=8)throw new Error('最多保存8个接口地址。');config={baseURL,provider,model,thinkingFormat,apiKey};profiles.set(baseURL,{...config});sendJSON(response,200,publicConfig());return;
         }
         if(route==='/api/test'){const result=await completion({messages:[{role:'user',content:'请只回复 OK，用于测试 API 连接。'}]});sendJSON(response,200,{ok:true,model:result.model});return;}
-        if(route==='/api/chat'){if(!Array.isArray(body.messages)||body.messages.length<1||body.messages.length>300)throw new Error('会话长度不符合要求，请开始新会话。');if(body.tools!==undefined&&(!Array.isArray(body.tools)||body.tools.length>96))throw new Error('操作接口数量异常。');if(body.stream===true&&body.purpose!=='summary'){await streamCompletion(body,response);return;}const result=await completion({messages:body.messages,tools:body.tools,effort:body.effort,purpose:body.purpose});sendJSON(response,200,result);return;}
+        if(route==='/api/chat'){if(!Array.isArray(body.messages)||body.messages.length<1||body.messages.length>300)throw new Error('会话长度不符合要求，请开始新会话。');if(body.tools!==undefined&&(!Array.isArray(body.tools)||body.tools.length>96))throw new Error('操作接口数量异常。');if(body.stream===true&&body.purpose!=='summary'){await streamCompletion(body,response);return;}const result=await completion({messages:body.messages,tools:body.tools,effort:body.effort,purpose:body.purpose,maxTokens:body.maxTokens,summaryMode:body.summaryMode,summaryMaxTokens:body.summaryMaxTokens});sendJSON(response,200,result);return;}
         sendJSON(response,404,{error:'没有这个接口。'});return;
       }
       if(!['GET','HEAD'].includes(request.method)){sendJSON(response,405,{error:'请求方法不支持。'});return;}
       const relative=decodeURIComponent(route==='/'?'/index.html':route),file=path.resolve(root,'.'+relative);if(!file.startsWith(root+path.sep)||relative.includes('\0')){sendJSON(response,403,{error:'路径不允许访问。'});return;}
       const ext=path.extname(file);if(!types[ext]||relative.includes('/tests/')||relative.endsWith('/server.mjs')){sendJSON(response,404,{error:'文件不存在。'});return;}
       try{const data=await readFile(file);response.writeHead(200,{'Content-Type':types[ext],'Cache-Control':'no-cache'});response.end(request.method==='HEAD'?undefined:data);}catch{sendJSON(response,404,{error:'文件不存在。'});}
-    }catch(error){const message=error.name==='TimeoutError'?'API 请求超时，已完成的本地操作仍然保留。':error.message;sendJSON(response,400,{error:message});}
+    }catch(error){const message=error.name==='TimeoutError'?'API 请求超时，已完成的本地操作仍然保留。':error.message;sendJSON(response,400,{error:message,...(Number.isInteger(error.upstreamStatus)?{upstreamStatus:error.upstreamStatus}:{})});}
   });return server;
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){

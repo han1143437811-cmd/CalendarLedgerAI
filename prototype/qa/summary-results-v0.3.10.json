@@ -1,0 +1,70 @@
+{
+  "passed": true,
+  "version": "0.3.10",
+  "findings": [
+    {
+      "check": "empty JSON summary uses one compatible retry through real HTTP proxy",
+      "passed": true
+    },
+    {
+      "check": "configured v4.1 alias stays unchanged after recovery",
+      "passed": true
+    },
+    {
+      "check": "ordinary answer continues after successful summary recovery",
+      "passed": true
+    },
+    {
+      "check": "all summary requests omit business tools",
+      "passed": true
+    },
+    {
+      "check": "summary device clock cannot turn historical questions into ordinary replies",
+      "passed": true
+    },
+    {
+      "check": "both empty attempts fall back locally and normal chat still answers",
+      "passed": true
+    },
+    {
+      "check": "original prefix remains in history after fallback",
+      "passed": true
+    },
+    {
+      "check": "model menu names local fallback, exact failure and retry delay",
+      "passed": true
+    },
+    {
+      "check": "summary menu fits 320px mobile screen",
+      "passed": true
+    },
+    {
+      "check": "summary menu fits 412px mobile screen",
+      "passed": true
+    },
+    {
+      "check": "cold restart retains cooldown and advances local context with zero extra API summary calls",
+      "passed": true
+    },
+    {
+      "check": "manual retry recovers immediately and updates live menu status",
+      "passed": true
+    },
+    {
+      "check": "HTTP 401 is reported accurately without immediate second attempt",
+      "passed": true
+    },
+    {
+      "check": "gateway error never persists its echoed API secret",
+      "passed": true
+    },
+    {
+      "check": "all recovery paths leave actual money schedules and tasks unchanged",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "actualModel": false,
+  "apiKeyUsed": false,
+  "transport": "real preview HTTP proxy and browser app; controlled summary failures"
+}

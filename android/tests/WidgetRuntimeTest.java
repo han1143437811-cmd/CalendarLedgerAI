@@ -47,7 +47,7 @@ public class WidgetRuntimeTest extends Instrumentation {
             if("cold-date".equals(phase))intent.setAction(PACKAGE+".WIDGET_OPEN").putExtra("widgetTarget","date").putExtra("widgetDate","2026-10-10");
             if(phase.startsWith("weather"))FakeWeatherConnection.install();
             if("web-tools".equals(phase))FakeWebConnection.install();
-            if("chat-api".equals(phase)||"conversation".equals(phase)||"clock".equals(phase))FakeGatewayConnection.install();
+            if("chat-api".equals(phase)||"conversation".equals(phase)||"clock".equals(phase)||"summary".equals(phase))FakeGatewayConnection.install();
             startApp(intent);
             if("baseline".equals(phase)) {
                 if(getTargetContext().getSharedPreferences("api-config",0).getString("keyCipher","").isEmpty()) {
@@ -89,6 +89,7 @@ public class WidgetRuntimeTest extends Instrumentation {
                 aiOperationsAcceptance(report);
             } else if("web-tools".equals(phase)||"live-web".equals(phase)) {
                 webAcceptance(report,"live-web".equals(phase));
+            } else if("summary".equals(phase)){summaryAcceptance(report);
             } else if("clock".equals(phase)){clockAcceptance(report);
             } else if("conversation".equals(phase)){conversationAcceptance(report);
             } else if("chat-api".equals(phase)) {
@@ -185,7 +186,7 @@ public class WidgetRuntimeTest extends Instrumentation {
             java.lang.reflect.Method apply=optionsClass.getDeclaredMethod("apply",JSONObject.class,JSONObject.class,String.class);apply.setAccessible(true);
             for(String effort:new String[]{"none","low","high","max"}){JSONObject payload=new JSONObject();apply.invoke(null,payload,new JSONObject().put("effort",effort),"https://api.deepseek.com");check("native official thinking wire mapping "+effort,payload.getString("reasoning_effort").equals(effort)&&payload.getJSONObject("thinking").getString("type").equals("none".equals(effort)?"disabled":"enabled"));}
             JSONObject summaryPayload=new JSONObject();apply.invoke(null,summaryPayload,new JSONObject().put("effort","max").put("purpose","summary"),"https://api.deepseek.com");
-            check("native summary wire is bounded JSON without thinking",summaryPayload.getInt("max_tokens")==1600&&summaryPayload.getString("reasoning_effort").equals("none")&&summaryPayload.getJSONObject("response_format").getString("type").equals("json_object"));
+            check("native summary wire is bounded JSON without thinking",summaryPayload.getInt("max_tokens")==4096&&summaryPayload.getString("reasoning_effort").equals("none")&&summaryPayload.getJSONObject("response_format").getString("type").equals("json_object"));
             JSONObject learningSnapshot=new JSONObject(evaluate("CalendarAndroid.loadSnapshot()"));
             learningSnapshot.getJSONObject("state").put("aiMemorySuggestions",new JSONArray().put(new JSONObject().put("id","mem_qa_account").put("key","默认账户").put("value","支付宝").put("evidence","我习惯用支付宝支付")));
             evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(learningSnapshot.toString())+")");restartApp();
@@ -237,6 +238,44 @@ public class WidgetRuntimeTest extends Instrumentation {
             report.put("provider",evaluate("__qaParsed.provider")).put("sources",new JSONArray(evaluate("JSON.stringify(__qaParsed.items.map(r=>({title:r.title,url:r.url})))")));
         }
         report.put("actualPublicNetwork",live).put("apiKeyUsed",false);
+    }
+
+    private void seedSummaryHistory(boolean reset)throws Exception{
+        JSONObject snapshot=new JSONObject(evaluate("CalendarAndroid.loadSnapshot()")),s=snapshot.getJSONObject("state");JSONArray chat=reset?new JSONArray():s.getJSONArray("chat");int start=chat.length();
+        for(int i=0;i<(reset?32:26);i++)chat.put(new JSONObject().put("id","native_summary_"+(start+i)).put("role",i%2==0?"user":"assistant").put("text",i%2==0?"保留实际付款，日历按天分摊。":"助手说完成，实际需查询。"));
+        s.put("chat",chat);if(reset){s.put("chatBranches",new JSONArray()).put("aiSummary",JSONObject.NULL);s.remove("activeChatBranchId");}
+        snapshot.getJSONObject("aiConfig").put("autoSummary",true).put("effort","none");evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(snapshot.toString())+")");restartApp();evaluate("document.querySelector('[data-action=open-ai]').click()");
+    }
+    private void summaryAcceptance(JSONObject report)throws Exception{
+        String before=evaluate("CalendarAndroid.loadSnapshot()");android.content.SharedPreferences prefs=getTargetContext().getSharedPreferences("api-config",0);Map<String,?> oldPrefs=new HashMap<>(prefs.getAll());
+        try{
+            seedSummaryHistory(true);
+            evaluate("document.querySelector('[data-action=ai-connection]').click();var f=document.querySelector('form[data-form=ai-connection]');f.elements.provider.value='newapi';f.elements.provider.dispatchEvent(new Event('change',{bubbles:true}));f.elements.baseURL.value='https://8.8.8.8/v1';f.elements.apiKey.value='summary-native-fixture-secret';f.elements.model.value='deepseek-v4.1';f.elements.thinkingFormat.value='deepseek';f.requestSubmit()");waitFor("!document.querySelector('.modal')&&calendarLedgerPreview.getConfig().configured",10000);
+            String originalBusiness=business();FakeGatewayConnection.chatPayloads.clear();FakeGatewayConnection.summaryCalls=0;FakeGatewayConnection.summaryMode="empty-once";
+            sendChat("继续讨论订阅规则");
+            check("native empty JSON output uses exactly one summary retry",FakeGatewayConnection.summaryCalls==2);
+            check("native retry becomes an API summary and keeps the v4.1 alias",truth("calendarLedgerPreview.getState().aiSummary.source==='api'&&calendarLedgerPreview.getConfig().model==='deepseek-v4.1'"));
+            JSONObject first=FakeGatewayConnection.chatPayloads.get(0),second=FakeGatewayConnection.chatPayloads.get(1);
+            check("native primary summary gets 4096 tokens without tools",first.getInt("max_tokens")==4096&&first.has("response_format")&&!first.has("tools"));
+            check("native compatible retry omits JSON and thinking controls",second.getInt("max_tokens")==4096&&!second.has("response_format")&&!second.has("thinking")&&!second.has("reasoning_effort"));
+            check("native summary time is passive metadata",first.getJSONArray("messages").getJSONObject(1).getString("content").contains("只压缩历史资料"));
+            check("native recovery keeps the original prefix and normal answer",truth("calendarLedgerPreview.getState().chat[0].text==='保留实际付款，日历按天分摊。'&&calendarLedgerPreview.getState().chat.at(-1).text.includes('已查询')"));
+            FakeGatewayConnection.summaryMode="empty";FakeGatewayConnection.summaryCalls=0;seedSummaryHistory(true);sendChat("摘要故障时继续聊天");
+            check("native repeated empty output falls back after two attempts",FakeGatewayConnection.summaryCalls==2&&truth("calendarLedgerPreview.getState().aiSummary.source==='local'&&calendarLedgerPreview.getState().aiSummary.lastFailure.code==='empty'"));
+            evaluate("document.querySelector('#chat-model-button').click()");waitFor("!!document.querySelector('[data-summary-status]')",5000);
+            check("native model menu displays failure and retry interval",truth("document.querySelector('[data-summary-status]').textContent.includes('本地原话摘录')&&document.querySelector('[data-summary-status]').textContent.includes('空正文')&&document.querySelector('[data-summary-status]').textContent.includes('分钟后')"));
+            evaluate("document.querySelector('[data-summary-status]').scrollIntoView({block:'end'})");screenshot("app-summary",null);evaluate("document.querySelector('[data-action=close-modal]').click()");
+            String at=evaluate("String(calendarLedgerPreview.getState().aiSummary.lastFailure.at)");seedSummaryHistory(false);sendChat("重启后继续聊");
+            check("native cooldown survives restart with zero additional API summaries",FakeGatewayConnection.summaryCalls==2&&truth("String(calendarLedgerPreview.getState().aiSummary.lastFailure.at)==="+JSONObject.quote(at)+"&&calendarLedgerPreview.getState().aiSummary.coveredMessages>=52"));
+            FakeGatewayConnection.summaryMode="success";evaluate("document.querySelector('#chat-model-button').click();document.querySelector('[data-compress-now]').click()");waitFor("calendarLedgerPreview.getState().aiSummary.source==='api'",10000);
+            check("native manual retry recovers during cooldown with no new history",FakeGatewayConnection.summaryCalls==3&&truth("!calendarLedgerPreview.getState().aiSummary.lastFailure&&document.querySelector('[data-summary-status]').textContent.includes('API 摘要')"));
+            evaluate("document.querySelector('[data-action=close-modal]').click()");FakeGatewayConnection.summaryMode="auth";FakeGatewayConnection.summaryCalls=0;seedSummaryHistory(true);sendChat("API鉴权失败时继续");
+            check("native upstream 401 survives bridge and does not retry immediately",FakeGatewayConnection.summaryCalls==1&&truth("calendarLedgerPreview.getState().aiSummary.lastFailure.code==='http_401'&&calendarLedgerPreview.getState().aiSummary.lastFailure.reason.includes('401')"));
+            check("native upstream echoed key is masked before persistence",truth("!JSON.stringify(calendarLedgerPreview.getState()).includes('summary-native-fixture-secret')&&calendarLedgerPreview.getState().aiSummary.lastFailure.reason.includes('[已隐藏]')"));
+            check("native summary failure still permits a normal tool-backed answer",truth("calendarLedgerPreview.getState().chat.at(-1).text.includes('已查询')"));
+            check("native summary recovery never changes real business records",originalBusiness.equals(business()));
+            report.put("actualModel",false).put("apiKeyUsed",false).put("transport","Production native HTTPS bridge and summary recovery with test-only upstream faults");
+        }finally{FakeGatewayConnection.summaryMode="";android.content.SharedPreferences.Editor edit=prefs.edit().clear();for(Map.Entry<String,?> row:oldPrefs.entrySet()){Object value=row.getValue();if(value instanceof String)edit.putString(row.getKey(),(String)value);else if(value instanceof Boolean)edit.putBoolean(row.getKey(),(Boolean)value);}edit.commit();evaluate("CalendarAndroid.saveSnapshot("+JSONObject.quote(before)+")");restartApp();}
     }
     private void clockAcceptance(JSONObject report)throws Exception{
         String before=evaluate("CalendarAndroid.loadSnapshot()");android.content.SharedPreferences prefs=getTargetContext().getSharedPreferences("api-config",0);Map<String,?> oldPrefs=new HashMap<>(prefs.getAll());
@@ -902,7 +941,7 @@ public class WidgetRuntimeTest extends Instrumentation {
         Bitmap screen=getUiAutomation().takeScreenshot();if(screen==null)throw new AssertionError("No Android screenshot");
         Bitmap image=screen;
         if(crop!=null){Rect rect=new Rect();onUi(()->crop.getGlobalVisibleRect(rect));image=Bitmap.createBitmap(screen,rect.left,rect.top,rect.width(),rect.height());}
-        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.9.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
+        try(FileOutputStream output=new FileOutputStream(new File(activity.getExternalFilesDir(null),"qa-"+name+"-v0.3.10.png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
         finally{if(image!=screen)image.recycle();screen.recycle();}
     }
     private void check(String name,boolean passed)throws Exception{findings.put(new JSONObject().put("check",name).put("passed",passed));if(!passed)throw new AssertionError(name);}

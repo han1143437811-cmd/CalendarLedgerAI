@@ -4,7 +4,7 @@ export function openAIMemory({state, openModal, dispatch, changed, escape,openCo
       <p class="settings-note">已确认偏好保存在本机。AI 会按当前问题选取记忆，找回较早原话和操作记录；聊天超过 200 条时，保留最多 80 条精简摘录。使用远程 AI 时，选取的上下文会发送至你配置的服务。</p>
       <label class="record-row"><span class="grow">从聊天中建议偏好<span class="record-meta">自然表达的习惯先核对，采纳后才生效</span></span><input type="checkbox" data-memory-suggestions-toggle ${state.aiMemoryPolicy?.suggestions!==false?'checked':''}></label>
       <div id="ai-memory-suggestions"></div>
-      <div id="ai-memory-list"></div>${state.aiSummary?`<details class="memory-summary"><summary>对话摘要 · 已压缩 ${state.aiSummary.coveredMessages} 条消息</summary><p>${escape(state.aiSummary.text)}</p><span class="record-meta">模型生成的历史资料，真实状态仍需查询。</span></details>`:''}
+      <div id="ai-memory-list"></div>${state.aiSummary?`<details class="memory-summary"><summary>${state.aiSummary.source==='local'?'本地原话摘录':'对话摘要'} · 已整理 ${state.aiSummary.coveredMessages} 条消息</summary><p>${escape(state.aiSummary.text)}</p><span class="record-meta">${state.aiSummary.source==='local'?'API 摘要暂不可用，以下为有摘略的原话，更多细节可查询聊天原文。':'模型生成的历史资料，真实状态仍需查询。'}</span></details>`:''}
       <form data-memory-form><div class="form-grid">
         <div class="form-field full"><label for="ai-memory-key">记忆名称</label><input id="ai-memory-key" name="key" maxlength="60" placeholder="例如：订阅分摊规则" required></div>
         <div class="form-field full"><label for="ai-memory-value">偏好内容</label><input id="ai-memory-value" name="value" maxlength="300" placeholder="例如：月订阅默认按付款所在自然月均摊" required></div>

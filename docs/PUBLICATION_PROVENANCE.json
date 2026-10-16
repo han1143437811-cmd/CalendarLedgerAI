@@ -148,6 +148,22 @@
       "actualUserGatewayUsed": false,
       "actualSamsungPhone": false,
       "realPublicWebNetworkVerified": true
+    },
+    {
+      "date": "2026-10-16",
+      "version": "0.3.10",
+      "package": "org.calendarledger.preview",
+      "apkSha256": "f7b7b2b81209fd51a51b6da40042d1cbee5b40c79ae3708aa12140cffaeb9858",
+      "upstreamSourceImported": false,
+      "changes": [
+        "Bounded API summary recovery for empty, truncated and incompatible responses",
+        "Labeled local excerpts and per-branch persistent backoff with immediate manual recovery",
+        "Provider/model configuration preserved; passive summary clock metadata and masked upstream HTTP errors"
+      ],
+      "realUserApiKeyUsed": false,
+      "actualUserGatewayUsed": false,
+      "actualSamsungPhone": false,
+      "realPublicWebNetworkVerified": true
     }
   ],
   "scope": "Initial v0.2.3 public release; newer runtime changes are recorded in subsequentReleases."

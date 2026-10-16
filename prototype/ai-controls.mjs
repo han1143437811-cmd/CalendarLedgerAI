@@ -1,5 +1,6 @@
 import {thinkingEnabled,providerLabel} from './api-providers.mjs';
 import {THINKING_LEVELS,isDeepSeek,modelLabel} from './ai-options.mjs';
+import {summaryStatus} from './ai-summary.mjs';
 export function openAIControls({config,state,openModal,escape,save,fetchModels,compress,close=()=>{},connect=()=>{},switchConnection=async()=>{},focusThinking=false}){
   openModal('选择模型','继续当前对话，随时换一种思考方式。',`
     <div id="ai-controls-panel" class="chat-model-picker">
@@ -16,7 +17,7 @@ export function openAIControls({config,state,openModal,escape,save,fetchModels,c
     <label class="record-row"><span class="grow">自动压缩上下文<small class="record-meta">长对话自动摘要，原消息仍可查看</small></span><input name="autoSummary" type="checkbox" ${config.autoSummary!==false?'checked':''}></label>
     <label class="record-row"><span class="grow">允许联网搜索<small class="record-meta">需要时查资料，并显示来源</small></span><input name="webEnabled" type="checkbox" ${config.webEnabled!==false?'checked':''}></label>
     <div class="form-error" role="alert"></div><div class="form-actions"><button class="btn primary" type="submit">应用设置</button><button class="btn" type="button" data-compress-now>压缩上下文</button></div></form>
-    <p class="settings-note">${state.aiSummary?'已建立本聊天的上下文摘要。':'长对话会自动保留主要结论和待解决的问题。'}摘要会产生一次额外 API 请求。</p></div>`);
+    <p class="settings-note" data-summary-status role="status">${escape(summaryStatus(state.aiSummary))}</p><p class="settings-note">API 摘要通常请求一次；遇到空回复或格式问题最多补试一次。失败时使用注明来源的本地摘录，原消息保留。</p></div>`);
   const panel=document.querySelector('#ai-controls-panel'),form=panel.querySelector('form'),error=panel.querySelector('.form-error');
   panel.closest('.modal').classList.add('chat-settings-sheet');
   const range=form.elements.effort,label=panel.querySelector('[data-thinking-label]'),list=panel.querySelector('[data-model-list]'),status=panel.querySelector('[data-model-status]');
@@ -33,7 +34,7 @@ export function openAIControls({config,state,openModal,escape,save,fetchModels,c
   panel.addEventListener('click',async event=>{
     const choice=event.target.closest('[data-model-choice]');if(choice){form.elements.model.value=choice.dataset.modelChoice;await apply(true);return;}
     if(event.target.closest('[data-fetch-models]'))await refresh();
-    const button=event.target.closest('[data-compress-now]');if(button){button.disabled=true;error.textContent='';try{await compress();button.textContent='压缩检查完成';}catch(e){error.textContent=e.message;}finally{button.disabled=false;}}
+    const button=event.target.closest('[data-compress-now]');if(button){button.disabled=true;error.textContent='';button.textContent='正在整理…';try{await compress();if(panel.isConnected){button.textContent=state.aiSummary?.source==='local'?'重试 API 摘要':'压缩检查完成';panel.querySelector('[data-summary-status]').textContent=summaryStatus(state.aiSummary);}}catch(e){error.textContent=e.message;button.textContent='重试压缩';}finally{button.disabled=false;}}
   });
   form.addEventListener('submit',async event=>{event.preventDefault();await apply(false);});
   draw();if(config.configured)refresh();else status.textContent='连接 API 后可获取模型列表';

@@ -13,7 +13,13 @@ final class AiRequestOptions {
         boolean deepseek="deepseek".equals(format)||!"none".equals(format)&&"api.deepseek.com".equalsIgnoreCase(new URL(base).getHost());
         int tokens=body.optInt("maxTokens",8192);
         if(tokens!=2048&&tokens!=4096&&tokens!=8192&&tokens!=16384&&tokens!=32768)throw new IOException("回复长度上限无效。");
-        if(summary){tokens=1600;payload.put("response_format",new JSONObject().put("type","json_object"));effort="none";}
+        if(summary){
+            String mode=body.optString("summaryMode","json");tokens=body.optInt("summaryMaxTokens",4096);
+            if((!"json".equals(mode)&&!"compatible".equals(mode))||(tokens!=4096&&tokens!=8192))throw new IOException("摘要参数无效。");
+            if("json".equals(mode))payload.put("response_format",new JSONObject().put("type","json_object"));
+            else deepseek=false;
+            effort="none";
+        }
         else if(deepseek){tokens=Math.max(tokens,"max".equals(effort)?32768:"high".equals(effort)?16384:"low".equals(effort)?8192:2048);}
         if(deepseek)payload.put("thinking",new JSONObject().put("type","none".equals(effort)?"disabled":"enabled")).put("reasoning_effort",effort);
         payload.put("max_tokens",tokens);

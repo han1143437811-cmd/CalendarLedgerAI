@@ -3,17 +3,25 @@ import java.net.*;import java.io.*;import java.nio.charset.StandardCharsets;impo
 /** A test-only OpenAI-compatible gateway; no external model request. */
 final class FakeGatewayConnection extends HttpURLConnection {
     static String lastUrl="",lastAuthorization="";static JSONObject lastPayload;static int chats,models;static String chatMode="";static boolean cancelled;static boolean clockCase;static int clockDelayMillis;static final java.util.List<JSONObject> chatPayloads=new java.util.ArrayList<>();private boolean disconnected;
+    static String summaryMode="";static int summaryCalls;
     private final ByteArrayOutputStream body=new ByteArrayOutputStream();
     private FakeGatewayConnection(URL url){super(url);}
     static void install(){URL.setURLStreamHandlerFactory(protocol->"https".equals(protocol)?new URLStreamHandler(){protected URLConnection openConnection(URL url)throws IOException{if(!url.getHost().equals("8.8.8.8")&&!url.getHost().equals("8.8.4.4"))throw new IOException("Unexpected test API host");return new FakeGatewayConnection(url);}}:null);}
     public void connect(){}public void disconnect(){disconnected=true;cancelled=true;}public boolean usingProxy(){return false;}
-    public OutputStream getOutputStream(){return body;}public int getResponseCode(){return 200;}public String getContentType(){return chatMode.isEmpty()||url.getPath().endsWith("/models")?"application/json":"text/event-stream";}
+    private boolean summaryRequest(){try{return !summaryMode.isEmpty()&&new JSONObject(new String(body.toByteArray(),StandardCharsets.UTF_8)).getJSONArray("messages").getJSONObject(0).optString("content").startsWith("你是对话压缩器");}catch(Exception ignored){return false;}}
+    public OutputStream getOutputStream(){return body;}public int getResponseCode(){return summaryRequest()&&summaryMode.equals("auth")?401:200;}public String getContentType(){return chatMode.isEmpty()||url.getPath().endsWith("/models")?"application/json":"text/event-stream";}
+    public InputStream getErrorStream(){summaryCalls++;return new ByteArrayInputStream(("{\"error\":{\"message\":\"Authentication failed summary-native-fixture-secret\"}}").getBytes(StandardCharsets.UTF_8));}
     static byte[] event(JSONObject delta,String finish)throws JSONException{return ("data: "+new JSONObject().put("model","tenant-model").put("choices",new JSONArray().put(new JSONObject().put("index",0).put("delta",delta).put("finish_reason",finish==null?JSONObject.NULL:finish))).toString()+"\n\n").getBytes(StandardCharsets.UTF_8);}
     static JSONObject clockContext(JSONObject payload)throws JSONException{JSONArray rows=payload.getJSONArray("messages");for(int i=0;i<rows.length();i++){JSONObject row=rows.getJSONObject(i);String content=row.optString("content");if(row.optString("role").equals("system")&&content.startsWith("[应用提供的实时设备时间]"))return new JSONObject(content.split("\n")[1]);}throw new JSONException("Missing device clock context");}
     public InputStream getInputStream()throws IOException {try{
         lastUrl=url.toString();lastAuthorization=getRequestProperty("Authorization");JSONObject response;
         if(url.getPath().endsWith("/models")){models++;response=new JSONObject().put("data",new JSONArray().put(new JSONObject().put("id","tenant-model")));}
-        else {chats++;lastPayload=new JSONObject(new String(body.toByteArray(),StandardCharsets.UTF_8));chatPayloads.add(lastPayload);if(clockDelayMillis>0)try{Thread.sleep(clockDelayMillis);}catch(InterruptedException e){throw new IOException(e);}if(!chatMode.isEmpty()){
+        else {chats++;lastPayload=new JSONObject(new String(body.toByteArray(),StandardCharsets.UTF_8));chatPayloads.add(lastPayload);
+            if(summaryRequest()){
+                summaryCalls++;String text=summaryMode.equals("empty")||summaryMode.equals("empty-once")&&summaryCalls==1?"":lastPayload.has("response_format")?"{\"summary\":\"保留实际付款、日历按天分摊，执行状态需要查询。\"}":"用户希望保留实际付款，在日历按天分摊月订阅费用，执行情况需要查询。";
+                return new ByteArrayInputStream(new JSONObject().put("model",lastPayload.optString("model")).put("choices",new JSONArray().put(new JSONObject().put("message",new JSONObject().put("role","assistant").put("content",text)).put("finish_reason","stop"))).toString().getBytes(StandardCharsets.UTF_8));
+            }
+            if(clockDelayMillis>0)try{Thread.sleep(clockDelayMillis);}catch(InterruptedException e){throw new IOException(e);}if(!chatMode.isEmpty()){
                 java.util.List<byte[]> chunks=new java.util.ArrayList<>();
                 chunks.add(event(new JSONObject().put("reasoning_content","先理解目标，再分解学习路线。"),null));
                 chunks.add(event(new JSONObject().put("content","## 从一个小项目开始\n\n先确定你想解决的问题，再选择学习内容。\n\n"),null));

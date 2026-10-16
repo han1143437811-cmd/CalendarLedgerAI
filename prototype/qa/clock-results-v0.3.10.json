@@ -1,0 +1,57 @@
+{
+  "passed": true,
+  "version": "0.3.10",
+  "findings": [
+    {
+      "check": "upstream receives exact browser device date time weekday and timezone",
+      "passed": true
+    },
+    {
+      "check": "selected future calendar date does not override current clock",
+      "passed": true
+    },
+    {
+      "check": "tool continuation refreshes current time across midnight and preserves relative anchor",
+      "passed": true
+    },
+    {
+      "check": "relative date scheduling saves actual local date and minute",
+      "passed": true
+    },
+    {
+      "check": "previous-day message carries original local timestamp in next context",
+      "passed": true
+    },
+    {
+      "check": "clock refresh preserves exact thinking and tool-result pairing",
+      "passed": true
+    },
+    {
+      "check": "summary API also receives freshly sampled time without changing summary options",
+      "passed": true
+    },
+    {
+      "check": "summary input preserves original message timestamps instead of redating old dialogue",
+      "passed": true
+    },
+    {
+      "check": "cold reload retains original user and assistant timestamps",
+      "passed": true
+    },
+    {
+      "check": "reopened conversation reads new current date instead of snapshot date",
+      "passed": true
+    },
+    {
+      "check": "changing device timezone is reflected without app restart",
+      "passed": true
+    },
+    {
+      "check": "clock requests contain no configured API secret in local data",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "actualModel": false,
+  "clockSource": "controlled client clock and timezone through actual browser app and HTTP proxy"
+}

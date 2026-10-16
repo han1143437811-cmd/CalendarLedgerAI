@@ -9,7 +9,7 @@ test('proxy forwards selected thinking and summary options and authenticates mod
   try{const post=(route,body)=>fetch(base+route,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     await post('/api/config',{baseURL:'https://api.deepseek.com',model:'deepseek-v4-pro',apiKey:'mock-no-real-key'});
     await post('/api/chat',{messages:[{role:'user',content:'分析'}],effort:'max'});const thinking=JSON.parse(received.at(-1).body);assert.equal(thinking.reasoning_effort,'max');assert.equal(thinking.thinking.type,'enabled');assert.equal(thinking.model,'deepseek-v4-pro');
-    await post('/api/chat',{messages:[{role:'user',content:'只输出JSON摘要'}],purpose:'summary',effort:'max',tools:[{type:'function'}]});const summary=JSON.parse(received.at(-1).body);assert.equal(summary.reasoning_effort,'none');assert.equal(summary.max_tokens,1600);assert.equal(summary.tools,undefined);assert.equal(summary.response_format.type,'json_object');
+    await post('/api/chat',{messages:[{role:'user',content:'只输出JSON摘要'}],purpose:'summary',effort:'max',tools:[{type:'function'}]});const summary=JSON.parse(received.at(-1).body);assert.equal(summary.reasoning_effort,'none');assert.equal(summary.max_tokens,4096);assert.equal(summary.tools,undefined);assert.equal(summary.response_format.type,'json_object');
     const models=await(await fetch(base+'/api/models')).json();assert.equal(models.items.length,2);assert.equal(received.at(-1).headers.Authorization,'Bearer mock-no-real-key');
   }finally{await new Promise(resolve=>server.close(resolve));}
 });

@@ -68,3 +68,9 @@ prototype/qa/*-v038*.txt
 !prototype/qa/web-native-live-v0.3.9.json
 !prototype/qa/conversation-results-v0.3.9.json
 !prototype/qa/clock-results-v0.3.9.json
+
+!prototype/qa/android-widget-v0.3.10-results.json
+!prototype/qa/web-native-live-v0.3.10.json
+!prototype/qa/conversation-results-v0.3.10.json
+!prototype/qa/clock-results-v0.3.10.json
+!prototype/qa/summary-results-v0.3.10.json

@@ -17,10 +17,10 @@ test('summary uses no thinking, a bounded JSON answer and leaves the most recent
   const result=await compressConversation(s,{model:'deepseek-flash',request:async body=>{calls++;assert.equal(body.purpose,'summary');const data=JSON.parse(body.messages[1].content);assert.equal(data.excerpts.length,26);return {message:{content:JSON.stringify({summary:'订阅规则待核对，尚未写入账目。'})}};}});
   assert.equal(calls,1);assert.equal(result.changed,true);assert.equal(s.aiSummary.throughId,'msg_25');assert.equal(JSON.stringify(s.chat),original);
   assert.equal(summaryCandidates(s).length,0);assert.equal(needsSummary(s),false);assert.equal(s.transactions.length,0);
-  const options=completionOptions(base,'max',{summary:true});assert.equal(options.reasoning_effort,'none');assert.equal(options.max_tokens,1600);
+  const options=completionOptions(base,'max',{summary:true});assert.equal(options.reasoning_effort,'none');assert.equal(options.max_tokens,4096);
 });
-test('failed or malformed summary never changes the old summary, conversation or actual records',async()=>{
-  for(const content of ['bad json','{}',JSON.stringify({summary:'x'.repeat(4000)})]){const s=state(),before=JSON.stringify(s);await assert.rejects(compressConversation(s,{model:'test',request:async()=>({message:{content}})}));assert.equal(JSON.stringify(s),before);}
+test('failed or malformed summaries fall back to labeled excerpts without changing conversation or actual records',async()=>{
+  for(const content of ['bad json','{}',JSON.stringify({summary:'x'.repeat(4000)})]){const s=state(),chat=JSON.stringify(s.chat),records=JSON.stringify(s.transactions);const result=await compressConversation(s,{model:'test',request:async()=>({message:{content}})});assert.equal(result.source,'local');assert.equal(JSON.stringify(s.chat),chat);assert.equal(JSON.stringify(s.transactions),records);assert.match(s.aiSummary.text,/本地原话摘录/);}
 });
 test('large summary request has valid JSON and only marks actually supplied turns as covered',async()=>{
   const s=state();s.chat=history(200).map(row=>({...row,text:'原话'.repeat(1000)}));let sent;

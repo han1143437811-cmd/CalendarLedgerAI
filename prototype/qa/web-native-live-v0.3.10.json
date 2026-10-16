@@ -1,0 +1,87 @@
+{
+  "passed": true,
+  "version": "0.3.10",
+  "actualSamsungPhone": false,
+  "apiKeyUsed": false,
+  "actualPublicNetwork": true,
+  "native": {
+    "phase": "live-web",
+    "androidApi": 36,
+    "actualSamsungPhone": false,
+    "host": "Android AppWidgetHost in instrumentation overlay",
+    "version": "0.3.10",
+    "provider": "Bing RSS",
+    "sources": [
+      {
+        "title": "DeepSeek | Into the Unknown",
+        "url": "https://www.deepseek.com/"
+      },
+      {
+        "title": "DeepSeek | API Platform",
+        "url": "https://www.deepseek.com/en/platform/"
+      },
+      {
+        "title": "DeepSeek App",
+        "url": "https://download.deepseek.com/"
+      },
+      {
+        "title": "DeepSeek · GitHub",
+        "url": "https://github.com/deepseek-ai"
+      },
+      {
+        "title": "DeepSeek - Wikipedia",
+        "url": "https://en.m.wikipedia.org/wiki/DeepSeek"
+      }
+    ],
+    "actualPublicNetwork": true,
+    "apiKeyUsed": false,
+    "passed": true,
+    "findings": [
+      {
+        "check": "native public page guard rejects 127.0.0.1",
+        "passed": true
+      },
+      {
+        "check": "native public page guard rejects 10.1.2.3",
+        "passed": true
+      },
+      {
+        "check": "native public page guard rejects 192.168.1.1",
+        "passed": true
+      },
+      {
+        "check": "native public page guard rejects 100.64.0.1",
+        "passed": true
+      },
+      {
+        "check": "native public page guard rejects ::1",
+        "passed": true
+      },
+      {
+        "check": "native public page guard rejects fd00::1",
+        "passed": true
+      },
+      {
+        "check": "real native web route rejects private addresses",
+        "passed": true
+      },
+      {
+        "check": "native public page route returns actual HTTP content",
+        "passed": true
+      },
+      {
+        "check": "native public page is parsed into bounded source text",
+        "passed": true
+      },
+      {
+        "check": "native live search returns actual search-provider content",
+        "passed": true
+      },
+      {
+        "check": "native live search yields real clickable HTTPS results",
+        "passed": true
+      }
+    ]
+  },
+  "apkSha256": "f7b7b2b81209fd51a51b6da40042d1cbee5b40c79ae3708aa12140cffaeb9858"
+}
